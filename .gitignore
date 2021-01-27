@@ -1,0 +1,10 @@
+Debug
+glad/
+KHR/
+x64/
+*.vcxproj*
+*.hdr
+*.png
+*.jpg
+*.ppm
+*.sln
