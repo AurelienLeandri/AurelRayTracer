@@ -13,7 +13,7 @@ Material::~Material()
 }
 
 /*
-void Material::emit(hit_record & hitRecord) const
+void Material::emit(HitRecord & hitRecord) const
 {
     hitRecord.emission = glm::vec3();
 }
@@ -21,7 +21,7 @@ void Material::emit(hit_record & hitRecord) const
 
 
 /*
-void Material::getBSDF(hit_record & hitRecord) const
+void Material::getBSDF(HitRecord & hitRecord) const
 {
     hitRecord.bsdf = &_bsdf;
 }

@@ -1,7 +1,7 @@
 
 #include "Sphere.h"
 
-//#include "AABB.h"
+#include "AABB.h"
 #include "Utils.h"
 
 #include <math.h>
@@ -65,10 +65,13 @@ bool Sphere::hit(Ray r, float t_min, float t_max, HitRecord & record) const
 	return true;
 }
 
-/*
+void Sphere::transform(const glm::vec3& translation, const glm::vec3& rotation)
+{
+	center += translation;
+}
+
 bool Sphere::boundingBox(float t0, float t1, AABB& box) const
 {
 	box = AABB(center - glm::vec3(radius, radius, radius), center + glm::vec3(radius, radius, radius));
 	return true;
 }
-*/
