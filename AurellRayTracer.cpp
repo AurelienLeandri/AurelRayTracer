@@ -16,6 +16,7 @@
 #include "RayTracer.h"
 #include "BVHNode.h"
 #include "ModelLoader.h"
+#include "Triangle.h"
 
 
 int main()
@@ -45,9 +46,19 @@ int main()
     sphere->material = material;
     world->list.push_back(sphere);
 
-    std::shared_ptr<HitableList> utah_teapot = ModelLoader::loadModel("utah-teapot.obj");
-    utah_teapot->transform(glm::vec3(0, 0, 50));
-    world->concatenateHitableList(utah_teapot);
+    std::shared_ptr<HitableList> model = ModelLoader::loadModel("Survival_BackPack_2/backpack.obj");
+    //std::shared_ptr<HitableList> model = ModelLoader::loadModel("utah-teapot.obj");
+    if (model) {
+        //model->transform(glm::vec3(0, 0, 50), glm::vec3(M_PI / 2, M_PI / 2, 0));
+        model->transform(glm::vec3(0, 0, 6), glm::vec3(0, M_PI / 3 * 2, 0));
+        world->concatenateHitableList(model);
+    }
+
+    /*std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(
+        Vertex(glm::vec3(0, 0, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)),
+        Vertex(glm::vec3(10, 0, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)),
+        Vertex(glm::vec3(0, 10, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)));
+    world->list.push_back(triangle);*/
 
    //world->list.push_back(std::make_shared<Sphere>(glm::vec3(0, 0, 10), 1.f));
 

@@ -45,7 +45,7 @@ bool Triangle::_oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) cons
 	*/
 
 	float normal_dot_direction = glm::dot(triangle_normal, r.direction);
-	if (normal_dot_direction >= 0)  // the ray direction and the triangle plane are parallel
+	if (normal_dot_direction == 0)  // the ray direction and the triangle plane are parallel
 		return false;
 
 	record.t = -(glm::dot(triangle_normal, r.origin) + _D) / normal_dot_direction;
@@ -66,7 +66,7 @@ bool Triangle::_oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) cons
 	float dot0 = glm::dot(triangle_normal, glm::cross(v1.position - v0.position, v0_P));
 	float dot1 = glm::dot(triangle_normal, glm::cross(v2.position - v1.position, v1_P));
 	float dot2 = glm::dot(triangle_normal, glm::cross(v0.position - v2.position, v2_P));
-	if (!((dot0 <= 0 && dot1 < 0 && dot2 <= 0) || (dot0 > 0 && dot1 > 0 && dot2 > 0)))  // all dots must have the same sign
+	if (!((dot0 <= 0 && dot1 <= 0 && dot2 <= 0) || (dot0 > 0 && dot1 > 0 && dot2 > 0)))  // all dots must have the same sign
 	{
 		return false;
 	}
@@ -87,13 +87,13 @@ bool Triangle::_oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) cons
 	record.u = uv.x;
 	record.v = uv.y;
 
-	/*
 	record.material = material.get();
 	if (material) {
+		/*
 		material->getBSDF(record);
 		material->emit(record);
+		*/
 	}
-	*/
 
 	return true;
 }

@@ -127,7 +127,9 @@ namespace {
                 textures.push_back(_texturesCache[texture_path]);
             }
             else {
-                textures.push_back(std::make_shared<ImageTexture>(texture_path));
+                std::shared_ptr<ImageTexture> new_texture = std::make_shared<ImageTexture>("Survival_BackPack_2/" + texture_path);
+                _texturesCache.insert(std::pair<std::string, std::shared_ptr<ImageTexture>>(texture_path, new_texture));
+                textures.push_back(new_texture);
             }
         }
         return textures;
