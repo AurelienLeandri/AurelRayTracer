@@ -15,6 +15,7 @@
 #include "Application.h"
 #include "RayTracer.h"
 #include "BVHNode.h"
+#include "BVHBuilder.h"
 #include "ModelLoader.h"
 #include "Triangle.h"
 
@@ -46,27 +47,45 @@ int main()
     sphere->material = material;
     world->list.push_back(sphere);
 
-    std::shared_ptr<HitableList> model = ModelLoader::loadModel("Survival_BackPack_2/backpack.obj");
-    //std::shared_ptr<HitableList> model = ModelLoader::loadModel("utah-teapot.obj");
+    std::shared_ptr<Triangle> triangle0 = std::make_shared<Triangle>(
+        Vertex(glm::vec3(0, 0, 1), glm::vec2(0, 0), glm::vec3(1, 0, 0)),
+        Vertex(glm::vec3(1, 1, 1), glm::vec2(1, 1), glm::vec3(1, 0, 0)),
+        Vertex(glm::vec3(0, 1, 1), glm::vec2(0, 1), glm::vec3(1, 0, 0))
+    );
+    std::shared_ptr<Triangle> triangle1 = std::make_shared<Triangle>(
+        Vertex(glm::vec3(0, 0, 1), glm::vec2(0, 0), glm::vec3(1, 0, 0)),
+        Vertex(glm::vec3(1, 0, 1), glm::vec2(1, 0), glm::vec3(1, 0, 0)),
+        Vertex(glm::vec3(1, 1, 1), glm::vec2(1, 1), glm::vec3(1, 0, 0))
+    );
+    //world->list.push_back(triangle0);
+    //world->list.push_back(triangle1);
+    triangle0->transform(glm::vec3(-0.5, -0.5, -0.5));
+    triangle1->transform(glm::vec3(-0.5, -0.5, -0.5));
+    std::shared_ptr<Material> material2 = std::make_shared<Material>();
+    //material2->diffuse = std::make_shared<ImageTexture>("uvs.png");
+    triangle0->material = material2;
+    triangle1->material = material2;
+    HitRecord record;
+    //triangle0->hit(Ray(glm::vec3(0, 0, 0), glm::normalize(glm::vec3(-0.45, 0.45, 0.5))), 0, 100000, record);
+    triangle1->hit(Ray(glm::vec3(0, 0, 0), glm::normalize(glm::vec3(0.05, 0, 0.5))), 0, 100000, record);
+    
+    std::shared_ptr<HitableList> model;
+    //model = ModelLoader::loadModel("utah-teapot.obj");
+    model = ModelLoader::loadModel("Survival_BackPack_2/backpack.obj");
+    //model = ModelLoader::loadModel("Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx");
     if (model) {
-        //model->transform(glm::vec3(0, 0, 50), glm::vec3(M_PI / 2, M_PI / 2, 0));
-        model->transform(glm::vec3(0, 0, 6), glm::vec3(0, M_PI / 3 * 2, 0));
+        //model->transform(glm::vec3(0, 0, 50));  // teapot
+        model->transform(glm::vec3(-0.5f, 0, 6), glm::vec3(0, M_PI / 5 * 4, 0));  // backpack
+        //model->transform(glm::vec3(50, 10, 200), glm::vec3(0, -M_PI / 4, 0));  // cerberus
+
         world->concatenateHitableList(model);
     }
-
-    /*std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(
-        Vertex(glm::vec3(0, 0, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)),
-        Vertex(glm::vec3(10, 0, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)),
-        Vertex(glm::vec3(0, 10, 50), glm::vec2(0, 0), glm::vec3(1, 0, 1)));
-    world->list.push_back(triangle);*/
 
    //world->list.push_back(std::make_shared<Sphere>(glm::vec3(0, 0, 10), 1.f));
 
     std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
 
-
     sub_clock = std::clock();
-    std::cout << "Setting up world...";
     float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
     glm::vec3 look_from = glm::vec3(0, 0, -1);
     glm::vec3 look_at = glm::vec3(0, 0, 10);
@@ -76,7 +95,9 @@ int main()
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
     ray_tracer.setCamera(camera);
 
-    std::shared_ptr<BVHNode> bvh = std::make_shared<BVHNode>(world->list, 0, world->list.size(), 0.f, 1.f);
+    std::cout << "Computing BVH...";
+
+    std::shared_ptr<BVHNode> bvh = BVHBuilder::buildBVH(world->list, 0, world->list.size(), 0.f, 1.f);
     ray_tracer.setWorld(bvh);
 
     std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;

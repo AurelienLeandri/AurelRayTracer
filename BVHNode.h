@@ -11,8 +11,6 @@ class BVHNode :
 {
 public:
 	BVHNode();
-	BVHNode(std::vector<std::shared_ptr<Hitable>>& list, int offset, int size, float time0, float time1);
-
 	virtual bool hit(Ray r, float t_min, float t_max, HitRecord& record) const;
 	virtual bool boundingBox(float t0, float t1, AABB& box) const;
 	virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3()) {};

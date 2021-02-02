@@ -59,33 +59,36 @@ bool Triangle::_oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) cons
 	record.position = r.direction * record.t + r.origin;
 	const glm::vec3& P = record.position;  // just an alias
 
-	// Is the point inside the triangle?
 	glm::vec3 v0_P = P - v0.position;
 	glm::vec3 v1_P = P - v1.position;
 	glm::vec3 v2_P = P - v2.position;
-	float dot0 = glm::dot(triangle_normal, glm::cross(v1.position - v0.position, v0_P));
+
+	// These two are used below and can be reused for computing the barycentric coordinates afterwards
+	glm::vec3 v0_v1 = v1.position - v0.position;
+	glm::vec3 v2_v0 = v0.position - v2.position;
+
+	float dot0 = glm::dot(triangle_normal, glm::cross(v0_v1, v0_P));
 	float dot1 = glm::dot(triangle_normal, glm::cross(v2.position - v1.position, v1_P));
-	float dot2 = glm::dot(triangle_normal, glm::cross(v0.position - v2.position, v2_P));
+	float dot2 = glm::dot(triangle_normal, glm::cross(v2_v0, v2_P));
 	if (!((dot0 <= 0 && dot1 <= 0 && dot2 <= 0) || (dot0 > 0 && dot1 > 0 && dot2 > 0)))  // all dots must have the same sign
 	{
 		return false;
 	}
 
-	// Some values for linear interpolation
-	float length_v0_P = glm::length(v0_P);
-	float length_v1_P = glm::length(v1_P);
-	float length_v2_P = glm::length(v2_P);
-	float inv_sum_lengths = 1 / (length_v0_P + length_v1_P + length_v2_P);
+	// Barycentric coordinates
+	float u = (glm::length(glm::cross(v2_v0, v0_P))) / _parallelogramArea;
+	float v = (glm::length(glm::cross(v0_v1, v0_P))) / _parallelogramArea;
+	float w = 1 - u - v;
 
-	// Compute normal at intersection point
-	record.normal = glm::normalize(
-		(length_v0_P * v0.normal + length_v1_P * v1.normal + length_v2_P * v2.normal) * inv_sum_lengths
-	);
+	// UV coordinates interpolation
+	record.u = u * v1.uv.x + v * v2.uv.x + w * v0.uv.x;
+	record.v = u * v1.uv.y + v * v2.uv.y + w * v0.uv.y;
 
-	// Compute UV-coordinates at intersection point
-	glm::vec2 uv = (length_v0_P * v0.uv + length_v1_P * v1.uv + length_v2_P * v2.uv) * inv_sum_lengths;
-	record.u = uv.x;
-	record.v = uv.y;
+	// Normals interpolation
+	record.normal.x = u * v1.normal.x + v * v2.normal.x + w * v0.normal.x;
+	record.normal.y = u * v1.normal.y + v * v2.normal.y + w * v0.normal.y;
+	record.normal.z = u * v1.normal.z + v * v2.normal.z + w * v0.normal.z;
+	record.normal = glm::normalize(record.normal);
 
 	record.material = material.get();
 	if (material) {
@@ -138,83 +141,13 @@ void Triangle::transform(const glm::vec3& translation, const glm::vec3& rotation
 		vertex.position = glm::vec3(translation_mat * rotation_mat_x * rotation_mat_y * rotation_mat_z * glm::vec4(vertex.position, 1.0));
 		vertex.normal = glm::normalize(glm::vec3(rotation_mat_x * rotation_mat_y * rotation_mat_z * glm::vec4(vertex.normal, 0.0)));
 	}
-	_computeTriangleNormal();
+	_computeTriangleNormalAndParallelogramArea();
 	_computePlaneDParameter();
 }
 
 bool Triangle::hit(Ray r, float t_min, float t_max, HitRecord& record) const
 {
 	return _oldAlgo(r, t_min, t_max, record);
-
-	/*
-	float normal_dot_direction = glm::dot(_normal, r.direction);
-	if (normal_dot_direction >= 0)  // the ray direction and the triangle plane are parallel
-		return false;
-
-	static const float EPSILON = 0.000001f;
-	glm::vec3 edge1, edge2, tvec, pvec, qvec;
-	float det, inv_det;
-	float& t = record.t;
-	float& u = record.u;
-	float& v = record.v;
-
-	// Find vectors for two edges sharing vertex 0
-	edge1 = v1.position - v0.position;
-	edge2 = v2.position - v0.position;
-
-	// Calculate determinant (and later U parameter)
-	pvec = glm::cross(r.direction, edge2);
-
-	// If determinant is near zero, ray lies in plane of triangle
-	det = glm::dot(edge1, pvec);
-
-	// No backface culling
-	if (det > -EPSILON && det < EPSILON)
-		return false;
-	inv_det = 1 / det;
-
-	// Calculate distance from v0 to ray origin
-	tvec = r.origin - v0.position;
-
-	// Calculate U parameter and test bounds
-	u = glm::dot(tvec, pvec) * inv_det;
-	if (u < 0.f || u > 1.f)
-		return false;
-
-	// Prepare to test V parameter
-	qvec = glm::cross(tvec, edge1);
-
-	// Calculate V parameter and test bounds
-	v = glm::dot(r.direction, qvec) * inv_det;
-	if (v < 0.f || u + v > 1.f)
-		return false;
-
-	// Calculate t, scale parameters, ray intersects triangle
-	t = glm::dot(edge2, qvec) * inv_det;
-
-	// Some values for linear interpolation
-	record.position = r.direction * record.t + r.origin;
-	float length_v0_P = glm::length(record.position - v0.position);
-	float length_v1_P = glm::length(record.position - v1.position);
-	float length_v2_P = glm::length(record.position - v2.position);
-	float inv_sum_lengths = 1 / (length_v0_P + length_v1_P + length_v2_P);
-
-	// Compute normal at intersection point
-	record.normal = glm::normalize(
-		(length_v0_P * v0.normal + length_v1_P * v1.normal + length_v2_P * v2.normal) * inv_sum_lengths
-	);
-
-	record.normal = v0.normal;
-
-
-	record.material = material.get();
-	if (material) {
-		material->getBSDF(record);
-		material->emit(record);
-	}
-
-	return true;
-	*/
 }
 
 bool Triangle::boundingBox(float t0, float t1, AABB& box) const
@@ -245,12 +178,16 @@ bool Triangle::boundingBox(float t0, float t1, AABB& box) const
 	return true;
 }
 
-void Triangle::_computeTriangleNormal()
+void Triangle::_computeTriangleNormalAndParallelogramArea()
 {
-	_normal = glm::normalize(glm::cross(v1.position - v0.position, v2.position - v0.position));
+	_normal = glm::cross(v1.position - v0.position, v2.position - v0.position);  // We normalize afterwards because this value can be used for computing the area
+	// The magnitude of the cross product is the area of the parallelogram formed by the two vector parameters
+	_parallelogramArea = glm::length(_normal);
+	_normal = glm::normalize(_normal);
 }
 
 void Triangle::_computePlaneDParameter()
 {
 	_D = -glm::dot(this->v0.position, _normal);
 }
+

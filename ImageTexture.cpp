@@ -14,6 +14,7 @@ ImageTexture::ImageTexture(int width, int height, int nbChannels) : Texture(), _
 
 ImageTexture::ImageTexture(std::string path) : _path(path)
 {
+    stbi_set_flip_vertically_on_load(false);
     _data = stbi_load(path.c_str(), &_width, &_height, &_nbChannels, 0);
 }
 
@@ -44,9 +45,21 @@ ImageTexture::~ImageTexture()
 
 glm::vec3 ImageTexture::color(float u, float v, const glm::vec3 & p) const
 {
+    /*
+    if (v > 1 || v < 0) {
+        int a = 0;
+        a = a;
+    }
+    */
+    u = fmod(u, 1.0f);
+    v = fmod(v, 1.0f);
+    if (v > 1 || v < 0 || u < 0 || u > 1) {
+        int a = 0;
+        a = a;
+    }
     int i = (int) std::max(0.f, std::min(u * _width, (float)(_width - 1)));
-    int j = (int) std::max(0.f, std::min((1 - v) * _height, (float)(_height - 1)));
+    int j = (int) std::max(0.f, std::min((1.f - v) * _height, (float)(_height - 1)));
     int index = (_nbChannels * _width) * j + (i * _nbChannels);
-    float inv_255 = 1.f / 255;
-    return glm::vec3(_data[index] * inv_255, _data[index + 1] * inv_255, _data[index + 2] * inv_255);
+    static const float INV_255 = 1.f / 255;
+    return glm::vec3(_data[index] * INV_255, _data[index + 1] * INV_255, _data[index + 2] * INV_255);
 }

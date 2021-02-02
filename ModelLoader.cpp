@@ -19,9 +19,9 @@
 #include "HitableList.h"
 
 namespace {
-    void processNode(aiNode* node, const aiScene* scene, std::shared_ptr<HitableList> triangles);
-    void processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<HitableList> triangles);
-    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures);
+    void processNode(aiNode* node, const aiScene* scene, std::shared_ptr<HitableList> triangles, const std::string &directory);
+    void processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<HitableList> triangles, const std::string &directory);
+    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures, const std::string &directory);
 
     std::map<std::string, std::shared_ptr<Texture>> _texturesCache;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 }
@@ -29,7 +29,7 @@ namespace {
 std::shared_ptr<HitableList> ModelLoader::loadModel(std::string path)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
         std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
@@ -37,28 +37,29 @@ std::shared_ptr<HitableList> ModelLoader::loadModel(std::string path)
     }
 
     std::shared_ptr<HitableList> triangles = std::make_shared<HitableList>();
-    processNode(scene->mRootNode, scene, triangles);
+    std::string directory = path.substr(0, path.find_last_of('/'));
+    processNode(scene->mRootNode, scene, triangles, directory);
 
     return triangles;
 }
 
 namespace {
 
-    void processNode(aiNode* node, const aiScene* scene, std::shared_ptr<HitableList> triangles)
+    void processNode(aiNode* node, const aiScene* scene, std::shared_ptr<HitableList> triangles, const std::string& directory)
     {
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            processMesh(mesh, scene, triangles);
+            processMesh(mesh, scene, triangles, directory);
         }
         for (unsigned int i = 0; i < node->mNumChildren; i++)
         {
-            processNode(node->mChildren[i], scene, triangles);
+            processNode(node->mChildren[i], scene, triangles, directory);
         }
 
     }
 
-    void processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<HitableList> triangles)
+    void processMesh(aiMesh* mesh, const aiScene* scene, std::shared_ptr<HitableList> triangles, const std::string& directory)
     {
         // Process material
         aiMaterial* assimp_material = scene->mMaterials[mesh->mMaterialIndex];
@@ -74,10 +75,10 @@ namespace {
          normal: texture_normalN
         */
         std::vector<std::shared_ptr<Texture>> diffuseMaps, specularMaps, normalMaps, heightMaps;
-        loadMaterialTextures(assimp_material, aiTextureType_DIFFUSE, "texture_diffuse", diffuseMaps);
-        loadMaterialTextures(assimp_material, aiTextureType_SPECULAR, "texture_specular", specularMaps);
-        loadMaterialTextures(assimp_material, aiTextureType_HEIGHT, "texture_normal", normalMaps);
-        loadMaterialTextures(assimp_material, aiTextureType_AMBIENT, "texture_height", heightMaps);
+        loadMaterialTextures(assimp_material, aiTextureType_DIFFUSE, "texture_diffuse", diffuseMaps, directory);
+        loadMaterialTextures(assimp_material, aiTextureType_SPECULAR, "texture_specular", specularMaps, directory);
+        loadMaterialTextures(assimp_material, aiTextureType_HEIGHT, "texture_normal", normalMaps, directory);
+        loadMaterialTextures(assimp_material, aiTextureType_AMBIENT, "texture_height", heightMaps, directory);
         if (diffuseMaps.size()) material->diffuse = diffuseMaps[0];
         if (specularMaps.size()) material->specular = specularMaps[0];
         if (normalMaps.size()) material->normal = normalMaps[0];
@@ -108,14 +109,14 @@ namespace {
                         has_uv ? glm::vec2(mesh->mTextureCoords[0][face.mIndices[j + 2]].x, mesh->mTextureCoords[0][face.mIndices[j + 2]].y) : glm::vec2(0, 0),  // uv
                         has_normals ? glm::vec3(mesh->mNormals[face.mIndices[j + 2]].x, mesh->mNormals[face.mIndices[j + 2]].y, mesh->mNormals[face.mIndices[j + 2]].z) : glm::vec3(1, 0, 0)  // normals
                     )
-                    );
+                );
                 triangle->material = material;
                 triangles->list.push_back(triangle);
             }
         }
     }
 
-    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures)
+    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures, const std::string& directory)
     {
         for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
         {
@@ -127,7 +128,7 @@ namespace {
                 textures.push_back(_texturesCache[texture_path]);
             }
             else {
-                std::shared_ptr<ImageTexture> new_texture = std::make_shared<ImageTexture>("Survival_BackPack_2/" + texture_path);
+                std::shared_ptr<ImageTexture> new_texture = std::make_shared<ImageTexture>(directory + "/" + texture_path);
                 _texturesCache.insert(std::pair<std::string, std::shared_ptr<ImageTexture>>(texture_path, new_texture));
                 textures.push_back(new_texture);
             }

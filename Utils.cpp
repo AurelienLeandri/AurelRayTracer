@@ -10,7 +10,7 @@
 
 float frand()
 {
-	return static_cast<float>(rand()) / RAND_MAX;
+	return static_cast<float>(rand()) / (RAND_MAX + 1);
 }
 
 glm::vec3 random_in_unit_sphere()

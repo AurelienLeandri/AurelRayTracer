@@ -19,7 +19,7 @@ public:
 	virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3());
 
 public:
-	void _computeTriangleNormal();
+	void _computeTriangleNormalAndParallelogramArea();
 	void _computePlaneDParameter();
 	bool _oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) const;
 
@@ -36,5 +36,6 @@ private:
 	// Normal of the triangle and D parameter of the triangle plane for faster hit function
 	glm::vec3 _normal = glm::vec3(1, 0, 0);
 	float _D = 0;
+	float _parallelogramArea = 0;
 };
 

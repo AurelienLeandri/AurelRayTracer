@@ -65,6 +65,7 @@ glm::vec3 RayTracer::_getColor(const Ray& r, size_t depth) const {
         if (record.material && record.material->diffuse) {
             return record.material->diffuse->color(record.u, record.v, record.position);
         }
+        return glm::vec3(record.u, record.v, 0);
         return record.normal;
     }
     return glm::vec3(0, 0, 0);  // background black
