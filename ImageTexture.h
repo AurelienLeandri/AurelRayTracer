@@ -19,6 +19,7 @@ public:
     virtual ~ImageTexture();
 
     virtual glm::vec3 color(float u, float v, const glm::vec3& p) const;
+    void setFactor(const glm::vec3 &factor);
 
 private:
     // Owns
@@ -28,5 +29,6 @@ private:
     int _height = 0;
     int _nbChannels = 0;
     std::string _path;
+    glm::vec3 _factor = glm::vec3(1, 1, 1);
 };
 

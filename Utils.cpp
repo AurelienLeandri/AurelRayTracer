@@ -77,12 +77,8 @@ float linear_interpolation(float a, float b, float ratio)
 
 void get_sphere_uv(const glm::vec3& n, float & u, float & v)
 {
-	u = atan2(n.x, n.z) / (2 * M_PI) + 0.5;
-	v = n.y * 0.5 + 0.5;
-	if (u > 1.0 || v > 1.0) {
-		int a = 0;
-		a = a;
-	}
+	u = atan2(n.x, n.z) / (2 * static_cast<float>(M_PI)) + 0.5f;
+	v = n.y * 0.5f + 0.5f;
 }
 
 glm::vec3 spherical_to_cartesian(float theta, float phi)

@@ -52,13 +52,12 @@ bool Sphere::hit(Ray r, float t_min, float t_max, HitRecord & record) const
 	record.position = r.pointAtParameter(record.t);
 	record.normal = record.position - center;
 	record.normal = glm::normalize(record.normal);
+	
 	record.material = material.get();
-	/*
-	if (material) {
-		material->getBSDF(record);
-		material->emit(record);
+	if (record.material) {
+		record.material->getBSDF(record);
+		record.material->emit(record);
 	}
-	*/
 
     get_sphere_uv(record.normal, record.u, record.v);
 
@@ -75,3 +74,8 @@ bool Sphere::boundingBox(float t0, float t1, AABB& box) const
 	box = AABB(center - glm::vec3(radius, radius, radius), center + glm::vec3(radius, radius, radius));
 	return true;
 }
+
+glm::vec3 Sphere::random(const glm::vec3& origin) const {
+	return glm::vec3(1, 0, 0);
+}
+

@@ -61,5 +61,10 @@ glm::vec3 ImageTexture::color(float u, float v, const glm::vec3 & p) const
     int j = (int) std::max(0.f, std::min((1.f - v) * _height, (float)(_height - 1)));
     int index = (_nbChannels * _width) * j + (i * _nbChannels);
     static const float INV_255 = 1.f / 255;
-    return glm::vec3(_data[index] * INV_255, _data[index + 1] * INV_255, _data[index + 2] * INV_255);
+    return glm::vec3(_data[index] * INV_255, _data[index + 1] * INV_255, _data[index + 2] * INV_255) * _factor;
+}
+
+void ImageTexture::setFactor(const glm::vec3& factor)
+{
+    _factor = factor;
 }

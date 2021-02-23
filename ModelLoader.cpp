@@ -79,10 +79,11 @@ namespace {
         loadMaterialTextures(assimp_material, aiTextureType_SPECULAR, "texture_specular", specularMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_HEIGHT, "texture_normal", normalMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_AMBIENT, "texture_height", heightMaps, directory);
-        if (diffuseMaps.size()) material->diffuse = diffuseMaps[0];
+        if (diffuseMaps.size()) material->albedo = diffuseMaps[0];
         if (specularMaps.size()) material->specular = specularMaps[0];
         if (normalMaps.size()) material->normal = normalMaps[0];
         if (heightMaps.size()) material->height = heightMaps[0];
+        material->recomputeBSDF();
 
         // Process triangles
         bool has_uv = mesh->mTextureCoords[0];

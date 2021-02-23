@@ -17,11 +17,13 @@ public:
 	virtual bool hit(Ray r, float t_min, float t_max, HitRecord& record) const override;
 	virtual bool boundingBox(float t0, float t1, AABB& box) const override;
 	virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3());
+	virtual glm::vec3 random(const glm::vec3& origin) const;
 
 public:
 	void _computeTriangleNormalAndParallelogramArea();
 	void _computePlaneDParameter();
 	bool _oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) const;
+	bool _moellerTrumbore(Ray r, float t_min, float t_max, HitRecord& record) const;
 
 private:
 	Vertex _vertices[3];

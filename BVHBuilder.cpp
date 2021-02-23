@@ -23,24 +23,24 @@ namespace {
 			return false;
 		}
 		int axis = 0;
-		float t0 = t0;
-		float t1 = t0;
+		float t0 = 0;
+		float t1 = std::numeric_limits<float>::max();
 	};
 
 	struct SplitInfo {
-		SplitInfo(std::shared_ptr<BVHNode> node, int offset, int size) :
+		SplitInfo(std::shared_ptr<BVHNode> node, size_t offset, size_t size) :
 			node(node),
 			offset(offset),
 			size(size)
 		{}
 
 		std::shared_ptr<BVHNode> node;
-		int offset;
-		int size;
+		size_t offset;
+		size_t size;
 	};
 }
 
-std::shared_ptr<BVHNode> BVHBuilder::buildBVH(std::vector<std::shared_ptr<Hitable>>& list, int offset, int size, float time0, float time1)
+std::shared_ptr<BVHNode> BVHBuilder::buildBVH(std::vector<std::shared_ptr<Hitable>>& list, size_t offset, size_t size, float time0, float time1)
 {
 	if (size == 0)
 		return nullptr;
@@ -63,7 +63,7 @@ std::shared_ptr<BVHNode> BVHBuilder::buildBVH(std::vector<std::shared_ptr<Hitabl
 		std::sort(list.begin() + split_info.offset, list.begin() + split_info.offset + split_info.size, custom_less);
 		if (split_info.size == 2) {
 			split_info.node->left = list[split_info.offset];
-			split_info.node->right = list[split_info.offset + 1];
+			split_info.node->right = list[static_cast<size_t>(split_info.offset) + 1];
 		}
 		else if (split_info.size == 1) {
 			split_info.node->left = split_info.node->right = list[split_info.offset];
@@ -78,7 +78,7 @@ std::shared_ptr<BVHNode> BVHBuilder::buildBVH(std::vector<std::shared_ptr<Hitabl
 		}
 	}
 
-	for (int i = bvh_nodes.size() - 1; i >= 0; --i) {
+	for (int i = static_cast<int>(bvh_nodes.size()) - 1; i >= 0; --i) {
 		AABB box_left, box_right;
 		if (!bvh_nodes[i]->left->boundingBox(time0, time1, box_left)) {
 			std::cerr << "Hitable a has no bounding box!" << std::endl;

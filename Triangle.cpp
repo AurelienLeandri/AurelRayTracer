@@ -91,11 +91,63 @@ bool Triangle::_oldAlgo(Ray r, float t_min, float t_max, HitRecord& record) cons
 	record.normal = glm::normalize(record.normal);
 
 	record.material = material.get();
-	if (material) {
-		/*
-		material->getBSDF(record);
-		material->emit(record);
-		*/
+	if (record.material) {
+		record.material->getBSDF(record);
+		record.material->emit(record);
+	}
+
+	return true;
+}
+
+bool Triangle::_moellerTrumbore(Ray r, float t_min, float t_max, HitRecord& record) const
+{
+	glm::vec3 v0v1(v1.position - v0.position);  // B - A
+	glm::vec3 v0v2(v2.position - v0.position);  // C - A
+	glm::vec3 cross_D_v0v2 = glm::cross(r.direction, v0v2);
+	float det_M = glm::dot(v0v1, cross_D_v0v2);
+	
+	static const float EPSILON = 0.0000001f;
+	if (glm::abs(det_M) < EPSILON)  // We are not culling back-facing triangles; this however checks if the triangle and the ray are parallel (or very close to be so)
+		return false;
+
+	// Cramer's rule. NOTE: t, u, v are arranged in that order (t u v)
+
+	float inv_det_M = 1 / det_M;
+	glm::vec3 v0O = r.origin - v0.position;
+	float u = glm::dot(v0O, cross_D_v0v2) * inv_det_M;
+	if (u < 0 || u > 1)
+		return false;
+
+	glm::vec3 cross_v0O_v0v1 = glm::cross(v0O, v0v1);
+	float v = glm::dot(r.direction, cross_v0O_v0v1) * inv_det_M;
+	if (v < 0 || u + v > 1)
+		return false;
+
+	record.t = glm::dot(v0v2, cross_v0O_v0v1) * inv_det_M;
+	if (record.t <= 0 || record.t < t_min || record.t >= t_max)
+		return false;
+
+	record.position = r.direction * record.t + r.origin;
+
+	float w = 1 - u - v;
+
+	// UV coordinates interpolation
+	record.u = u * v1.uv.x + v * v2.uv.x + w * v0.uv.x;
+	record.v = u * v1.uv.y + v * v2.uv.y + w * v0.uv.y;
+
+	// Normals interpolation
+	record.normal.x = u * v1.normal.x + v * v2.normal.x + w * v0.normal.x;
+	record.normal.y = u * v1.normal.y + v * v2.normal.y + w * v0.normal.y;
+	record.normal.z = u * v1.normal.z + v * v2.normal.z + w * v0.normal.z;
+	record.normal = glm::normalize(record.normal);
+
+	if (glm::dot(record.normal, r.direction) > 0)
+		record.normal *= -1;
+
+	record.material = material.get();
+	if (record.material) {
+		record.material->getBSDF(record);
+		record.material->emit(record);
 	}
 
 	return true;
@@ -147,7 +199,7 @@ void Triangle::transform(const glm::vec3& translation, const glm::vec3& rotation
 
 bool Triangle::hit(Ray r, float t_min, float t_max, HitRecord& record) const
 {
-	return _oldAlgo(r, t_min, t_max, record);
+	return _moellerTrumbore(r, t_min, t_max, record);
 }
 
 bool Triangle::boundingBox(float t0, float t1, AABB& box) const
@@ -190,4 +242,9 @@ void Triangle::_computePlaneDParameter()
 {
 	_D = -glm::dot(this->v0.position, _normal);
 }
+
+glm::vec3 Triangle::random(const glm::vec3& origin) const {
+	return glm::vec3(1, 0, 0);
+}
+
 
