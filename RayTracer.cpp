@@ -13,6 +13,10 @@
 #include "HitRecord.h"
 #include "HitableList.h"
 
+
+static float max_green = 0;
+
+
 RayTracer::~RayTracer()
 {
     if (_imageBuffer) {
@@ -44,7 +48,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = _getColor(r, 1);
+            glm::vec3 sample_color = glm::max(glm::vec3(0, 0, 0), _getColor(r, 2));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -61,48 +65,52 @@ bool RayTracer::iterate() {
 
 glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t depth) const {
     glm::vec3 color(0, 0, 0);
-    glm::vec3 weights(1, 1, 1);
+    glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
-    while (true) {
+    while (depth-- > 0) {
         HitRecord hit_record;
         if (_world->hit(w_o, hit_record)) {
-            /*
-            if (hit_record.material) {
-                if (hit_record.material->albedo) {
-                    return hit_record.material->albedo->color(hit_record.u, hit_record.v, hit_record.position);
-                }
-                else {
-                    return hit_record.material->albedoValue;
-                }
-            }
-            else {
-                return hit_record.normal;
-            }
-            */
-            if (!hit_record.material) {  // Default material
+            // If the object we hit has no material, we assign a default one
+            if (!hit_record.material) {
                 static Material default_material;
                 hit_record.material = &default_material;
                 default_material.getBSDF(hit_record);
                 default_material.emit(hit_record);
             }
 
-            color += hit_record.emission * weights;
-            if (depth-- == 0) break;
+            // Direct lighting
+            for (const std::shared_ptr<Hitable>& light : _lights) {
+                glm::vec3 light_sample(0, 0, 0);
+                float light_sample_proba = light->sample(light_sample, hit_record.position, hit_record.normal);
+                HitRecord occlusion_hit_record;
+                // If the light can be sampled from our position, we check if we hit the light:
+                // To verify this, "occlusion_hit_record.t" should be very close to one since "light_sample" stretches from the current position to the light.
+                if (light_sample_proba > 0 && _world->hit(Ray(hit_record.position, light_sample), occlusion_hit_record) && occlusion_hit_record.t > 0.9999f) {
+                    float cos_light_surface = glm::dot(glm::normalize(light_sample), hit_record.normal);
+                    if (cos_light_surface > 0) {
+                        glm::vec3 light_f = hit_record.bsdf->f(light_sample, -w_o.direction, hit_record);
+                        glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                        glm::vec3 light_color = occlusion_hit_record.emission * path_accumulated_weight * light_scattering / light_sample_proba;
+                        color += light_color;
+                    }
+                }
+            }
 
-            const BSDF &bsdf = *hit_record.bsdf;
+            // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
-            glm::vec3 sample_proba = bsdf.sample_f(w_i, -w_o.direction, hit_record);  // Get a sample vector, gets the proba to pick it
-            glm::vec3 f = bsdf.f(w_i, -w_o.direction, hit_record);  // Scattering weight from BSDF
-            w_i = glm::normalize(w_i);
-            float cos_theta = std::fabs(glm::dot(w_i, hit_record.normal));  // Light attenuation wrt. angle
-            weights *= (cos_theta * f) / sample_proba;
+            glm::vec3 sample_proba = hit_record.bsdf->sample_f(w_i, -w_o.direction, hit_record);  // Get a sample vector, gets the proba to pick it
+            glm::vec3 f = hit_record.bsdf->f(w_i, -w_o.direction, hit_record);  // Scattering weight from BSDF
+            float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
+            glm::vec3 scattering = light_attenuation_wrt_angle * f;
+            glm::vec3 previous_weight = path_accumulated_weight;
+            path_accumulated_weight *= scattering / sample_proba;
             w_o = Ray(hit_record.position, w_i);
         }
         else {
-            break;
+            break;  // The path is over. The ray didn't hit anything
         }
     }
-    return color;  // background black
+    return color;
 }
 
 const float* RayTracer::getImageBuffer() const

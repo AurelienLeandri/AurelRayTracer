@@ -17,7 +17,7 @@ public:
 	virtual bool hit(Ray r, float t_min, float t_max, HitRecord& record) const override;
 	virtual bool boundingBox(float t0, float t1, AABB& box) const override;
 	virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3());
-	virtual glm::vec3 random(const glm::vec3& origin) const;
+	virtual float sample(glm::vec3 &value, const glm::vec3& origin, const glm::vec3& origin_normal) const override;
 
 public:
 	void _computeTriangleNormalAndParallelogramArea();

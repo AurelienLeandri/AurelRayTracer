@@ -1,6 +1,9 @@
 #include "Triangle.h"
 
 #include "AABB.h"
+#include "Utils.h"
+
+#include <iostream>
 
 Triangle::Triangle(const Vertex& vertex0, const Vertex& vertex1, const Vertex& vertex2, std::shared_ptr<Material> material,
 	const glm::vec3& translation, const glm::vec3& rotation) : Hitable(material)
@@ -243,8 +246,21 @@ void Triangle::_computePlaneDParameter()
 	_D = -glm::dot(this->v0.position, _normal);
 }
 
-glm::vec3 Triangle::random(const glm::vec3& origin) const {
-	return glm::vec3(1, 0, 0);
+float Triangle::sample(glm::vec3& value, const glm::vec3& origin, const glm::vec3& origin_normal) const {
+	float u = frand();
+	float v = frand();
+	if (u + v > 1) {
+		u = 1 - u;
+		v = 1 - v;
+	}
+	glm::vec3 point_on_triangle = (u * (v1.position - v0.position) + v * (v2.position - v0.position)) + v0.position;
+	value = point_on_triangle - origin;
+	float light_cosine = glm::dot(glm::normalize(value), origin_normal);
+	if (light_cosine < 0.1)
+		return 0;
+	float length_squared = glm::dot(value, value);
+	float result = glm::dot(value, value) / (glm::dot(glm::normalize(value), origin_normal) * (_parallelogramArea * 0.5f));
+	return fabs(glm::dot(value, value)) / (std::fabs(glm::dot(glm::normalize(value), origin_normal)) * (_parallelogramArea * 0.5f));
 }
 
 

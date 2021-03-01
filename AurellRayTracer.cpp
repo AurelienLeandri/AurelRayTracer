@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <ctime>
+#include <fstream>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -120,7 +121,7 @@ namespace {
 		std::shared_ptr<Material> material_green = std::make_shared<Material>();
 		material_green->albedoValue = glm::vec3(0.12f, 0.45f, 0.15f);
 		std::shared_ptr<Material> material_light = std::make_shared<Material>();
-		material_light->emissionValue = glm::vec3(30, 30, 30);
+		material_light->emissionValue = glm::vec3(100, 100, 100);
 		material_light->albedoValue = glm::vec3(0, 0, 0);
 
 		material_red->recomputeBSDF();
@@ -357,7 +358,7 @@ int main()
 
 	std::vector<std::shared_ptr<Hitable>> lights;
 
-	std::shared_ptr<Camera> camera = backpack_scene(world, lights);
+	std::shared_ptr<Camera> camera = cornell_box_scene(world, lights);
 
 	std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
 
@@ -378,6 +379,18 @@ int main()
         finished = ray_tracer.iterate();
         application.refreshWindow(ray_tracer.getImageBuffer());
     } while (!finished);
+	
+	std::fstream file_stream;
+	file_stream.open("image_buffer.txt", std::ios::out);
+	const float* image_buffer = ray_tracer.getImageBuffer();
+	for (int y = 200; y < 600; ++y) {
+		for (int x = 0; x < 800 * 3; x+=3) {
+			file_stream << image_buffer[y * 800 * 3 + x] << " ";
+			file_stream << image_buffer[y * 800 * 3 + x + 1] << " ";
+			file_stream << image_buffer[y * 800 * 3 + x + 2] << std::endl;
+		}
+	}
+	file_stream.close();
 
     std::cout << "Ray tracing took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds." << std::endl;
 

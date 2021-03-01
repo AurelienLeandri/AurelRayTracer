@@ -24,7 +24,7 @@ public:
 	virtual bool hit(Ray r, HitRecord &record) const;
 	virtual bool boundingBox(float t0, float t1, AABB& box) const = 0;
 	//virtual float pdf_value(const glm::vec3& origin, const glm::vec3& direction) const { return 0.f; }
-	virtual glm::vec3 random(const glm::vec3& origin) const { return glm::vec3(1.f, 0.f, 0.f); };  // TODO: make pure virtual
+	virtual float sample(glm::vec3& value, const glm::vec3& origin, const glm::vec3& origin_normal) const { return 0.f; };
 	virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3()) = 0;
 
 public:

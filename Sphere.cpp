@@ -75,7 +75,4 @@ bool Sphere::boundingBox(float t0, float t1, AABB& box) const
 	return true;
 }
 
-glm::vec3 Sphere::random(const glm::vec3& origin) const {
-	return glm::vec3(1, 0, 0);
-}
 
