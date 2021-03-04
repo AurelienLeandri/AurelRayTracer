@@ -121,7 +121,7 @@ namespace {
 		std::shared_ptr<Material> material_green = std::make_shared<Material>();
 		material_green->albedoValue = glm::vec3(0.12f, 0.45f, 0.15f);
 		std::shared_ptr<Material> material_light = std::make_shared<Material>();
-		material_light->emissionValue = glm::vec3(100, 100, 100);
+		material_light->emissionValue = glm::vec3(30, 30, 30);
 		material_light->albedoValue = glm::vec3(0, 0, 0);
 
 		material_red->recomputeBSDF();
@@ -229,6 +229,11 @@ namespace {
 	}
 
 	std::shared_ptr<Camera> backpack_scene(std::shared_ptr<HitableList> world, std::vector<std::shared_ptr<Hitable>>& lights) {
+		std::shared_ptr<Material> material_light = std::make_shared<Material>();
+		material_light->emissionValue = glm::vec3(50, 40, 30);
+		material_light->albedoValue = glm::vec3(0, 0, 0);
+		material_light->recomputeBSDF();
+		
 		std::shared_ptr<HitableList> model;
 		model = ModelLoader::loadModel("Survival_BackPack_2/backpack.obj");
 		if (model) {
@@ -236,15 +241,30 @@ namespace {
 			world->concatenateHitableList(model);
 		}
 
+		world->list.push_back(std::make_shared<Triangle>(
+			Vertex(glm::vec3(-3, 0, 6), glm::vec2(0, 0), glm::vec3(1, 0, 0)),
+			Vertex(glm::vec3(-3, 1, 6), glm::vec2(0, 1), glm::vec3(1, 0, 0)),
+			Vertex(glm::vec3(-3, 0, 7), glm::vec2(1, 0), glm::vec3(1, 0, 0)),
+			material_light
+			));
+		lights.push_back(world->list.back());
+		world->list.push_back(std::make_shared<Triangle>(
+			Vertex(glm::vec3(-3, 1, 7), glm::vec2(0, 0), glm::vec3(1, 0, 0)),
+			Vertex(glm::vec3(-3, 0, 7), glm::vec2(0, 1), glm::vec3(1, 0, 0)),
+			Vertex(glm::vec3(-3, 1, 6), glm::vec2(1, 0), glm::vec3(1, 0, 0)),
+			material_light
+			));
+		lights.push_back(world->list.back());
+
 		std::shared_ptr<Material> light_material = std::make_shared<Material>();
 		light_material->albedoValue = glm::vec3(0, 0, 0);
 		light_material->emissionValue = glm::vec3(100, 100, 100);
 		light_material->recomputeBSDF();
 		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
 		light_sphere->material = light_material;
-		world->list.push_back(light_sphere);
+		//world->list.push_back(light_sphere);
 
-		lights.push_back(light_sphere);
+		//lights.push_back(light_sphere);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -1);
@@ -358,7 +378,7 @@ int main()
 
 	std::vector<std::shared_ptr<Hitable>> lights;
 
-	std::shared_ptr<Camera> camera = cornell_box_scene(world, lights);
+	std::shared_ptr<Camera> camera = backpack_scene(world, lights);
 
 	std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
 

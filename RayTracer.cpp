@@ -12,6 +12,8 @@
 #include "Utils.h"
 #include "HitRecord.h"
 #include "HitableList.h"
+#include "Embree.h"
+#include "ImageTexture.h"
 
 
 static float max_green = 0;
@@ -48,7 +50,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0, 0, 0), _getColor(r, 2));
+            glm::vec3 sample_color = glm::max(glm::vec3(0, 0, 0), _getColor(r));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -63,11 +65,27 @@ bool RayTracer::iterate() {
     return _currentSample > _NB_SAMPLES;
 }
 
-glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t depth) const {
+bool RayTracer::_hit(Ray r, float t_min, float t_max, HitRecord& record) const {
+    Embree* embree = Embree::getInstance();
+    if (embree) {
+
+    }
+    else {
+        return _world->hit(r, t_min, t_max, record);
+    }
+}
+
+bool RayTracer::_hit(Ray r, HitRecord& record) const {
+    return _hit(r, 0.001f, std::numeric_limits<float>::max(), record);
+}
+
+glm::vec3 RayTracer::_getColor(const Ray& camera_ray) const {
+    size_t depth = 0;
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
-    while (depth-- > 0) {
+    float russian_roulette_weight = 1.f;
+        while (true) {
         HitRecord hit_record;
         if (_world->hit(w_o, hit_record)) {
             // If the object we hit has no material, we assign a default one
@@ -76,6 +94,10 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t depth) const {
                 hit_record.material = &default_material;
                 default_material.getBSDF(hit_record);
                 default_material.emit(hit_record);
+            }
+
+            if (depth == 0) {  // Hitting lights on the first ray
+                color += hit_record.emission;
             }
 
             // Direct lighting
@@ -102,13 +124,28 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t depth) const {
             glm::vec3 f = hit_record.bsdf->f(w_i, -w_o.direction, hit_record);  // Scattering weight from BSDF
             float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
             glm::vec3 scattering = light_attenuation_wrt_angle * f;
+
+            if (depth >= 5) {
+                russian_roulette_weight = 1.f - glm::min(0.0625f * depth, 1.f);
+                if (frand() > russian_roulette_weight) {
+                    break;
+                }
+            }
+
             glm::vec3 previous_weight = path_accumulated_weight;
             path_accumulated_weight *= scattering / sample_proba;
+            path_accumulated_weight /= russian_roulette_weight;
             w_o = Ray(hit_record.position, w_i);
         }
         else {
+            static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
+            float u = 0, v = 0;
+            get_sphere_uv(glm::normalize(w_o.direction), u, v);
+            color += path_accumulated_weight * environment_emission_texture->color(u, v, glm::vec3());
             break;  // The path is over. The ray didn't hit anything
         }
+
+        depth++;
     }
     return color;
 }

@@ -10,6 +10,7 @@
 class Hitable;
 class Camera;
 class Ray;
+class HitRecord;
 
 class RayTracer {
 public:
@@ -24,7 +25,9 @@ public:
     void setCamera(std::shared_ptr<Camera> camera);
 
 private:
-    glm::vec3 _getColor(const Ray& r, size_t depth) const;
+    glm::vec3 _getColor(const Ray& r) const;
+    bool _hit(Ray r, float t_min, float t_max, HitRecord& record) const;
+    bool _hit(Ray r, HitRecord& record) const;
 
 private:
     float* _imageBuffer = nullptr;
@@ -33,7 +36,7 @@ private:
     const size_t _HEIGHT = Application::HEIGHT;
     const size_t _NB_CHANNELS = Application::NB_CHANNELS;
 
-    const size_t _NB_SAMPLES = 2000;
+    const size_t _NB_SAMPLES = 64;
     const float _INV_NB_SAMPLES = 1.f / _NB_SAMPLES;
     const size_t _NB_THREADS = omp_get_max_threads();
     const size_t _PORTION_SIZE = (_WIDTH * _HEIGHT) / _NB_THREADS;

@@ -256,7 +256,7 @@ float Triangle::sample(glm::vec3& value, const glm::vec3& origin, const glm::vec
 	glm::vec3 point_on_triangle = (u * (v1.position - v0.position) + v * (v2.position - v0.position)) + v0.position;
 	value = point_on_triangle - origin;
 	float light_cosine = glm::dot(glm::normalize(value), origin_normal);
-	if (light_cosine < 0.1)
+	if (light_cosine < 0.1 || glm::dot(glm::vec3(0, -1, 0), value) >= 0)
 		return 0;
 	float length_squared = glm::dot(value, value);
 	float result = glm::dot(value, value) / (glm::dot(glm::normalize(value), origin_normal) * (_parallelogramArea * 0.5f));
