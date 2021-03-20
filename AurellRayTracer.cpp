@@ -235,8 +235,12 @@ namespace {
 
 	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
 	{
+		Transform t;
+		t.translation = glm::vec3(1.5f, 0, 3);
+		t.scaling = glm::vec3(0.8f, 1, 0.5f);
+		t.rotation_rads = glm::vec3(M_PI / 4, M_PI / 2, M_PI);
 		std::string model_path = "Survival_BackPack_2/backpack.obj";
-		if (!ModelLoader::loadModel(model_path, scene)) {
+		if (!ModelLoader::loadModel(model_path, scene, t)) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
@@ -265,7 +269,7 @@ namespace {
 		scene.addMesh(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
-		glm::vec3 look_from = glm::vec3(5, 0, 6);
+		glm::vec3 look_from = glm::vec3(0, 0, -6);
 		glm::vec3 look_at = glm::vec3(0, 0, 0);
 		float dist_to_focus = 10.f;
 		float aperture = 0.f;
