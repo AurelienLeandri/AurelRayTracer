@@ -22,6 +22,7 @@ LambertianReflection::~LambertianReflection()
 glm::vec3 LambertianReflection::f(const glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record) const
 {
     glm::vec3 albedo = _albedoTexture ? _albedoTexture->color(hit_record.u, hit_record.v, hit_record.position) : _albedoValue;
+    // When one integrates the hemispherical-directional function over the hemisphere, we get pi, hence the 1 / pi.
     return albedo / float(M_PI);
 }
 

@@ -20,11 +20,14 @@ BSDF::~BSDF()
 
 glm::vec3 BSDF::f(const glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord &hit_record) const
 {
-    glm::vec3 f_total = glm::vec3();
-    for (const BxDF *bxdf : _bxdfs) {
-        f_total += bxdf->f(w_i, w_o, hit_record);
+    bool reflected = glm::dot(w_o, hit_record.normal) * glm::dot(w_i, hit_record.normal) > 0;  // Both w_i and w_o are on the same side of the surface -> Reflection. If not -> Transmission.
+    glm::vec3 f(0, 0, 0);
+    for (int i = 0; i < _bxdfs.size(); ++i) {
+        if ((reflected && (_bxdfs[i]->type & BxDF::BSDF_REFLECTION)) || (!reflected && (_bxdfs[i]->type & BxDF::BSDF_TRANSMISSION))) {
+            f += _bxdfs[i]->f(w_i, w_o, hit_record);
+        }
     }
-    return f_total;
+    return f;
 }
 
 glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record) const

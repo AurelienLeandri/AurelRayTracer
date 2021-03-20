@@ -21,7 +21,7 @@ namespace {
     std::unordered_map<std::string, std::shared_ptr<Texture>> _texturesCache;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 }
    
-bool ModelLoader::loadModel(std::string path, SceneData& scene)
+bool ModelLoader::loadModel(std::string path, SceneData& scene, const Transform& transform)
 {
     Assimp::Importer importer;
     const aiScene* ai_scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
@@ -33,7 +33,7 @@ bool ModelLoader::loadModel(std::string path, SceneData& scene)
 
     std::unordered_map<aiMaterial*, unsigned int> model_materials;
     std::string directory = path.substr(0, path.find_last_of('/'));
-    _processNode(ai_scene->mRootNode, ai_scene, model_materials, directory, scene);
+    _processNode(ai_scene->mRootNode, ai_scene, model_materials, directory, scene, transform);
 
     return true;
 }
@@ -43,16 +43,16 @@ void ModelLoader::_processNode(
     aiNode* node,
     const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    const std::string& directory, SceneData& scene)
+    const std::string& directory, SceneData& scene, const Transform& transform)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = ai_scene->mMeshes[node->mMeshes[i]];
-        _processMesh(mesh, ai_scene, model_materials, directory, scene);
+        _processMesh(mesh, ai_scene, model_materials, directory, scene, transform);
     }
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        _processNode(node->mChildren[i], ai_scene, model_materials, directory, scene);
+        _processNode(node->mChildren[i], ai_scene, model_materials, directory, scene, transform);
     }
 
 }
@@ -61,7 +61,7 @@ void ModelLoader::_processMesh(
     aiMesh* assimp_mesh,
     const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    const std::string& directory, SceneData& scene)
+    const std::string& directory, SceneData& scene, const Transform& transform)
 {
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
@@ -117,6 +117,8 @@ void ModelLoader::_processMesh(
                 has_uv ? glm::vec2(assimp_mesh->mTextureCoords[0][i].x, assimp_mesh->mTextureCoords[0][i].y) : glm::vec2(0, 0)
             });
     }
+
+    mesh->transform(transform);
 
     scene.addMesh(mesh);
 }
