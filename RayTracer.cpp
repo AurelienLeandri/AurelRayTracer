@@ -15,6 +15,7 @@
 #include "HitableList.h"
 #include "Embree.h"
 #include "ImageTexture.h"
+#include "SceneData.h"
 #include "Mesh.h"
 
 
@@ -26,11 +27,11 @@ RayTracer::~RayTracer()
         delete[] _imageBuffer;
         _imageBuffer = nullptr;
     }
-    if (_scene) {
-        rtcReleaseScene(_scene);
+    if (_rtcScene) {
+        rtcReleaseScene(_rtcScene);
     }
-    if (_device) {
-        rtcReleaseDevice(_device);
+    if (_rtcDevice) {
+        rtcReleaseDevice(_rtcDevice);
     }
 }
 
@@ -72,24 +73,10 @@ bool RayTracer::iterate() {
     return _currentSample > _NB_SAMPLES;
 }
 
-bool RayTracer::_hit(Ray r, float t_min, float t_max, HitRecord& record) const {
-    Embree* embree = nullptr;
-    if (embree) {
-
-    }
-    else {
-        return _world->hit(r, t_min, t_max, record);
-    }
-}
-
-bool RayTracer::_hit(Ray r, HitRecord& record) const {
-    return _hit(r, 0.001f, std::numeric_limits<float>::max(), record);
-}
-
-    /*
-    * Cast a single ray with origin (ox, oy, oz) and direction
-    * (dx, dy, dz).
-    */
+/*
+* Cast a single ray with origin (ox, oy, oz) and direction
+* (dx, dy, dz).
+*/
 bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
 {
     /*
@@ -123,7 +110,7 @@ bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
      * There are multiple variants of rtcIntersect. This one
      * intersects a single ray with the scene.
      */
-    rtcIntersect1(_scene, &context, &rayhit);
+    rtcIntersect1(_rtcScene, &context, &rayhit);
 
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID)
     {
@@ -131,20 +118,20 @@ bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
         hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));;
         hit_record.t = rayhit.ray.tfar;
 
-        struct alignas (16) interpolated_data {
+        static struct alignas (16) interpolated_data {
             float normals[4] = { 0 };
             float uvs[4] = { 0 };
         };
-        interpolated_data interpolation;
-        RTCGeometry geometry = rtcGetGeometry(_scene, rayhit.hit.geomID);
+        static interpolated_data interpolation;
+        RTCGeometry geometry = rtcGetGeometry(_rtcScene, rayhit.hit.geomID);
         rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, &interpolation.normals[0], nullptr, nullptr, 4);
         rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, &interpolation.uvs[0], nullptr, nullptr, 4);
         hit_record.normal = glm::normalize(glm::vec3(interpolation.normals[0], interpolation.normals[1], interpolation.normals[2]));
         hit_record.u = interpolation.uvs[0];
         hit_record.v = interpolation.uvs[1];
 
-        if (unsigned int material_id = _meshes.at(rayhit.hit.geomID)->materialId) {
-            hit_record.material = _materials.at(material_id).get();
+        if (unsigned int material_id = _scene->getMeshes().at(rayhit.hit.geomID)->materialId) {
+            hit_record.material = _scene->getMaterials().at(material_id).get();
             hit_record.material->getBSDF(hit_record);
             hit_record.material->emit(hit_record);
         }
@@ -171,13 +158,24 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray) const {
         //if (_world->hit(w_o, hit_record)) {
         if (_castRay(camera_ray, hit_record)) {
 
+            // return glm::vec3(1, 0, 0);
+
+            return hit_record.normal;
+
+            if (hit_record.material->albedo) {
+                return hit_record.material->albedo->color(hit_record.u, hit_record.v, hit_record.position);
+            }
+            else {
+                return hit_record.material->emissionValue;
+            }
+
             if (depth == 0) {  // Hitting lights on the first ray
                 color += hit_record.emission;
             }
 
             // Direct lighting
-            for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _lights) {
-                const std::shared_ptr<Mesh> &light = pair.second;
+            for (unsigned int light_id : _lights) {
+                const std::shared_ptr<Mesh> &light = _scene->getMeshes().at(light_id);
                 glm::vec3 light_sample(0, 0, 0);
                 float light_sample_proba = light->sample(light_sample, hit_record.position, hit_record.normal);
                 HitRecord occlusion_hit_record;
@@ -232,23 +230,12 @@ const float* RayTracer::getImageBuffer() const
     return _imageBuffer;
 }
 
-void RayTracer::setWorld(const std::shared_ptr<Hitable> world, const std::vector<std::shared_ptr<Hitable>>& lights) {
-    _world = world;
-    _legacyLights = lights;
-}
-
 void RayTracer::setCamera(std::shared_ptr<Camera> camera) {
-    this->_camera = camera;
+    _camera = camera;
 }
 
-void RayTracer::setScene(const std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes, const std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials) {
-    _meshes = meshes;
-    _materials = materials;
-    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : meshes) {
-        if (pair.second->materialId && (materials.at(pair.second->materialId)->emission || materials.at(pair.second->materialId)->emissionValue != glm::vec3(0, 0, 0))) {  // Light source
-            _lights[pair.first] = pair.second;
-        }
-    }
+void RayTracer::setScene(const SceneData& scene) {
+    _scene = &scene;
 }
 
 namespace { // embree
@@ -261,48 +248,51 @@ namespace { // embree
 }
 
 bool RayTracer::start() {
+    if (!_scene || !_camera) {
+        return false;
+    }
 
-    _device = rtcNewDevice(nullptr);
+    // Register meshes with emissive material as lights, to retrieve them by index in the scene geometry for importance sampling
+    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _scene->getMeshes()) {
+        std::shared_ptr<Material> mesh_material = _scene->getMaterials().at(pair.second->materialId);
+        if (pair.second->materialId && (mesh_material->emission || mesh_material->emissionValue != glm::vec3(0, 0, 0))) {  // Light source
+            _lights.push_back(pair.first);
+        }
+    }
 
-    if (!_device) {
+    _rtcDevice = rtcNewDevice(nullptr);
+
+    if (!_rtcDevice) {
         printf("error %d: cannot create device\n", rtcGetDeviceError(nullptr));
         return 1;
     }
 
-    rtcSetDeviceErrorFunction(_device, errorFunction, nullptr);
+    rtcSetDeviceErrorFunction(_rtcDevice, errorFunction, nullptr);
 
-    _scene = rtcNewScene(_device);
+    _rtcScene = rtcNewScene(_rtcDevice);
 
-    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _meshes) {
-        RTCGeometry geom = rtcNewGeometry(_device, RTC_GEOMETRY_TYPE_TRIANGLE);
-        for (const Vertex& vertex : pair.second->geometry) {
-            _vertices.push_back({ vertex.position.x, vertex.position.y, vertex.position.z });
-            _normals.push_back({ vertex.normal.x, vertex.normal.y, vertex.normal.z });
-            _uvs.push_back({ vertex.uv.x, vertex.uv.y });
-        }
-        for (const unsigned int& index : pair.second->indices) {
-            _indices.push_back(index);
-        }
+    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _scene->getMeshes()) {
+        RTCGeometry geom = rtcNewGeometry(_rtcDevice, RTC_GEOMETRY_TYPE_TRIANGLE);
 
         // Vertices
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, &_vertices[0], 0, sizeof(_VertexData), pair.second->geometry.size());
+        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], 0, sizeof(Vertex), pair.second->geometry.size());
 
         // Normals
         rtcSetGeometryVertexAttributeCount(geom, 1);      
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, RTC_FORMAT_FLOAT3, &_normals[0], 0, sizeof(_NormalsData), pair.second->geometry.size());
+        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], sizeof(glm::vec3), sizeof(Vertex), pair.second->geometry.size());
 
         // UVs
         rtcSetGeometryVertexAttributeCount(geom, 2);
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &_uvs[0], 0, sizeof(_UVData), pair.second->geometry.size());
+        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], sizeof(glm::vec3) * 2, sizeof(Vertex), pair.second->geometry.size());
 
         // Indices
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &_indices[0], 0, 3 * sizeof(unsigned int), pair.second->indices.size() / 3);
+        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &pair.second->indices[0], 0, 3 * sizeof(unsigned int), pair.second->indices.size() / 3);
 
         rtcCommitGeometry(geom);
-        rtcAttachGeometry(_scene, geom);
+        rtcAttachGeometry(_rtcScene, geom);
         rtcReleaseGeometry(geom);
     }
     
-    rtcCommitScene(_scene);
+    rtcCommitScene(_rtcScene);
 }
 

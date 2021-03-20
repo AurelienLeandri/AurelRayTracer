@@ -14,20 +14,18 @@
 #include "ImageTexture.h"
 #include "HitableList.h"
 #include "Mesh.h"
-
-unsigned int ModelLoader::_nextGeometryId = 0;
-unsigned int ModelLoader::_nextMaterialId = 1;
+#include "SceneData.h"
 
 namespace {
     std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures, const std::string &directory);
     std::unordered_map<std::string, std::shared_ptr<Texture>> _texturesCache;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 }
    
-bool ModelLoader::loadModel(std::string path, std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes, std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials)
+bool ModelLoader::loadModel(std::string path, SceneData& scene)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+    const aiScene* ai_scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
+    if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode) // if is Not Zero
     {
         std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
         return false;
@@ -35,7 +33,7 @@ bool ModelLoader::loadModel(std::string path, std::unordered_map<unsigned int, s
 
     std::unordered_map<aiMaterial*, unsigned int> model_materials;
     std::string directory = path.substr(0, path.find_last_of('/'));
-    _processNode(scene->mRootNode, scene, materials, model_materials, meshes, directory);
+    _processNode(ai_scene->mRootNode, ai_scene, model_materials, directory, scene);
 
     return true;
 }
@@ -43,40 +41,34 @@ bool ModelLoader::loadModel(std::string path, std::unordered_map<unsigned int, s
 
 void ModelLoader::_processNode(
     aiNode* node,
-    const aiScene* scene,
-    std::unordered_map<unsigned int, std::shared_ptr<Material>>& global_materials,
+    const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes, 
-    const std::string& directory)
+    const std::string& directory, SceneData& scene)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        _processMesh(mesh, scene, global_materials, model_materials, meshes, directory);
+        aiMesh* mesh = ai_scene->mMeshes[node->mMeshes[i]];
+        _processMesh(mesh, ai_scene, model_materials, directory, scene);
     }
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        _processNode(node->mChildren[i], scene, global_materials, model_materials, meshes, directory);
+        _processNode(node->mChildren[i], ai_scene, model_materials, directory, scene);
     }
 
 }
 
 void ModelLoader::_processMesh(
     aiMesh* assimp_mesh,
-    const aiScene* scene,
-    std::unordered_map<unsigned int, std::shared_ptr<Material>>& global_materials,
+    const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-    const std::string& directory)
+    const std::string& directory, SceneData& scene)
 {
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
     // Process material
-    aiMaterial* assimp_material = scene->mMaterials[assimp_mesh->mMaterialIndex];
+    aiMaterial* assimp_material = ai_scene->mMaterials[assimp_mesh->mMaterialIndex];
 
     if (assimp_material && model_materials.find(assimp_material) == model_materials.end()) {
-        model_materials[assimp_material] = ModelLoader::_nextMaterialId;
-
         std::shared_ptr<Material> material = std::make_shared<Material>();
 
         /* (Note from learnopengl since Itook the modifiedmodel from here:)
@@ -98,9 +90,7 @@ void ModelLoader::_processMesh(
         if (heightMaps.size()) material->height = heightMaps[0];
         material->recomputeBSDF();
 
-        global_materials[ModelLoader::_nextMaterialId] = material;
-
-        ModelLoader::_nextMaterialId++;
+        model_materials[assimp_material] = scene.addMaterial(material);
     }
 
     mesh->materialId = model_materials[assimp_material];
@@ -121,17 +111,14 @@ void ModelLoader::_processMesh(
     for (unsigned int i = 0; i < assimp_mesh->mNumVertices; i++) {
         auto a = assimp_mesh->mVertices[i];
         auto c = assimp_mesh->mNormals[i];
-        mesh->geometry.push_back(
-            Vertex(
+        mesh->geometry.push_back({
                 glm::vec3(assimp_mesh->mVertices[i].x, assimp_mesh->mVertices[i].y, assimp_mesh->mVertices[i].z),
-                has_uv ? glm::vec2(assimp_mesh->mTextureCoords[0][i].x, assimp_mesh->mTextureCoords[0][i].y) : glm::vec2(0, 0),
-                has_normals ? glm::vec3(assimp_mesh->mNormals[i].x, assimp_mesh->mNormals[i].y, assimp_mesh->mNormals[i].z) : glm::vec3(1, 0, 0)
-            )
-        );
+                has_normals ? glm::vec3(assimp_mesh->mNormals[i].x, assimp_mesh->mNormals[i].y, assimp_mesh->mNormals[i].z) : glm::vec3(1, 0, 0),
+                has_uv ? glm::vec2(assimp_mesh->mTextureCoords[0][i].x, assimp_mesh->mTextureCoords[0][i].y) : glm::vec2(0, 0)
+            });
     }
 
-    meshes[ModelLoader::_nextGeometryId] = mesh;
-    ModelLoader::_nextGeometryId++;
+    scene.addMesh(mesh);
 }
 
 namespace {

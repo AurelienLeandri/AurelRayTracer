@@ -18,6 +18,7 @@
 #include "BVHNode.h"
 #include "BVHBuilder.h"
 #include "ModelLoader.h"
+#include "SceneData.h"
 #include "Triangle.h"
 #include "Mesh.h"
 
@@ -232,14 +233,36 @@ namespace {
 	}
 	*/
 
-	std::shared_ptr<Camera> backpack_scene(
-		std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-		std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials)
+	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
 	{
 		std::string model_path = "Survival_BackPack_2/backpack.obj";
-		if (!ModelLoader::loadModel(model_path, meshes, materials)) {
+		if (!ModelLoader::loadModel(model_path, scene)) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
+
+		std::shared_ptr<Material> light_material = std::make_shared<Material>();
+		light_material->albedoValue = glm::vec3(0, 0, 0);
+		light_material->emissionValue = glm::vec3(1000, 1000, 1000);
+		light_material->recomputeBSDF();
+		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
+		light_sphere->material = light_material;
+		unsigned int light_material_id = scene.addMaterial(light_material);
+
+		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
+			Vertex({ glm::vec3(-3, 0, 6), glm::vec3(1, 0, 0), glm::vec2(0, 0) }),
+			Vertex({ glm::vec3(-3, 1, 6), glm::vec3(1, 0, 0), glm::vec2(0, 1) }),
+			Vertex({ glm::vec3(-3, 0, 7), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
+			);
+		light_mesh0->materialId = light_material_id;
+		scene.addMesh(light_mesh0);
+
+		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
+			Vertex({ glm::vec3(-3, 1, 7), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
+			Vertex({ glm::vec3(-3, 0, 7), glm::vec3(1, 0, 0), glm::vec2(1, 0) }),
+			Vertex({ glm::vec3(-3, 1, 6), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
+		);
+		light_mesh1->materialId = light_material_id;
+		scene.addMesh(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(5, 0, 6);
@@ -250,12 +273,10 @@ namespace {
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
 
-	std::shared_ptr<Camera> teapot_scene(
-		std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-		std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials)
+	std::shared_ptr<Camera> teapot_scene(SceneData &scene)
 	{
 		std::string model_path = "utah-teapot.obj";
-		if (!ModelLoader::loadModel(model_path, meshes, materials)) {
+		if (!ModelLoader::loadModel(model_path, scene)) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
@@ -280,12 +301,10 @@ namespace {
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
 
-	std::shared_ptr<Camera> cerberus_scene(
-		std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-		std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials)
+	std::shared_ptr<Camera> cerberus_scene(SceneData &scene)
 	{
 		std::string model_path = "Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
-		if (!ModelLoader::loadModel(model_path, meshes, materials)) {
+		if (!ModelLoader::loadModel(model_path, scene)) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 		//model->transform(glm::vec3(50, 10, 200), glm::vec3(0, -M_PI / 4, 0));  // cerberus
@@ -337,14 +356,12 @@ int main()
 	sub_clock = std::clock();
 	std::cout << "Loading scene data...";
 
-	std::unordered_map<unsigned int, std::shared_ptr<Mesh>> meshes;
-	std::unordered_map<unsigned int, std::shared_ptr<Material>> materials;
+	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera = backpack_scene(meshes, materials);
+	std::shared_ptr<Camera> camera = backpack_scene(*scene);
 
 	ray_tracer.setCamera(camera);
-
-	ray_tracer.setScene(meshes, materials);
+	ray_tracer.setScene(*scene);
 
     std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
 

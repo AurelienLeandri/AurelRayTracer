@@ -11,33 +11,25 @@
 
 class HitableList;
 class Texture;
-class Mesh;
 class Material;
+class SceneData;
 
 class ModelLoader
 {
 public:
-	static bool loadModel(std::string path, std::unordered_map<unsigned int, std::shared_ptr<Mesh>> &meshes, std::unordered_map<unsigned int, std::shared_ptr<Material>>& materials);
+    static bool loadModel(std::string path, SceneData &scene);
 
 private:
     static void _processNode(
         aiNode* node,
-        const aiScene* scene,
-        std::unordered_map<unsigned int, std::shared_ptr<Material>>& global_materials,
+        const aiScene* ai_scene,
         std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-        std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-        const std::string& directory);
+        const std::string& directory, SceneData& scene);
     
     static void _processMesh(
         aiMesh* assimp_mesh,
-        const aiScene* scene,
-        std::unordered_map<unsigned int, std::shared_ptr<Material>>& global_materials,
+        const aiScene* ai_scene,
         std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-        std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& meshes,
-        const std::string& directory);
-
-private:
-	static unsigned int _nextGeometryId;
-	static unsigned int _nextMaterialId;
+        const std::string& directory, SceneData& scene);
 };
 
