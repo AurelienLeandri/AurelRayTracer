@@ -42,7 +42,7 @@ private:
     const size_t _HEIGHT = Application::HEIGHT;
     const size_t _NB_CHANNELS = Application::NB_CHANNELS;
 
-    const size_t _NB_SAMPLES = 64;
+    const size_t _NB_SAMPLES = 1000;
     const float _INV_NB_SAMPLES = 1.f / _NB_SAMPLES;
     const size_t _NB_THREADS = omp_get_max_threads();
     const size_t _PORTION_SIZE = (_WIDTH * _HEIGHT) / _NB_THREADS;

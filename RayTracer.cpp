@@ -99,7 +99,7 @@ bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
     rayhit.ray.dir_x = ray.direction.x;
     rayhit.ray.dir_y = ray.direction.y;
     rayhit.ray.dir_z = ray.direction.z;
-    rayhit.ray.tnear = 0;
+    rayhit.ray.tnear = 0.01f;
     rayhit.ray.tfar = std::numeric_limits<float>::infinity();
     rayhit.ray.mask = -1;
     rayhit.ray.flags = 0;
@@ -155,19 +155,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray) const {
     float russian_roulette_weight = 1.f;
         while (true) {
         HitRecord hit_record;
-        //if (_world->hit(w_o, hit_record)) {
-        if (_castRay(camera_ray, hit_record)) {
-
-            // return glm::vec3(1, 0, 0);
-
-            return hit_record.normal;
-
-            if (hit_record.material->albedo) {
-                return hit_record.material->albedo->color(hit_record.u, hit_record.v, hit_record.position);
-            }
-            else {
-                return hit_record.material->emissionValue;
-            }
+        if (_castRay(w_o, hit_record)) {
 
             if (depth == 0) {  // Hitting lights on the first ray
                 color += hit_record.emission;
@@ -179,9 +167,10 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray) const {
                 glm::vec3 light_sample(0, 0, 0);
                 float light_sample_proba = light->sample(light_sample, hit_record.position, hit_record.normal);
                 HitRecord occlusion_hit_record;
+                Ray direct_lighting_ray(hit_record.position, light_sample);
                 // If the light can be sampled from our position, we check if we hit the light:
                 // To verify this, "occlusion_hit_record.t" should be very close to one since "light_sample" stretches from the current position to the light.
-                if (light_sample_proba > 0 && _castRay(Ray(hit_record.position, light_sample), occlusion_hit_record) && occlusion_hit_record.t > 0.9999f) {
+                if (light_sample_proba > 0 && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.t > 0.9999f) {
                     float cos_light_surface = glm::dot(glm::normalize(light_sample), hit_record.normal);
                     if (cos_light_surface > 0) {
                         glm::vec3 light_f = hit_record.bsdf->f(light_sample, -w_o.direction, hit_record);
@@ -212,7 +201,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray) const {
             w_o = Ray(hit_record.position, w_i);
         }
         else {
-            return glm::vec3();
+            return color;
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;
             get_sphere_uv(glm::normalize(w_o.direction), u, v);
