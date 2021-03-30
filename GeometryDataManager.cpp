@@ -7,7 +7,17 @@ const std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& SceneData::getMes
 	return _geometries;
 }
 
+std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& SceneData::getMeshes()
+{
+	return _geometries;
+}
+
 const std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials() const
+{
+	return _materials;
+}
+
+std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials()
 {
 	return _materials;
 }

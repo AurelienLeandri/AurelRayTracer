@@ -48,8 +48,8 @@ bool Sphere::hit(Ray r, float t_min, float t_max, HitRecord & record) const
 		}
 	}
 
-	record.t = t;
-	record.position = r.pointAtParameter(record.t);
+	record.tRay = t;
+	record.position = r.pointAtParameter(record.tRay);
 	record.normal = record.position - center;
 	record.normal = glm::normalize(record.normal);
 	

@@ -3,8 +3,10 @@
 #include <glm.hpp>
 
 #include <vector>
+#include <memory>
 
-class BxDF;
+#include "BxDF.h"
+
 struct HitRecord;
 
 class BSDF
@@ -15,11 +17,11 @@ public:
 
 public:
     glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord &hit_record) const;
-    glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord &hit_record) const;
-    bool add(const BxDF *bxdf);  // TODO: maybe make unique, or shared depending on future needs
+    glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord &hit_record, float &pdf) const;
+    bool add(std::shared_ptr<const BxDF> bxdf);
 
 private:
-    std::vector<const BxDF *> _bxdfs;
+    std::vector<std::shared_ptr<const BxDF>> _bxdfs;
 
 private:
     static const size_t MAX_NB_BXDFS = 8;

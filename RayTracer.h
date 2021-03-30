@@ -13,7 +13,7 @@
 class Hitable;
 class Camera;
 class Ray;
-class HitRecord;
+struct HitRecord;
 class Material;
 class SceneData;
 
@@ -32,7 +32,7 @@ public:
 
 
 private:
-    glm::vec3 _getColor(const Ray& r) const;
+    glm::vec3 _getColor(const Ray& r, size_t max_depth = 0) const;
     bool _castRay(const Ray& ray, HitRecord& hit_record) const;
 
 private:

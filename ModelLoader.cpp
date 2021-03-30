@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "Triangle.h"
-#include "ImageTexture.h"
+#include "Texture.h"
 #include "HitableList.h"
 #include "Mesh.h"
 #include "SceneData.h"
@@ -69,7 +69,7 @@ void ModelLoader::_processMesh(
     aiMaterial* assimp_material = ai_scene->mMaterials[assimp_mesh->mMaterialIndex];
 
     if (assimp_material && model_materials.find(assimp_material) == model_materials.end()) {
-        std::shared_ptr<Material> material = std::make_shared<Material>();
+        std::shared_ptr<MatteMaterial> material;
 
         /* (Note from learnopengl since Itook the modifiedmodel from here:)
             We assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -84,11 +84,15 @@ void ModelLoader::_processMesh(
         loadMaterialTextures(assimp_material, aiTextureType_SPECULAR, "texture_specular", specularMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_HEIGHT, "texture_normal", normalMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_AMBIENT, "texture_height", heightMaps, directory);
-        if (diffuseMaps.size()) material->albedo = diffuseMaps[0];
+        if (diffuseMaps.size()) material = std::make_shared<MatteMaterial>(diffuseMaps[0]);
+        else {
+            material = std::make_shared<MatteMaterial>(ConstantTexture::white);
+        }
+        /*
         if (specularMaps.size()) material->specular = specularMaps[0];
         if (normalMaps.size()) material->normal = normalMaps[0];
         if (heightMaps.size()) material->height = heightMaps[0];
-        material->recomputeBSDF();
+        */
 
         model_materials[assimp_material] = scene.addMaterial(material);
     }

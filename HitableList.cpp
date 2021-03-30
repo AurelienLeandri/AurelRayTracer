@@ -12,7 +12,7 @@ bool HitableList::hit(Ray r, float t_min, float t_max, HitRecord & record) const
       if (hitable->hit(r, t_min, max_t, candidate_HitRecord)) {
         hit_anything = true;
         record = candidate_HitRecord;
-        max_t = candidate_HitRecord.t;
+        max_t = candidate_HitRecord.tRay;
       }
     }
     return hit_anything;

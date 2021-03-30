@@ -23,7 +23,7 @@ public:
 
 public:
     virtual glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const = 0;
-    virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord& hit_record) const = 0;
+    virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord& hit_record, float &pdf) const = 0;
 
 public:
     const int type;

@@ -12,25 +12,50 @@ struct HitRecord;
 class Material
 {
 public:
-    Material();
     virtual ~Material();
 
 public:
-    virtual void getBSDF(HitRecord &hitRecord) const;
+    virtual void getBSDF(HitRecord &hitRecord) const = 0;
     virtual void emit(HitRecord &hitRecord) const;
-    void recomputeBSDF();  // TODO: remove
+};
 
-    // Refactor when the archi gets better
-    glm::vec3 color = glm::vec3(1, 1, 1);
-    std::shared_ptr<Texture> albedo = nullptr;
-    glm::vec3 albedoValue = glm::vec3(1, 1, 1);
-    std::shared_ptr<Texture> specular = nullptr;
-    std::shared_ptr<Texture> normal = nullptr;
-    std::shared_ptr<Texture> height = nullptr;
-    std::shared_ptr<Texture> emission = nullptr;
-    glm::vec3 emissionValue = glm::vec3(0, 0, 0);
+class MatteMaterial : public Material
+{
+public:
+    MatteMaterial(std::shared_ptr<Texture> albedo);
+    virtual ~MatteMaterial();
+
+public:
+    virtual void getBSDF(HitRecord& hitRecord) const;
 
 protected:
-    BSDF _bsdf;
+    std::shared_ptr<Texture> _albedo = ConstantTexture::white;
+};
+
+class EmissiveMaterial : public Material
+{
+public:
+    EmissiveMaterial(std::shared_ptr<Texture> emission, std::shared_ptr<Texture> albedo = ConstantTexture::white);
+    virtual ~EmissiveMaterial();
+
+public:
+    virtual void getBSDF(HitRecord& hitRecord) const;
+    virtual void emit(HitRecord& hitRecord) const override;
+
+protected:
+    std::shared_ptr<Texture> _emission = ConstantTexture::black;
+    std::shared_ptr<Texture> _albedo = ConstantTexture::white;
+};
+
+class Dielectric : public Material {
+public:
+    Dielectric(float eta, std::shared_ptr<Texture> albedo = ConstantTexture::white);
+
+public:
+    virtual void getBSDF(HitRecord& hitRecord) const;
+
+private:
+    float _eta = 1;
+    std::shared_ptr<Texture> _albedo = ConstantTexture::white;
 };
 
