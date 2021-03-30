@@ -13,7 +13,9 @@ class SceneData
 {
 public:
 	const std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& getMeshes() const;
+	std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& getMeshes();
 	const std::unordered_map<unsigned int, std::shared_ptr<Material>>& getMaterials() const;
+	std::unordered_map<unsigned int, std::shared_ptr<Material>>& getMaterials();
 	unsigned int addMesh(std::shared_ptr<Mesh> mesh);
 	unsigned int addMaterial(std::shared_ptr<Material> material);
 

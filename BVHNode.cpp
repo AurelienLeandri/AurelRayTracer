@@ -19,7 +19,7 @@ bool BVHNode::hit(Ray r, float t_min, float t_max, HitRecord& record) const
 		bool hit_left = left->hit(r, t_min, t_max, left_record);
 		bool hit_right = right->hit(r, t_min, t_max, right_record);
 		if (hit_left && hit_right) {
-			record = left_record.t < right_record.t ? left_record : right_record;
+			record = left_record.tRay < right_record.tRay ? left_record : right_record;
 			return true;
 		}
 		else if (hit_left) {

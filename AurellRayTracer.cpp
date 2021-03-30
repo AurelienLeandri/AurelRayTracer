@@ -12,7 +12,7 @@
 #include "Camera.h"
 #include "Sphere.h"
 #include "HitableList.h"
-#include "ImageTexture.h"
+#include "Texture.h"
 #include "Application.h"
 #include "RayTracer.h"
 #include "BVHNode.h"
@@ -21,6 +21,7 @@
 #include "SceneData.h"
 #include "Triangle.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 
 namespace {
@@ -82,25 +83,20 @@ namespace {
 	}
 
 	void cornell_box(SceneData &scene) {
-		std::shared_ptr<Material> material_red = std::make_shared<Material>();
-		material_red->albedoValue = glm::vec3(0.65f, 0.05f, 0.05f);
-		std::shared_ptr<Material> material_white = std::make_shared<Material>();
-		material_white->albedoValue = glm::vec3(0.73f, 0.73f, 0.73f);
-		std::shared_ptr<Material> material_green = std::make_shared<Material>();
-		material_green->albedoValue = glm::vec3(0.12f, 0.45f, 0.15f);
-		std::shared_ptr<Material> material_light = std::make_shared<Material>();
-		material_light->emissionValue = glm::vec3(30, 30, 30);
-		material_light->albedoValue = glm::vec3(0, 0, 0);
-
-		material_red->recomputeBSDF();
-		material_white->recomputeBSDF();
-		material_green->recomputeBSDF();
-		material_light->recomputeBSDF();
+		std::shared_ptr<MatteMaterial> material_red = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.65f, 0.05f, 0.05f)));
+		std::shared_ptr<MatteMaterial> material_white = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.73f, 0.73f, 0.73f)));
+		std::shared_ptr<MatteMaterial> material_green = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.12f, 0.45f, 0.15f)));
+		std::shared_ptr<EmissiveMaterial> material_light = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(30, 30, 30)), ConstantTexture::black);
 
 		unsigned int material_red_id = scene.addMaterial(material_red);
 		unsigned int material_green_id = scene.addMaterial(material_green);
 		unsigned int material_white_id = scene.addMaterial(material_white);
 		unsigned int material_light_id = scene.addMaterial(material_light);
+
+		std::shared_ptr<Dielectric> mirror_material = std::make_shared<Dielectric>(0.f);
+		unsigned int mirror_material_id = scene.addMaterial(mirror_material);
+		std::shared_ptr<Dielectric> diamond_material = std::make_shared<Dielectric>(2.52f);
+		unsigned int diamond_material_id = scene.addMaterial(diamond_material);
 
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
@@ -109,7 +105,7 @@ namespace {
 		green_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
 		green_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
 		green_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		green_plane->materialId = material_green_id;
+		green_plane->materialId = mirror_material_id;
 		scene.addMesh(green_plane);
 
 		// Red plane
@@ -119,9 +115,10 @@ namespace {
 		red_plane->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });
 		red_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
 		red_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		red_plane->materialId = material_red_id;
+		red_plane->materialId = mirror_material_id;
 		scene.addMesh(red_plane);
 
+		// White ceiling
 		std::shared_ptr<Mesh> white_ceiling = std::make_shared<Mesh>();
 		white_ceiling->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
 		white_ceiling->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });
@@ -131,13 +128,14 @@ namespace {
 		white_ceiling->materialId = material_white_id;
 		scene.addMesh(white_ceiling);
 
+		// White plane in the back
 		std::shared_ptr<Mesh> white_plane = std::make_shared<Mesh>();
 		white_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
 		white_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(0, 0, -1), glm::vec2(1, 0) });
 		white_plane->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 1) });
 		white_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
 		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		white_plane->materialId = material_white_id;
+		white_plane->materialId = mirror_material_id;
 		scene.addMesh(white_plane);
 
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
@@ -162,20 +160,22 @@ namespace {
 		);
 		triangle_light_0->materialId = material_light_id;
 		triangle_light_1->materialId = material_light_id;
-		scene.addMesh(triangle_light_0);
-		scene.addMesh(triangle_light_1);
+		//scene.addMesh(triangle_light_0);
+		//scene.addMesh(triangle_light_1);
 
+		// Small box
 		Transform cubic_box_transform;
 		cubic_box_transform.scaling = glm::vec3(165);
 		cubic_box_transform.translation = glm::vec3(265, 0, 65);
 		cubic_box_transform.rotation_rads = glm::vec3(0, 18 * (float(M_PI) / 180.f), 0);
-		make_box(scene, material_white_id, cubic_box_transform);
-
+		//make_box(scene, material_white_id, cubic_box_transform);
+		
+		// Big box
 		Transform tall_box_transform;
 		tall_box_transform.scaling = glm::vec3(165, 330, 165);
 		tall_box_transform.translation = glm::vec3(130, 0, 295);
 		tall_box_transform.rotation_rads = glm::vec3(0, -15 * (float(M_PI) / 180.f), 0);
-		make_box(scene, material_white_id, tall_box_transform);
+		//make_box(scene, material_white_id, tall_box_transform);
 	}
 
 	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
@@ -189,10 +189,7 @@ namespace {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
-		std::shared_ptr<Material> light_material = std::make_shared<Material>();
-		light_material->albedoValue = glm::vec3(0, 0, 0);
-		light_material->emissionValue = glm::vec3(100, 100, 100);
-		light_material->recomputeBSDF();
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(100, 100, 100)), ConstantTexture::black);
 		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
 		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
@@ -233,10 +230,7 @@ namespace {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
-		std::shared_ptr<Material> light_material = std::make_shared<Material>();
-		light_material->albedoValue = glm::vec3(0, 0, 0);
-		light_material->emissionValue = glm::vec3(10, 10, 10);
-		light_material->recomputeBSDF();
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10, 10, 10)), ConstantTexture::black);
 		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
 		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
@@ -277,10 +271,12 @@ namespace {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
-		std::shared_ptr<Material> light_material = std::make_shared<Material>();
-		light_material->albedoValue = glm::vec3(0, 0, 0);
-		light_material->emissionValue = glm::vec3(10000, 10000, 10000);
-		light_material->recomputeBSDF();
+
+		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.42f);
+		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
+		scene.getMeshes()[0]->materialId = fresnel_material_id;
+
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
 		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
 		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
@@ -295,7 +291,7 @@ namespace {
 			);
 		light_mesh0->transform(light_transform);
 		light_mesh0->materialId = light_material_id;
-		scene.addMesh(light_mesh0);
+		//scene.addMesh(light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(0, 0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -304,7 +300,7 @@ namespace {
 			);
 		light_mesh1->transform(light_transform);
 		light_mesh1->materialId = light_material_id;
-		scene.addMesh(light_mesh1);
+		//scene.addMesh(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -352,7 +348,7 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera = cornell_box_scene(*scene);
+	std::shared_ptr<Camera> camera = cerberus_scene(*scene);
 
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);

@@ -42,19 +42,19 @@ glm::vec3 random_in_unit_disc()
 
 glm::vec3 reflect(const glm::vec3& v, const glm::vec3& normal)
 {
-	return v - 2.f * dot(v, normal) * normal;
+	return -v + 2.f * dot(v, normal) * normal;
 }
 
 bool refract(const glm::vec3& v, const glm::vec3& normal, float ni_over_nt, glm::vec3& refracted)
 {
-	glm::vec3 uv = glm::normalize(v);
-	float dt = dot(uv, normal);
-	float discriminant = 1.f - ni_over_nt * ni_over_nt * (1.f - dt * dt);
-	if (discriminant > 0.f) {
-		refracted = ni_over_nt * (uv - normal * dt) - normal * sqrtf(discriminant);
-		return true;
-	}
-	return false;
+	float cos_theta_i = glm::dot(normal, v);
+	float sin2_theta_i = glm::max(0.f, 1.f - cos_theta_i * cos_theta_i);
+	float sin2_theta_t = ni_over_nt * ni_over_nt * sin2_theta_i;
+	if (sin2_theta_t >= 1)
+		return false;  // total internal reflection
+	float cos_theta_t = glm::sqrt(1.f - sin2_theta_t);
+	refracted = ni_over_nt * -v + (ni_over_nt * cos_theta_i - cos_theta_t) * normal;
+	return true;
 }
 
 float trilinear_interpolation(float c[2][2][2], float x_d, float y_d, float z_d)

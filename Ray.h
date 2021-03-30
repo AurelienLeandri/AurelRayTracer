@@ -13,5 +13,6 @@ public:
     glm::vec3 origin;
     glm::vec3 direction;
 	float time;
+    mutable float eta = 1;  // Should be replaced by a more complete mediu class when we tackle volume rendering
 };
 
