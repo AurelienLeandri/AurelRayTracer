@@ -97,10 +97,11 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                 float light_sample_proba = light->sample(light_sample, hit_record.position, hit_record.normal);
                 HitRecord occlusion_hit_record;
                 Ray direct_lighting_ray(hit_record.position, light_sample);
+                light_sample = glm::normalize(light_sample);
                 // If the light can be sampled from our position, we check if we hit the light:
                 // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
                 if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay > 0.9999f) {
-                    float cos_light_surface = glm::dot(glm::normalize(light_sample), hit_record.normal);
+                    float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                     if (cos_light_surface > 0) {
                         glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
                         glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
