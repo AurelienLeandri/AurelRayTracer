@@ -49,20 +49,17 @@ namespace {
 
 glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float &pdf) const
 {
-	glm::vec3 w_o_local = hit_record.shadingCoordinateSystem * w_o;  // Transform. Should be done outside at material level
 	if (_etaInterface < 1) {  // Fully reflective material
-		w_i = glm::vec3(-w_o_local.x, -w_o_local.y, w_o_local.z);
+		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);
 		pdf = 1;
 		float inv_cos_theta = 1 / glm::abs(w_i.z);
-		w_i = glm::transpose(hit_record.shadingCoordinateSystem) * w_i;  // Transform back. Should be done outside at material level
 		return _albedo * glm::vec3(inv_cos_theta);
 	}
-	float fresnel_reflectance = _k == 0 ? fresnel_dielectric(w_o_local, _etaRay, _etaInterface) : fresnel_conductor(w_o_local, _etaRay, _etaInterface, 0);
+	float fresnel_reflectance = _k == 0 ? fresnel_dielectric(w_o, _etaRay, _etaInterface) : fresnel_conductor(w_o, _etaRay, _etaInterface, 0);
 	if (frand() < fresnel_reflectance) {  // Reflection
-		w_i = glm::vec3(-w_o_local.x, -w_o_local.y, w_o_local.z);
+		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);
 		float cos_w_i = w_i.z;
 		pdf = fresnel_reflectance;
-		w_i = glm::transpose(hit_record.shadingCoordinateSystem) * w_i;  // Transform back. Should be done outside at material level
 		return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(cos_w_i);
 	}
 	else {  // Transmition
@@ -72,7 +69,7 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 		else
 			eta_i_over_eta_t = _etaRay / _etaInterface;
 
-		if (!refract(w_o_local, glm::vec3(0, 0, 1), eta_i_over_eta_t, w_i))
+		if (!refract(w_o, glm::vec3(0, 0, 1), eta_i_over_eta_t, w_i))
 			return glm::vec3(0, 0, 0);
 
 		glm::vec3 f = _albedo * (glm::vec3(1, 1, 1) - fresnel_reflectance) / glm::abs(w_i.z);
@@ -80,7 +77,6 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 			f *= eta_i_over_eta_t * eta_i_over_eta_t;
 		}
 		pdf = 1 - fresnel_reflectance;
-		w_i = glm::transpose(hit_record.shadingCoordinateSystem) * w_i;  // Transform back. Should be done outside at material level
 		hit_record.ray.eta = _etaInterface;
 		return f;
 	}
