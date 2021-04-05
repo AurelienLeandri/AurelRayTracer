@@ -2,6 +2,7 @@
 
 #include "HitRecord.h"
 #include "LambertianReflection.h"
+#include "OrenNayarReflection.h"
 #include "FresnelSpecular.h"
 
 
@@ -17,7 +18,7 @@ MatteMaterial::~MatteMaterial()
 void MatteMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hit_record)));
+    hit_record.bsdf.add(std::make_shared<OrenNayarReflection>(_albedo->getColor(hit_record), 1.5f));
 }
 
 EmissiveMaterial::EmissiveMaterial(std::shared_ptr<Texture> emission, std::shared_ptr<Texture> albedo) : _emission(emission), _albedo(albedo) {
