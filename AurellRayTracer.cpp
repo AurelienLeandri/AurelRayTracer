@@ -357,7 +357,7 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera = cornell_box_scene(*scene);
+	std::shared_ptr<Camera> camera = cerberus_scene(*scene);
 
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);
