@@ -1,9 +1,32 @@
 #include "MicrofacetDistribution.h"
 
 #include <glm.hpp>
+#include <iostream>
 
 MicrofacetDistribution::MicrofacetDistribution()
 {
+    /*
+    std::cout << std::endl;
+    std::cout << "Roughness to alpha" << std::endl;
+    float step = 1.f / 100;
+    float r = 0;
+    while (r < 1) {
+        std::cout << roughnessToAlpha(r) << std::endl;
+        r += step;
+    }
+    */
+}
+
+float MicrofacetDistribution::G1(const glm::vec3& w) const
+{
+    return 1 / (1 + lambda(w));
+}
+
+float MicrofacetDistribution::G(const glm::vec3& wo, const glm::vec3& wi) const
+{
+    // Assuming than G2(wo) and G2(wi) are independent, we could return G(wo)*G(wi). But in practice this is wrong (ex wo = wi).
+    // The formula below is a nice approximation (not explained for now)
+    return 1 / (1 + lambda(wo) + lambda(wi));
 }
 
 float MicrofacetDistribution::roughnessToAlpha(float roughness)

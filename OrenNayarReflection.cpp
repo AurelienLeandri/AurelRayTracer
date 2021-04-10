@@ -27,7 +27,7 @@ glm::vec3 OrenNayarReflection::f(const glm::vec3& w_i, const glm::vec3& w_o, con
 	float sin_phi_i = w_i.y / sin_theta_i;
 	float cos_phi_o = w_o.x / sin_theta_o;
 	float sin_phi_o = w_o.y / sin_theta_o;
-	float cos_phi_i_minus_phi_o = cos_phi_i * sin_phi_i + sin_phi_i * sin_phi_o;
+	float cos_phi_i_minus_phi_o = cos_phi_i * cos_phi_o + sin_phi_i * sin_phi_o;
 
 	// TODO: avoid infinite values for tan_beta below
 	float sin_alpha_tan_beta = 0;
@@ -39,7 +39,7 @@ glm::vec3 OrenNayarReflection::f(const glm::vec3& w_i, const glm::vec3& w_o, con
 	}
 
 	// Plus jamais je fais ça mdeir.
-	return (_albedo / static_cast<float>(M_PI)) * (_A + _B * glm::max(0.f, cos_phi_i_minus_phi_o) * sin_alpha_tan_beta);
+	return (_albedo / (float)M_PI) * (_A + _B * glm::max(0.f, cos_phi_i_minus_phi_o) * sin_alpha_tan_beta);
 }
 
 glm::vec3 OrenNayarReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const

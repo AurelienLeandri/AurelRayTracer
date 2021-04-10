@@ -277,13 +277,13 @@ namespace {
 		}
 
 
-		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.54f);
+		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(1.f);
 		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 0.9f, 0.8f)));
 		unsigned int matte_material_id = scene.addMaterial(matte_material);
 
-		scene.getMeshes()[0]->materialId = matte_material_id;
+		scene.getMeshes()[0]->materialId = fresnel_material_id;
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
 		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
@@ -312,7 +312,7 @@ namespace {
 		//scene.addMesh(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
-		glm::vec3 look_from = glm::vec3(0, 0, -6);
+		glm::vec3 look_from = glm::vec3(0, 0, 216);
 		glm::vec3 look_at = glm::vec3(0, 0, 0);
 		float dist_to_focus = 10.f;
 		float aperture = 0.f;
