@@ -1,5 +1,8 @@
 #pragma once
 #include "BxDF.h"
+
+#include <glm.hpp>
+
 class FresnelSpecular :
     public BxDF
 {
@@ -12,12 +15,12 @@ public:
 
 public:
     static float fresnelDielectric(float cos_w_i_normal, float eta_i, float eta_t);
-    static float fresnelConductor(float cos_w_i_normal, float eta_i, float eta_t, float k);
+    static glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3 &eta_i, const glm::vec3& eta_t, const glm::vec3& k);
 
 private:
-    float _etaRay = 0;
-    float _etaInterface = 0;
-    float _k = 0;  // Imaginary part for conductors
+    glm::vec3 _etaRay = glm::vec3(0);
+    glm::vec3 _etaInterface = glm::vec3(0);
+    glm::vec3 _k = glm::vec3(0);  // Imaginary part for conductors
     glm::vec3 _albedo = glm::vec3(1, 1, 1);
     bool _fromLight = false;
 };

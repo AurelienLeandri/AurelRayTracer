@@ -17,6 +17,8 @@ TrowbridgeReitz::TrowbridgeReitz(float alpha_x, float alpha_y) : _alphaX(alpha_x
 
 float TrowbridgeReitz::D(const glm::vec3& w_h) const
 {
+	if (_alphaX == 0)  // Case where D is a dirac
+		return 1;
 	float cos2_theta_h = w_h.z * w_h.z;
 	/*
 	float sin2_theta_h = glm::max(0.f, 1 - cos2_theta_h);
@@ -35,8 +37,6 @@ float TrowbridgeReitz::D(const glm::vec3& w_h) const
 	float e = tan2_theta_h * ((cos2_phi_h / (_alphaX * _alphaX)) + (sin2_phi_h / (_alphaY * _alphaY)));
 	return 1 / ((float)M_PI * _alphaX * _alphaY * cos4_theta_h * (1 + e) * (1 + e));
 	*/
-	if (_alphaX == 0)  // Case where D is a dirac
-		return 1;
 	return _alphaX * _alphaX / ((float)M_PI * (float)glm::pow((_alphaX * _alphaX - 1) * cos2_theta_h + 1, 2));
 }
 

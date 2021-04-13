@@ -6,6 +6,8 @@
 #include "HitRecord.h"
 #include "Utils.h"
 
+#include <iostream>
+
 TorranceSparrowTransmission::TorranceSparrowTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model)
 	: BxDF(BxDF::BSDF_TRANSMISSION | BxDF::BSDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model)
 {
@@ -57,8 +59,10 @@ glm::vec3 TorranceSparrowTransmission::sample_f(glm::vec3& w_i, const glm::vec3&
 	glm::vec3 w_h(0, 0, 0);
 	_reflectionModel->sample_wh(w_h);
 	float dot_w_o_w_h = glm::dot(w_o, w_h);
-	if (dot_w_o_w_h < 0)
-		return glm::vec3(0, 0, 0);
+	while (dot_w_o_w_h < 0) {
+		_reflectionModel->sample_wh(w_h);
+		dot_w_o_w_h = glm::dot(w_o, w_h);
+	}
 
 	float eta_i_over_eta_t = w_o.z > 0 ? _etaRay / _etaInterface : _etaInterface / _etaRay;
 	if (glm::abs(eta_i_over_eta_t - 1.f) < 1e-4f) {  // Case both etas are ~=, to avoid division by zero for the pdf value
@@ -83,5 +87,12 @@ glm::vec3 TorranceSparrowTransmission::sample_f(glm::vec3& w_i, const glm::vec3&
 	pdf = D * glm::abs(w_h.z) * dw_h_over_dw_i;  // This is the pdf we used wrt to solid angle (hence the cos term).
 	hit_record.ray.eta = _etaInterface;
 	glm::vec3 brdf = f(w_i, w_o, hit_record);
+	float geuh = glm::abs((brdf.x * w_i.z / pdf));
+	if (geuh > 100.f)
+		f(w_i, w_o, hit_record);
+	if (glm::isinf(D) || glm::isinf(brdf.x) || glm::isinf(pdf) || glm::isnan(D) || glm::isnan(brdf.x) || glm::isnan(pdf)) {
+		int a = 0;
+		a = a;
+	}
 	return brdf;
 }
