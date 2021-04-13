@@ -58,7 +58,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0, 0, 0), _getColor(r, 100));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 100));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -116,7 +116,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             float sample_proba = 0;
             glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba);  // Get a sample vector, gets the proba to pick it
 
-            if (sample_proba < 0.000001f || (f == glm::vec3(0, 0, 0)))
+            if (sample_proba < 0.000001f || (f == glm::vec3(0)))
                 break;
 
             w_o = Ray(hit_record.position, w_i);
@@ -142,7 +142,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             //path_accumulated_weight /= russian_roulette_weight;
         }
         else {
-            //color += path_accumulated_weight * glm::vec3(1, 1, 1);
+            //color += path_accumulated_weight * glm::vec3(1);
             //return color;
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;

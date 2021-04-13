@@ -27,7 +27,7 @@ public:
     virtual glm::vec3 getColor(const HitRecord& hit_record) const;
 
 public:
-    glm::vec3 color = glm::vec3(1, 1, 1);
+    glm::vec3 color = glm::vec3(1);
     static std::shared_ptr<ConstantTexture> white;
     static std::shared_ptr<ConstantTexture> black;
     static std::shared_ptr<ConstantTexture> blue;

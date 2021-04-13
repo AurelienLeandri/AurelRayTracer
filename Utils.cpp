@@ -17,7 +17,7 @@ glm::vec3 random_in_unit_sphere()
 {
 	glm::vec3 result;
 	do {
-		result = 2.f * (glm::vec3(frand(), frand(), frand())) - glm::vec3(1, 1, 1);
+		result = 2.f * (glm::vec3(frand(), frand(), frand())) - glm::vec3(1);
 	} while (glm::length(result) >= 1.f);
 	return result;
 }
@@ -26,7 +26,7 @@ glm::vec3 random_on_unit_sphere()
 {
     glm::vec3 result;
     do {
-        result = 2.f * (glm::vec3(frand(), frand(), frand())) - glm::vec3(1, 1, 1);
+        result = 2.f * (glm::vec3(frand(), frand(), frand())) - glm::vec3(1);
     } while (glm::length(result) >= 1.f);
     return glm::normalize(result);
 }
