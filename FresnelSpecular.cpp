@@ -42,8 +42,28 @@ float FresnelSpecular::fresnelDielectric(float cos_w_normal, float eta_i, float 
 	return (r_parallel * r_parallel + r_perpendicular * r_perpendicular) * 0.5f;
 }
 
-float FresnelSpecular::fresnelConductor(float cos_w_normal, float eta_i, float eta_t, float k) {
-	return 0;
+glm::vec3 FresnelSpecular::fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm::vec3& eta_t, const glm::vec3& k) {
+	cos_w_normal = glm::clamp(cos_w_normal, -1.f, 1.f);
+	glm::vec3 eta = eta_t / eta_i;
+	glm::vec3 eta_k = k / eta_i;
+
+	float cos_w_normal2 = cos_w_normal * cos_w_normal;
+	float sin2_w_normal = 1. - cos_w_normal2;
+	glm::vec3 eta2 = eta * eta;
+	glm::vec3 eta_k2 = eta_k * eta_k;
+
+	glm::vec3 t0 = eta2 - eta_k2 - sin2_w_normal;
+	glm::vec3 a2_plus_b2 = glm::sqrt(t0 * t0 + 4.f * eta2 * eta_k2);
+	glm::vec3 t1 = a2_plus_b2 + cos_w_normal2;
+	glm::vec3 a = glm::sqrt(0.5f * (a2_plus_b2 + t0));
+	glm::vec3 t2 = (float)2 * cos_w_normal * a;
+	glm::vec3 Rs = (t1 - t2) / (t1 + t2);
+
+	glm::vec3 t3 = cos_w_normal2 * a2_plus_b2 + sin2_w_normal * sin2_w_normal;
+	glm::vec3 t4 = t2 * sin2_w_normal;
+	glm::vec3 Rp = Rs * (t3 - t4) / (t3 + t4);
+
+	return 0.5f * (Rp + Rs);
 }
 
 glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float &pdf) const
@@ -54,13 +74,16 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 		float inv_cos_theta = 1 / glm::abs(w_i.z);
 		return _albedo * glm::vec3(inv_cos_theta);
 	}
-	float fresnel_reflectance = _k == 0 ? fresnelDielectric(w_o.z, _etaRay, _etaInterface) : fresnelConductor(w_o.z, _etaRay, _etaInterface, 0);
+	glm::vec3 fresnel_reflectance = _k == glm::vec3(0) ? fresnelDielectric(w_o.z, _etaRay.x, _etaInterface.x) : fresnelConductor(w_o.z, _etaRay, _etaInterface, _k);
+	/*
 	if (frand() < fresnel_reflectance) {  // Reflection
 		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);
 		float cos_w_i = w_i.z;
 		pdf = fresnel_reflectance;
 		return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(cos_w_i);
 	}
+	*/
+	if (false) {}
 	else {  // Transmition
 		float eta_i_over_eta_t = 0;
 		if (_etaInterface < _etaRay)
@@ -75,7 +98,7 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 		if (_fromLight == true) {
 			f *= eta_i_over_eta_t * eta_i_over_eta_t;
 		}
-		pdf = 1 - fresnel_reflectance;
+		pdf = 1;
 		hit_record.ray.eta = _etaInterface;
 		return f;
 	}
