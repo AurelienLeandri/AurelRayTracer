@@ -55,12 +55,15 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 		return _albedo * glm::vec3(inv_cos_theta);
 	}
 	float fresnel_reflectance = _k == 0 ? fresnelDielectric(w_o.z, _etaRay, _etaInterface) : fresnelConductor(w_o.z, _etaRay, _etaInterface, 0);
+	/*
 	if (frand() < fresnel_reflectance) {  // Reflection
 		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);
 		float cos_w_i = w_i.z;
 		pdf = fresnel_reflectance;
 		return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(cos_w_i);
 	}
+	*/
+	if (false) {}
 	else {  // Transmition
 		float eta_i_over_eta_t = 0;
 		if (_etaInterface < _etaRay)
@@ -75,7 +78,7 @@ glm::vec3 FresnelSpecular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const 
 		if (_fromLight == true) {
 			f *= eta_i_over_eta_t * eta_i_over_eta_t;
 		}
-		pdf = 1 - fresnel_reflectance;
+		pdf = 1;
 		hit_record.ray.eta = _etaInterface;
 		return f;
 	}

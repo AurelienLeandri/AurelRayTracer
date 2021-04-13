@@ -54,6 +54,9 @@ Dielectric::Dielectric(float eta, std::shared_ptr<Texture> albedo) : _eta(eta), 
 void Dielectric::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 0, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.f))));
+    //hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 0, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.1f))));
+ 
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(0)));
+    //hit_record.bsdf.add(std::make_shared<FresnelSpecular>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record)));
 }
 

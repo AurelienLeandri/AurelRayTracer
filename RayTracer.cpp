@@ -116,11 +116,15 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             float sample_proba = 0;
             glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba);  // Get a sample vector, gets the proba to pick it
 
-            float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
-            glm::vec3 scattering = light_attenuation_wrt_angle * f;
-
             if (sample_proba < 0.000001f || (f == glm::vec3(0, 0, 0)))
                 break;
+
+            w_o = Ray(hit_record.position, w_i);
+
+            float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
+            if (glm::abs(sample_proba - light_attenuation_wrt_angle) < 1e-6f)
+                continue;
+
 
             /*
             if (depth >= 5) {
@@ -131,12 +135,14 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             }
             */
 
+            glm::vec3 scattering = light_attenuation_wrt_angle * f;
+
             glm::vec3 previous_weight = path_accumulated_weight;
             path_accumulated_weight *= scattering / sample_proba;
             //path_accumulated_weight /= russian_roulette_weight;
-            w_o = Ray(hit_record.position, w_i);
         }
         else {
+            //color += path_accumulated_weight * glm::vec3(1, 1, 1);
             //return color;
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;
