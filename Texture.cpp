@@ -17,7 +17,7 @@ glm::vec3 ImageTexture::getColor(const HitRecord& hit_record) const
 {
     if (_data)
         return _data->getColor(hit_record);
-    return glm::vec3(0, 0, 0);
+    return glm::vec3(0);
 }
 
 ImageTexture::_ImageTextureData::_ImageTextureData(std::string path)
@@ -51,13 +51,13 @@ glm::vec3 ImageTexture::_ImageTextureData::getColor(const HitRecord& hit_record)
         static const float INV_255 = 1.f / 255;
         return glm::vec3(_data[index] * INV_255, _data[index + 1] * INV_255, _data[index + 2] * INV_255);
     }
-    return glm::vec3(0, 0, 0);
+    return glm::vec3(0);
 }
 
 
 
-std::shared_ptr<ConstantTexture> ConstantTexture::white = std::make_shared<ConstantTexture>(glm::vec3(1, 1, 1));
-std::shared_ptr<ConstantTexture> ConstantTexture::black = std::make_shared<ConstantTexture>(glm::vec3(0, 0, 0));
+std::shared_ptr<ConstantTexture> ConstantTexture::white = std::make_shared<ConstantTexture>(glm::vec3(1));
+std::shared_ptr<ConstantTexture> ConstantTexture::black = std::make_shared<ConstantTexture>(glm::vec3(0));
 std::shared_ptr<ConstantTexture> ConstantTexture::blue = std::make_shared<ConstantTexture>(glm::vec3(0, 0, 1));
 
 ConstantTexture::ConstantTexture()

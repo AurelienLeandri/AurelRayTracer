@@ -29,7 +29,7 @@ namespace {
 	{
 		std::shared_ptr<Mesh> box_mesh = std::make_shared<Mesh>();
 
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec2(0, 0) });  // 0
+		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(0, 0, -1), glm::vec2(0, 0) });  // 0
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0) });  // 2
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
@@ -40,21 +40,21 @@ namespace {
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 1), glm::vec3(0, 0, 1), glm::vec2(1, 1) });  // 7
+		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(0, 0, 1), glm::vec2(1, 1) });  // 7
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
 
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
+		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 1
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
+		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
 		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 4
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
 
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 6
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
+		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
+		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
 		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 3
 
 		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
@@ -62,9 +62,9 @@ namespace {
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
 		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
 		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 1), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 7
+		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 7
 
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 0
+		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 0
 		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 4
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
 		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
@@ -105,7 +105,7 @@ namespace {
 
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
-		green_plane->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
+		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
 		green_plane->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(1, 0, 0), glm::vec2(0, 1) });
 		green_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
 		green_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
@@ -145,7 +145,7 @@ namespace {
 		scene.addMesh(white_plane);
 
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
-		white_floor->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
+		white_floor->geometry.push_back({ glm::vec3(0), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
 		white_floor->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 1) });
 		white_floor->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(0, 1, 0), glm::vec2(1, 0) });
 		white_floor->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
@@ -190,7 +190,7 @@ namespace {
 	{
 		Transform t;
 		t.translation = glm::vec3(0.5f, 0, 3);
-		t.scaling = glm::vec3(1, 1, 1);
+		t.scaling = glm::vec3(1);
 		t.rotation_rads = glm::vec3(0, -(3 * M_PI) / 4, 0);
 		std::string model_path = "Survival_BackPack_2/backpack.obj";
 		if (!ModelLoader::loadModel(model_path, scene, t)) {
@@ -220,7 +220,7 @@ namespace {
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
-		glm::vec3 look_at = glm::vec3(0, 0, 0);
+		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
 		float aperture = 0.f;
 		float fov = (40.f * float(M_PI)) / 180.f;
@@ -261,7 +261,7 @@ namespace {
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
-		glm::vec3 look_at = glm::vec3(0, 0, 0);
+		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
 		float aperture = 0.f;
 		float fov = (40.f * float(M_PI)) / 180.f;
@@ -283,7 +283,7 @@ namespace {
 		}
 
 
-		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(1.05f);
+		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.56f);
 		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 0.9f, 0.8f)));
@@ -319,7 +319,7 @@ namespace {
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
-		glm::vec3 look_at = glm::vec3(0, 0, 0);
+		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
 		float aperture = 0.f;
 		float fov = (40.f * float(M_PI)) / 180.f;
@@ -363,7 +363,7 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera = cornell_box_scene(*scene);
+	std::shared_ptr<Camera> camera = cerberus_scene(*scene);
 
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);

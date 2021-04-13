@@ -12,7 +12,7 @@ public:
     virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const;
 
 private:
-    glm::vec3 _albedo = glm::vec3(1, 1, 1);
+    glm::vec3 _albedo = glm::vec3(1);
     float _A = 0;
     float _B = 0;
 };

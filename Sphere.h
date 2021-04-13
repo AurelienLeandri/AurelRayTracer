@@ -14,7 +14,7 @@ public:
 	virtual bool boundingBox(float t0, float t1, AABB& box) const;
     virtual void transform(const glm::vec3& translation, const glm::vec3& rotation = glm::vec3());
 
-    glm::vec3 center = glm::vec3(0, 0, 0);
+    glm::vec3 center = glm::vec3(0);
     float radius = 1.f;
 };
 
