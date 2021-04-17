@@ -103,6 +103,7 @@ namespace {
 		unsigned int diamond_material_id = scene.addMaterial(diamond_material);
 		*/
 
+		/*
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
 		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
@@ -143,7 +144,9 @@ namespace {
 		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		white_plane->materialId = fresnel_material_id;
 		scene.addMesh(white_plane);
+		*/
 
+		// White floor
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
 		white_floor->geometry.push_back({ glm::vec3(0), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
 		white_floor->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 1) });
@@ -171,6 +174,7 @@ namespace {
 		scene.addMesh(triangle_light_1);
 		*/
 
+		/*
 		// Small box
 		Transform cubic_box_transform;
 		cubic_box_transform.scaling = glm::vec3(165);
@@ -184,6 +188,7 @@ namespace {
 		tall_box_transform.translation = glm::vec3(130, 0, 295);
 		tall_box_transform.rotation_rads = glm::vec3(0, -15 * (float(M_PI) / 180.f), 0);
 		make_box(scene, fresnel_material_id, tall_box_transform);
+		*/
 	}
 
 	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
@@ -363,7 +368,7 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera = cerberus_scene(*scene);
+	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);

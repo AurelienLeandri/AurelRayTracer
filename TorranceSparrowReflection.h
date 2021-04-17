@@ -9,7 +9,8 @@ class TorranceSparrowReflection :
     public BxDF
 {
 public:
-    TorranceSparrowReflection(float etaRay, float etaInterface, const glm::vec3 &albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, float k = 0);
+    TorranceSparrowReflection(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, float k = 0);
+    TorranceSparrowReflection(const glm::vec3& etaRay, const glm::vec3& etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, const glm::vec3& k = glm::vec3(0));
 
 public:
     // Inherited via BxDF
@@ -19,8 +20,8 @@ public:
 private:
     glm::vec3 _albedo;
     std::shared_ptr<MicrofacetDistribution> _reflectionModel;
-    float _etaRay = 0;
-    float _etaInterface = 0;
-    float _k = 0;  // Imaginary part for conductors
+    glm::vec3 _etaRay = glm::vec3(0);
+    glm::vec3 _etaInterface = glm::vec3(0);
+    glm::vec3  _k = glm::vec3(0);  // Imaginary part for conductors
 };
 
