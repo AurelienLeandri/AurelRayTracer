@@ -66,6 +66,11 @@ glm::vec3 SpecularTransmission::f(const glm::vec3& w_i, const glm::vec3& w_o, co
 	return glm::vec3(0);
 }
 
+float SpecularTransmission::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	return 0.0f;
+}
+
 glm::vec3 SpecularTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
 {
 	float fresnel_reflectance = fresnelDielectric(w_o.z, _etaRay, _etaInterface);
@@ -100,6 +105,11 @@ glm::vec3 SpecularReflection::f(const glm::vec3& w_i, const glm::vec3& w_o, cons
 	return glm::vec3(0);
 }
 
+float SpecularReflection::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	return 0.0f;
+}
+
 glm::vec3 SpecularReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const {
 	glm::vec3 fresnel_reflectance(0);
 	if (_k == glm::vec3(0)) {
@@ -111,4 +121,47 @@ glm::vec3 SpecularReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, con
 	w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);  // Reflect when the normal is (0, 0, 1)
 	pdf = 1;
 	return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
+}
+
+Specular::Specular(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
+	: BxDF(BxDF::BSDF_SPECULAR | BxDF::BSDF_TRANSMISSION | BxDF::BSDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
+{
+}
+
+glm::vec3 Specular::f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	return glm::vec3(0);
+}
+
+float Specular::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	return 0;
+}
+
+glm::vec3 Specular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
+{
+	float fresnel_reflectance = fresnelDielectric(w_o.z, _etaRay, _etaInterface);
+	if (frand() <= fresnel_reflectance) {  // Reflection
+		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);  // Reflect when the normal is (0, 0, 1)
+		pdf = fresnel_reflectance;
+		return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
+	}
+	else {  // Transmission
+		float eta_i_over_eta_t = 0;
+		if (_etaInterface < _etaRay)
+			eta_i_over_eta_t = _etaInterface / _etaRay;
+		else
+			eta_i_over_eta_t = _etaRay / _etaInterface;
+
+		if (!refract(w_o, glm::vec3(0, 0, 1), eta_i_over_eta_t, w_i))
+			return glm::vec3(0);
+
+		glm::vec3 f = _albedo * (glm::vec3(1) - fresnel_reflectance) / glm::abs(w_i.z);
+		if (_fromLight == true) {
+			f *= eta_i_over_eta_t * eta_i_over_eta_t;
+		}
+		pdf = 1 - fresnel_reflectance;
+		hit_record.ray.eta = _etaInterface;
+		return f;
+	}
 }

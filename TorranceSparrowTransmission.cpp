@@ -51,6 +51,30 @@ glm::vec3 TorranceSparrowTransmission::f(const glm::vec3& w_i, const glm::vec3& 
 	return f;
 }
 
+float TorranceSparrowTransmission::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	if (w_o.z * w_i.z > 0)  // Both w_i and w_o are in the same hemisphere. We handle only transmission so we return.
+		return 0;
+
+	float eta = w_o.z > 0 ? _etaInterface / _etaRay : _etaRay / _etaInterface;
+	float cos_w_o = w_o.z;
+	float cos_w_i = w_i.z;
+	glm::vec3 w_h = w_o + eta * w_i;
+
+	if (cos_w_i == 0 || cos_w_o == 0 || w_h == glm::vec3(0))
+		return 0;
+
+	w_h = glm::normalize(w_h);
+
+	float dot_w_o_w_h = glm::dot(w_o, w_h);
+	float dot_w_i_w_h = glm::dot(w_i, w_h);
+
+	float dw_h_over_dw_i = eta * eta * glm::abs(dot_w_i_w_h) / (float)glm::pow(eta * dot_w_i_w_h + dot_w_o_w_h, 2);
+
+	float D = _reflectionModel->D(w_h);
+	return D * glm::abs(w_h.z) * dw_h_over_dw_i;  // This is the pdf we used wrt to solid angle (hence the cos term).
+}
+
 glm::vec3 TorranceSparrowTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
 {
 	if (w_o.z == 0)
@@ -77,22 +101,8 @@ glm::vec3 TorranceSparrowTransmission::sample_f(glm::vec3& w_i, const glm::vec3&
 	if (w_o.z * w_i.z > 0)  // Both w_i and w_o are in the same hemisphere. We handle only transmission so we return.
 		return glm::vec3(0);
 
-	float eta = w_o.z > 0 ? _etaInterface / _etaRay : _etaRay / _etaInterface;
-
-	float dot_w_i_w_h = glm::dot(w_i, w_h);
-
-	float dw_h_over_dw_i = eta * eta * glm::abs(dot_w_i_w_h) / (float)glm::pow(eta * dot_w_i_w_h + dot_w_o_w_h, 2);
-
-	float D = _reflectionModel->D(w_h);
-	pdf = D * glm::abs(w_h.z) * dw_h_over_dw_i;  // This is the pdf we used wrt to solid angle (hence the cos term).
+	pdf = this->pdf(w_i, w_o, hit_record);  // This is the pdf we used wrt to solid angle (hence the cos term).
 	hit_record.ray.eta = _etaInterface;
 	glm::vec3 brdf = f(w_i, w_o, hit_record);
-	float geuh = glm::abs((brdf.x * w_i.z / pdf));
-	if (geuh > 100.f)
-		f(w_i, w_o, hit_record);
-	if (glm::isinf(D) || glm::isinf(brdf.x) || glm::isinf(pdf) || glm::isnan(D) || glm::isnan(brdf.x) || glm::isnan(pdf)) {
-		int a = 0;
-		a = a;
-	}
 	return brdf;
 }

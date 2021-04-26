@@ -115,6 +115,8 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             glm::vec3 w_i(0, 0, 0);
             float sample_proba = 0;
             glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba);  // Get a sample vector, gets the proba to pick it
+            sample_proba += hit_record.bsdf.pdf(w_i, w_o_calculations, hit_record);
+            f += hit_record.bsdf.f(w_i, w_o_calculations, hit_record);
 
             if (sample_proba < 0.000001f || (f == glm::vec3(0)))
                 break;

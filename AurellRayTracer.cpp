@@ -291,7 +291,7 @@ namespace {
 		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.56f);
 		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
 
-		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 0.9f, 0.8f)));
+		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 1, 1)));
 		unsigned int matte_material_id = scene.addMaterial(matte_material);
 
 		scene.getMeshes()[0]->materialId = fresnel_material_id;

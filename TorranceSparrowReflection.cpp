@@ -49,6 +49,26 @@ glm::vec3 TorranceSparrowReflection::f(const glm::vec3& w_i, const glm::vec3& w_
 	return f;
 }
 
+float TorranceSparrowReflection::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	if (w_o.z * w_i.z < 0)  // We handle only reflection so we return.
+		return 0;
+
+	float cos_w_o = glm::abs(w_o.z);
+	float cos_w_i = glm::abs(w_i.z);
+	glm::vec3 w_h = w_i + w_o;
+
+	if (cos_w_i == 0 || cos_w_o == 0 || w_h == glm::vec3(0))
+		return 0;
+
+	w_h = glm::normalize(w_h);
+
+	// Its somewhere in this im sure.
+	// Maybe w_i.z instead of w_o, plus some wheights. I need to look that up
+	float D = _reflectionModel->D(w_h);
+	return D * glm::abs(w_h.z) / (4 * glm::dot(w_h, w_o));  // This is the pdf we used wrt to solid angle (hence the cos term).
+}
+
 glm::vec3 TorranceSparrowReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
 {
 	if (w_o.z == 0)
@@ -72,9 +92,6 @@ glm::vec3 TorranceSparrowReflection::sample_f(glm::vec3& w_i, const glm::vec3& w
 	if (w_o.z * w_i.z < 0)  // Has to be in the same hemisphere
 		return glm::vec3(0);
 
-	// Its somewhere in this im sure.
-	// Maybe w_i.z instead of w_o, plus some wheights. I need to look that up
-	float D = _reflectionModel->D(w_h);
-	pdf = D * glm::abs(w_h.z) / (4 * glm::dot(w_h, w_o));  // This is the pdf we used wrt to solid angle (hence the cos term).
+	pdf = this->pdf(w_i, w_o, hit_record);
 	return f(w_i, w_o, hit_record);
 }
