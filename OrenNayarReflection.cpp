@@ -42,11 +42,3 @@ glm::vec3 OrenNayarReflection::f(const glm::vec3& w_i, const glm::vec3& w_o, con
 	return (_albedo / (float)M_PI) * (_A + _B * glm::max(0.f, cos_phi_i_minus_phi_o) * sin_alpha_tan_beta);
 }
 
-glm::vec3 OrenNayarReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
-{
-	do {
-		w_i = glm::normalize(glm::vec3(0, 0, 1) + glm::normalize(random_in_unit_sphere()));
-	} while (w_i.z <= 0.000001f);
-	pdf = glm::abs(w_i.z) / float(M_PI);
-	return f(w_i, w_o, hit_record);
-}

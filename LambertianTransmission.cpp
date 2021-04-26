@@ -14,6 +14,11 @@ glm::vec3 LambertianTransmission::f(const glm::vec3& w_i, const glm::vec3& w_o, 
 	return glm::vec3();
 }
 
+float LambertianTransmission::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	return 0.0f;
+}
+
 glm::vec3 LambertianTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
 {
 	return glm::vec3();

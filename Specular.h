@@ -6,6 +6,23 @@
 float fresnelDielectric(float cos_w_i_normal, float eta_i, float eta_t);
 glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm::vec3& eta_t, const glm::vec3& k);
 
+class Specular :
+    public BxDF
+{
+    Specular(float etaRay, float etaInterface, const glm::vec3& albedo, float k = 0, bool fromLight = false);
+
+public:
+    virtual glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const;
+    virtual float pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const override;
+    virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const;
+
+private:
+    float _etaRay = 0;
+    float _etaInterface = 0;
+    glm::vec3 _albedo = glm::vec3(1);
+    bool _fromLight = false;
+};
+
 class SpecularTransmission :
     public BxDF
 {
@@ -14,6 +31,7 @@ public:
 
 public:
     virtual glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const;
+    virtual float pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const override;
     virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float &pdf) const;
 
 private:
@@ -32,6 +50,7 @@ public:
 
 public:
     virtual glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const;
+    virtual float pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const override;
     virtual glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const;
 
 private:

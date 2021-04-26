@@ -23,14 +23,29 @@ glm::vec3 FresnelBlend::f(const glm::vec3& w_i, const glm::vec3& w_o, const HitR
 		(glm::vec3(1.f) - _fresnelReflection) *
 		(1 - (float)glm::pow(1 - .5f * glm::abs(w_i.z), 5)) *
 		(1 - (float)glm::pow(1 - .5f * glm::abs(w_o.z), 5));
-	glm::vec3 wh = w_i + w_o;
-	if (wh.x == 0 && wh.y == 0 && wh.z == 0) return glm::vec3(0);
-	wh = glm::normalize(wh);
-	glm::vec3 specular = _reflectionModel->D(wh) /
-		(4 * glm::abs(glm::dot(w_i, wh)) *
+	glm::vec3 w_h = w_i + w_o;
+	if (w_h.x == 0 && w_h.y == 0 && w_h.z == 0) return glm::vec3(0);
+	w_h = glm::normalize(w_h);
+	glm::vec3 specular = _reflectionModel->D(w_h) /
+		(4 * glm::abs(glm::dot(w_i, w_h)) *
 			std::max(glm::abs(w_i.z), glm::abs(w_o.z))) *
-		fresnel_schlick(glm::dot(w_i, wh), _fresnelReflection);
+		fresnel_schlick(glm::dot(w_i, w_h), _fresnelReflection);
 	return diffuse + specular;
+}
+
+float FresnelBlend::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const
+{
+	glm::vec3 w_h = w_i + w_o;
+
+	if (w_h.x == 0 && w_h.y == 0 && w_h.z == 0)
+		return 0;
+
+	w_h = glm::normalize(w_h);
+
+	float D = _reflectionModel->D(w_h);
+	float pdf_spec = D * glm::abs(w_h.z) / (4 * glm::dot(w_h, w_o));  // This is the pdf we used wrt to solid angle (hence the cos term).
+	float pdf_diffuse = glm::abs(w_i.z) / (float)M_PI;
+	return 0.5f * (pdf_spec + pdf_diffuse);
 }
 
 glm::vec3 FresnelBlend::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
@@ -69,11 +84,6 @@ glm::vec3 FresnelBlend::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const Hit
 
 	w_h = glm::normalize(w_h);
 
-	// Its somewhere in this im sure.
-	// Maybe w_i.z instead of w_o, plus some wheights. I need to look that up
-	float D = _reflectionModel->D(w_h);
-	float pdf_spec = D * glm::abs(w_h.z) / (4 * glm::dot(w_h, w_o));  // This is the pdf we used wrt to solid angle (hence the cos term).
-	float pdf_diffuse = glm::abs(w_i.z) / (float)M_PI;
-	pdf = 0.5f * (pdf_spec + pdf_diffuse);
+	pdf = this->pdf(w_i, w_o, hit_record);
 	return f(w_i, w_o, hit_record);
 }
