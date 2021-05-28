@@ -1,8 +1,6 @@
 
 #include "HitableList.h"
 
-#include "AABB.h"
-
 bool HitableList::hit(Ray r, float t_min, float t_max, HitRecord & record) const
 {
     float max_t = t_max;

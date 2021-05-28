@@ -1,6 +1,5 @@
 #include "Triangle.h"
 
-#include "AABB.h"
 #include "Utils.h"
 
 #include <iostream>

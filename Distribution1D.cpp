@@ -1,6 +1,6 @@
 #include "Distribution1D.h"
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 Distribution1D::Distribution1D(const float* values, size_t n)
 	: _values(values), _n(n), _cdf(_n + 1)

@@ -1,6 +1,6 @@
 #include "MicrofacetDistribution.h"
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 #include <iostream>
 
 MicrofacetDistribution::MicrofacetDistribution()

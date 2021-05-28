@@ -2,7 +2,7 @@
 
 #include "Distribution2D.h"
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 class InfiniteAreaLight
 {

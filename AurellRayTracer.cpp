@@ -1,22 +1,18 @@
 // AurellRayTracer.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <iostream>
 #include <iomanip>
 #include <ctime>
 #include <fstream>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "Camera.h"
-#include "Sphere.h"
-#include "HitableList.h"
 #include "Texture.h"
 #include "Application.h"
 #include "RayTracer.h"
-#include "BVHNode.h"
-#include "BVHBuilder.h"
 #include "ModelLoader.h"
 #include "SceneData.h"
 #include "Triangle.h"
@@ -24,8 +20,7 @@
 #include "Texture.h"
 #include "Distribution2D.h"
 #include "Utils.h"
-
-#include <fstream>
+#include "Material.h"
 
 
 namespace {
@@ -205,8 +200,6 @@ namespace {
 		}
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(100, 100, 100)), ConstantTexture::black);
-		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
-		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
 
 		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
@@ -246,8 +239,6 @@ namespace {
 		}
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10, 10, 10)), ConstantTexture::black);
-		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
-		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
 
 		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
@@ -297,8 +288,6 @@ namespace {
 		scene.getMeshes()[0]->materialId = fresnel_material_id;
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
-		std::shared_ptr<Sphere> light_sphere = std::make_shared<Sphere>(glm::vec3(-1, 1, 4), 0.5f);
-		light_sphere->material = light_material;
 		unsigned int light_material_id = scene.addMaterial(light_material);
 
 		Transform light_transform;
@@ -460,8 +449,8 @@ int main()
 
     bool finished = false;
     do {
-        finished = ray_tracer.iterate();
-        application.refreshWindow(ray_tracer.getImageBuffer());
+		finished = ray_tracer.iterate();
+		finished |= !application.refreshWindow(ray_tracer.getImageBuffer());
     } while (!finished);
 	
 	std::fstream file_stream;

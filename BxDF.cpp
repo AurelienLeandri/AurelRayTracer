@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 #include "Utils.h"
 

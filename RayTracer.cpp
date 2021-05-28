@@ -1,6 +1,6 @@
 #include "RayTracer.h"
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <ctime>
 #include <unordered_map>
@@ -12,12 +12,12 @@
 #include "Camera.h"
 #include "Utils.h"
 #include "HitRecord.h"
-#include "HitableList.h"
 #include "InfiniteAreaLight.h"
 #include "Embree.h"
 #include "Texture.h"
 #include "SceneData.h"
 #include "Mesh.h"
+#include "Material.h"
 
 
 static float max_green = 0;
