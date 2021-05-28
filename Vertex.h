@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 struct alignas (16) Vertex {
 	glm::vec3 position;

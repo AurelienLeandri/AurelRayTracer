@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 #include <omp.h>
 #include <memory>
 #include <vector>
@@ -10,7 +10,6 @@
 #include "Application.h"
 #include "Vertex.h"
 
-class Hitable;
 class Camera;
 class Ray;
 struct HitRecord;

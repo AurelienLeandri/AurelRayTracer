@@ -11,7 +11,6 @@
 
 #include "Transform.h"
 
-class HitableList;
 class Texture;
 class Material;
 class SceneData;

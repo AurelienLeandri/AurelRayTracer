@@ -1,7 +1,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
-#include "glfw3.h"
+#include <glfw3.h>
 
 class Application
 {
@@ -10,7 +10,7 @@ public:
     ~Application();
 
 public:
-    int refreshWindow(const float* image_buffer);
+    bool refreshWindow(const float* image_buffer);
     int init();
     void idle();
 
@@ -21,7 +21,7 @@ public:
     static const unsigned int NB_CHANNELS = 3;
 
 private:
-    void _processInput();
+    bool _processInput();
 
 private:
     // Application window

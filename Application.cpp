@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 namespace {
     const char* vertexShaderSource = "#version 460 core\n"
@@ -35,17 +35,15 @@ Application::~Application()
     glfwTerminate();
 }
 
-int Application::refreshWindow(const float* image_buffer)
+bool Application::refreshWindow(const float* image_buffer)
 {
-    if (!image_buffer) return -1;
-
-    _processInput();
+    bool window_open = _processInput();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, WIDTH, HEIGHT, 0, GL_RGB, GL_FLOAT, image_buffer);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(_window);
     glfwPollEvents();
-    return 0;
+    return window_open;
 }
 
 int Application::init()
@@ -166,10 +164,7 @@ void Application::idle() {
     }
 }
 
-void Application::_processInput()
+bool Application::_processInput()
 {
-    if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(_window)) {
-        glfwDestroyWindow(_window);
-        _window = nullptr;
-    }
+    return !(glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(_window));
 }

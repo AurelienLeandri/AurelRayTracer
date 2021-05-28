@@ -1,7 +1,6 @@
 #include "ModelLoader.h"
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
 #include <stb_image.h>
 
 #include <string>
@@ -12,8 +11,8 @@
 
 #include "Triangle.h"
 #include "Texture.h"
-#include "HitableList.h"
 #include "Mesh.h"
+#include "Material.h"
 #include "SceneData.h"
 
 namespace {

@@ -1,7 +1,7 @@
 #pragma once
 #include "BxDF.h"
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 float fresnelDielectric(float cos_w_i_normal, float eta_i, float eta_t);
 glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm::vec3& eta_t, const glm::vec3& k);
