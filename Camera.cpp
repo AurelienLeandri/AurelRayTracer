@@ -24,7 +24,6 @@ Camera::Camera(glm::vec3 position, glm::vec3 look_at, glm::vec3 up_axis, float f
 Ray Camera::getRay(float x, float y)
 {
 	glm::vec3 random = _lensRadius * random_in_unit_disc();
-	//glm::vec3 offset = _right * random.x + _up * random.y;
 	glm::vec3 offset(0.f, 0.f, 0.f);
 	float time = _t0 + (_t1 - _t0) * frand();
 	return Ray(_position + offset, _lowerLeftCorner + x * _screenDimensions.x * _right + y * _screenDimensions.y * _up - _position - offset, time);

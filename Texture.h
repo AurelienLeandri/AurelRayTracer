@@ -41,6 +41,10 @@ public:
 
 public:
     virtual glm::vec3 getColor(const HitRecord& hit_record) const;
+    int getWidth() const;
+    int getHeight() const;
+    const unsigned char* getData() const;
+    int getNbChannels() const;
 
 private:
     class _ImageTextureData :
@@ -56,7 +60,7 @@ private:
 
         virtual glm::vec3 getColor(const HitRecord& hit_record) const;
 
-    private:
+    public:
         // Owns
         unsigned char* _data = nullptr;
 

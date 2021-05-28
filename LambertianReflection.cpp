@@ -20,6 +20,8 @@ LambertianReflection::~LambertianReflection()
 
 glm::vec3 LambertianReflection::f(const glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record) const
 {
+    if (w_i.z * w_o.z < 0)
+        return glm::vec3(0);
     // When one integrates the hemispherical-directional function over the hemisphere, we get a pi factor, hence the 1 / pi.
     return _albedo / float(M_PI);
 }

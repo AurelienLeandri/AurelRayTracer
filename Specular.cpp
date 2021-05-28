@@ -120,6 +120,12 @@ glm::vec3 SpecularReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, con
 	}
 	w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);  // Reflect when the normal is (0, 0, 1)
 	pdf = 1;
+	if (fresnel_reflectance.x > 1.f)
+		int a = 0;
+	if (float l = glm::length(w_i) - 1.f > 0.0001f)
+		int a = 0;
+	if (float l2 = glm::length(w_o) - 1.f > 0.0001f)
+		int a = 0;
 	return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
 }
 

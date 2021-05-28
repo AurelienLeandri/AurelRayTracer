@@ -42,12 +42,15 @@ float BSDF::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit
 
 glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record, float &pdf) const
 {
-    glm::vec3 w_o_local = hit_record.shadingCoordinateSystem * w_o;
+    glm::vec3 w_o_local = glm::normalize(hit_record.shadingCoordinateSystem * w_o);
+    if (w_o.z == 0)
+        return glm::vec3(0);
+
     int random_index = frand() * _bxdfs.size();
     glm::vec3 w_i_local(0);
     glm::vec3 f = _bxdfs[random_index]->sample_f(w_i_local, w_o_local, hit_record, pdf);
 
-    if (pdf == 0)
+    if (pdf == 0 || f == glm::vec3(0, 0, 0))
         return glm::vec3(0);
 
     w_i = glm::transpose(hit_record.shadingCoordinateSystem) * w_i_local;
@@ -65,11 +68,17 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
         return f;
 
     bool reflected = w_i_local.z * w_o_local.z > 0;
+    if (reflected == false)
+        int a = 0;
+
+    f = glm::vec3(0);
     for (int i = 0; i < _bxdfs.size(); ++i) {
-        if (i == random_index) continue;  // pdf already contains the value of the pdf we sampled from, plus its a nice way to get at least a value of 1 for pdf if we sampled using a specular BxDF
         if ((reflected && _bxdfs[i]->type & BxDF::BSDF_REFLECTION) || (!reflected && _bxdfs[i]->type & BxDF::BSDF_TRANSMISSION))
             f += _bxdfs[i]->f(w_i_local, w_o_local, hit_record);
     }
+
+    if (f.x < 0 || f.y < 0 || f.z < 0 || pdf < 0)
+        int a = 0;
     return f;
 }
 

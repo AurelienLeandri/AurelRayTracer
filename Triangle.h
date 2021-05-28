@@ -13,6 +13,7 @@ public:
 
 public:
 	virtual float sample(glm::vec3 &value, const glm::vec3& origin, const glm::vec3& origin_normal) const override;
+	virtual float area() const;
 
 private:
 	void _computeTriangleNormalAndParallelogramArea();

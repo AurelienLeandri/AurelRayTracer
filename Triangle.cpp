@@ -42,7 +42,12 @@ float Triangle::sample(glm::vec3& value, const glm::vec3& origin, const glm::vec
 		return 0;
 	float length_squared = glm::dot(value, value);
 	float result = glm::dot(value, value) / (glm::dot(glm::normalize(value), origin_normal) * (_parallelogramArea * 0.5f));
-	return fabs(glm::dot(value, value)) / (std::fabs(glm::dot(glm::normalize(value), origin_normal)) * (_parallelogramArea * 0.5f));
+	return pdf(value, origin, origin_normal);
+}
+
+float Triangle::area() const
+{
+	return _parallelogramArea * 0.5f;
 }
 
 

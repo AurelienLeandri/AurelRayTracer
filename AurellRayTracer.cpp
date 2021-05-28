@@ -22,6 +22,10 @@
 #include "Triangle.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "Distribution2D.h"
+#include "Utils.h"
+
+#include <fstream>
 
 
 namespace {
@@ -103,7 +107,6 @@ namespace {
 		unsigned int diamond_material_id = scene.addMaterial(diamond_material);
 		*/
 
-		/*
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
 		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
@@ -144,7 +147,6 @@ namespace {
 		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		white_plane->materialId = fresnel_material_id;
 		scene.addMesh(white_plane);
-		*/
 
 		// White floor
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
@@ -276,12 +278,10 @@ namespace {
 	std::shared_ptr<Camera> cerberus_scene(SceneData &scene)
 	{
 		Transform t;
-		t.translation = glm::vec3(-50, 0, 200);
-		t.rotation_rads = glm::vec3(0, -M_PI / 4, 0);
-		/*
+		//t.translation = glm::vec3(-50, 0, 200);
+		//t.rotation_rads = glm::vec3(0, -M_PI / 4, 0);
 		t.translation = glm::vec3(0, 0, 200);
 		t.rotation_rads = glm::vec3(0, -M_PI / 12, 0);
-		*/
 		std::string model_path = "Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
 		if (!ModelLoader::loadModel(model_path, scene, t)) {
 			std::cerr << "Could not load model " << model_path << std::endl;
@@ -344,9 +344,87 @@ namespace {
 	}
 }
 
+float *test_2D_sampling(int nb_samples, int &width, int &height, int &nb_channels) {
+	if (!nb_samples) return nullptr;
+
+	std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
+	width = environment_emission_texture->getWidth();
+	height = environment_emission_texture->getHeight();
+	nb_channels = environment_emission_texture->getNbChannels();
+	const int LINE_SIZE = width * nb_channels;
+	float* buffer = new float[(size_t)width * height * nb_channels];
+	for (int i = 0; i < width * height * nb_channels; ++i)
+		buffer[i] = 0;
+	float* luminance_map = new float[(size_t)width * height];
+	const unsigned char* data = environment_emission_texture->getData();
+	int k = 0;
+	glm::vec3 true_res(0);
+	for (int i = 0; i < width * height * nb_channels; i += nb_channels) {
+		float e = data[i] * 0.3f + data[i + 1] * 0.59f + data[i + 2] * 0.11f;
+		true_res.r += data[i] / 255;
+		true_res.g += data[i + 1] / 255;
+		true_res.b += data[i + 2] / 255;
+		static const float INV_255 = 1.f / 255;
+		luminance_map[i / 3] = e *= INV_255;
+	}
+	std::cout << true_res.r << " " << true_res.g << " " << true_res.b << std::endl;
+	Distribution2D distrib(luminance_map, height, width);
+	glm::vec3 res(0);
+	for (int k = 0; k < nb_samples; ++k) {
+		int i = -1, j = -1;
+		float inv_pdf = 1 / distrib.sample(frand(), frand(), i, j);
+		res.r += data[i * LINE_SIZE + j * 3] / 255 * inv_pdf;
+		res.g += data[i * LINE_SIZE + j * 3 + 1] / 255 * inv_pdf;
+		res.b += data[i * LINE_SIZE + j * 3 + 2] / 255 * inv_pdf;
+		buffer[i * LINE_SIZE + j * 3] = 255;
+		buffer[i * LINE_SIZE + j * 3 + 1] = 255;
+		buffer[i * LINE_SIZE + j * 3 + 2] = 255;
+	}
+	res /= nb_samples;
+	std::cout << res.r << " " << res.g << " " << res.b << std::endl << std::endl;
+	/*
+	for (int k = 0; k < nb_samples; ++k) {
+		int i = -1, j = -1;
+		float inv_pdf = 1 / distrib.sample(frand(), frand(), i, j);
+		buffer[i * LINE_SIZE + j * 3] += data[i * LINE_SIZE + j * 3];
+		buffer[i * LINE_SIZE + j * 3 + 1] += data[i * LINE_SIZE + j * 3 + 1];
+		buffer[i * LINE_SIZE + j * 3 + 2] += data[i * LINE_SIZE + j * 3 + 2];
+	}
+	*/
+	std::ofstream os;
+	os.open("test.ppm");
+	os << "P3" << std::endl;
+	os << width << " " << height << std::endl;
+	os << "255" << std::endl;
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < LINE_SIZE; j += 3) {
+			float r = buffer[i * LINE_SIZE + j];
+			float g = buffer[i * LINE_SIZE + j + 1];
+			float b = buffer[i * LINE_SIZE + j + 2];
+			os << int(r) << " ";
+			os << int(g) << " ";
+			os << int(b) << " ";
+		}
+		os << std::endl;
+	}
+	os.flush();
+	os.close();
+	return buffer;
+}
+
 int main()
 {
-	//test_interpolate();
+	//int w = -1, h = -1, n = -1;
+	//float* b = test_2D_sampling(1000000, w, h, n);
+	/*
+	float* b = test_2D_sampling(1, w, h, n);
+	b = test_2D_sampling(10, w, h, n);
+	b = test_2D_sampling(100, w, h, n);
+	b = test_2D_sampling(1000, w, h, n);
+	b = test_2D_sampling(10000, w, h, n);
+	b = test_2D_sampling(100000, w, h, n);
+	b = test_2D_sampling(1000000, w, h, n);
+	*/
 	//return 0;
 
     std::clock_t main_clock(std::clock());

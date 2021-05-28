@@ -20,9 +20,30 @@ glm::vec3 ImageTexture::getColor(const HitRecord& hit_record) const
     return glm::vec3(0);
 }
 
+int ImageTexture::getWidth() const
+{
+    return _data->_width;
+}
+
+int ImageTexture::getHeight() const
+{
+    return _data->_height;
+}
+
+const unsigned char* ImageTexture::getData() const
+{
+    return _data->_data;
+}
+
+int ImageTexture::getNbChannels() const
+{
+    return _data->_nbChannels;
+}
+
 ImageTexture::_ImageTextureData::_ImageTextureData(std::string path)
 {
     stbi_set_flip_vertically_on_load(false);
+    stbi_ldr_to_hdr_gamma(1.0f);
     _data = stbi_load(path.c_str(), &_width, &_height, &_nbChannels, 0);
 }
 
