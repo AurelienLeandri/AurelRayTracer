@@ -78,16 +78,12 @@ glm::vec3 TorranceSparrowReflection::sample_f(glm::vec3& w_i, const glm::vec3& w
 
 	_reflectionModel->sample_wh(w_h);
 	float dot_w_o_w_h = glm::dot(w_o, w_h);
-	if (dot_w_o_w_h < 0)
-		return glm::vec3(0, 0, 0);
 	while (dot_w_o_w_h < 0) {
 		_reflectionModel->sample_wh(w_h);
 		dot_w_o_w_h = glm::dot(w_o, w_h);
 	}
 
 	w_i = glm::normalize(reflect(w_o, w_h));
-
-	glm::vec3 w_o2 = glm::normalize(w_i + w_o);
 
 	if (w_o.z * w_i.z < 0)  // Has to be in the same hemisphere
 		return glm::vec3(0);

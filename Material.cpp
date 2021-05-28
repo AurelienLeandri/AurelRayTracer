@@ -57,11 +57,15 @@ void Dielectric::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
     //hit_record.bsdf.add(std::make_shared<FresnelBlend>(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.5f, 0.3f, 0.5f), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.1f))));
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 300.f, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.5f)), 1.8f));
+    //hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 300.f, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.5f)), 1.8f));
     //hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 2.56f, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.1f))));
  
     //hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.2f))));
     //hit_record.bsdf.add(std::make_shared<SpecularTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record)));
     //hit_record.bsdf.add(std::make_shared<SpecularReflection>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record)));
+
+    // Plastic params
+    hit_record.bsdf.add(std::make_shared<LambertianReflection>(glm::vec3(0.9f, 0.4f, 0.8f)));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 1.5f, glm::vec3(1.f), std::make_shared<TrowbridgeReitz>(0.1f)));
 }
 

@@ -13,6 +13,7 @@
 #include "Utils.h"
 #include "HitRecord.h"
 #include "HitableList.h"
+#include "InfiniteAreaLight.h"
 #include "Embree.h"
 #include "Texture.h"
 #include "SceneData.h"
@@ -58,7 +59,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 100));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 10));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -111,12 +112,33 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                 }
             }
 
+            /*
+            static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
+            static InfiniteAreaLight light(environment_emission_texture->getData(), environment_emission_texture->getWidth(), environment_emission_texture->getHeight(), environment_emission_texture->getNbChannels());
+            glm::vec3 light_sample(0, 0, 0);
+            float light_sample_proba = light.sample(light_sample, hit_record.position, hit_record.normal);
+            HitRecord occlusion_hit_record;
+            Ray direct_lighting_ray(hit_record.position, light_sample);
+            light_sample = glm::normalize(light_sample);
+            // If the light can be sampled from our position, we check if we hit the light:
+            // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
+            bool hit_anything = _castRay(direct_lighting_ray, occlusion_hit_record);
+            if (light_sample_proba > 0.f && !hit_anything) {
+                float cos_light_surface = glm::dot(light_sample, hit_record.normal);
+                if (cos_light_surface > 0) {
+                    glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
+                    glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                    //glm::vec3 light_color = occlusion_hit_record.emission * path_accumulated_weight * light_scattering / light_sample_proba;
+                    glm::vec3 light_color = glm::vec3(1, 1, 1) * path_accumulated_weight * light_scattering / light_sample_proba;
+                    color += light_color;
+                }
+            }
+            */
+
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
             float sample_proba = 0;
             glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba);  // Get a sample vector, gets the proba to pick it
-            sample_proba += hit_record.bsdf.pdf(w_i, w_o_calculations, hit_record);
-            f += hit_record.bsdf.f(w_i, w_o_calculations, hit_record);
 
             if (sample_proba < 0.000001f || (f == glm::vec3(0)))
                 break;
@@ -144,8 +166,10 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             //path_accumulated_weight /= russian_roulette_weight;
         }
         else {
+            /*
             //color += path_accumulated_weight * glm::vec3(1);
-            //return color;
+            return color;
+            */
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;
             get_sphere_uv(glm::normalize(w_o.direction), u, v);
