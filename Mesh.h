@@ -3,8 +3,7 @@
 #include <vector>
 #include "Vertex.h"
 
-struct Transform;
-
+class Transform;
 
 // TODO: make abstract
 class Mesh

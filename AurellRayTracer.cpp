@@ -190,12 +190,12 @@ namespace {
 
 	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
 	{
-		Transform t;
+		TransformParameters t;
 		t.translation = glm::vec3(0.5f, 0, 3);
 		t.scaling = glm::vec3(1);
 		t.rotation_rads = glm::vec3(0, -(3 * M_PI) / 4, 0);
 		std::string model_path = "Survival_BackPack_2/backpack.obj";
-		if (!ModelLoader::loadModel(model_path, scene, t)) {
+		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
@@ -229,12 +229,12 @@ namespace {
 
 	std::shared_ptr<Camera> teapot_scene(SceneData &scene)
 	{
-		Transform t;
+		TransformParameters t;
 		t.translation = glm::vec3(0, 0, 3);
 		t.scaling = glm::vec3(0.08f, 0.08f, 0.08f);
 		t.rotation_rads = glm::vec3(0, M_PI / 4, 0);
 		std::string model_path = "utah-teapot.obj";
-		if (!ModelLoader::loadModel(model_path, scene, t)) {
+		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
@@ -268,13 +268,13 @@ namespace {
 
 	std::shared_ptr<Camera> cerberus_scene(SceneData &scene)
 	{
-		Transform t;
+		TransformParameters t;
 		//t.translation = glm::vec3(-50, 0, 200);
 		//t.rotation_rads = glm::vec3(0, -M_PI / 4, 0);
 		t.translation = glm::vec3(0, 0, 200);
 		t.rotation_rads = glm::vec3(0, -M_PI / 12, 0);
 		std::string model_path = "Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
-		if (!ModelLoader::loadModel(model_path, scene, t)) {
+		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
@@ -290,7 +290,7 @@ namespace {
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
 		unsigned int light_material_id = scene.addMaterial(light_material);
 
-		Transform light_transform;
+		TransformParameters light_transform;
 		light_transform.translation = glm::vec3(-30, 0, 100);
 		light_transform.scaling = glm::vec3(20, 20, 20);
 		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
@@ -298,7 +298,7 @@ namespace {
 			Vertex({ glm::vec3(0, 0.5f, -0.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) }),
 			Vertex({ glm::vec3(0, -0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
-		light_mesh0->transform(light_transform);
+		light_mesh0->transform(Transform(light_transform));
 		light_mesh0->materialId = light_material_id;
 		//scene.addMesh(light_mesh0);
 
@@ -307,7 +307,7 @@ namespace {
 			Vertex({ glm::vec3(0, -0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) }),
 			Vertex({ glm::vec3(0, 0.5f, -0.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 			);
-		light_mesh1->transform(light_transform);
+		light_mesh1->transform(Transform(light_transform));
 		light_mesh1->materialId = light_material_id;
 		//scene.addMesh(light_mesh1);
 
