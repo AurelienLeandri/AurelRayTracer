@@ -1,25 +1,29 @@
 #pragma once
 
+#include "Shape.h"
+
 #include <vector>
+
 #include "Vertex.h"
 
 class Transform;
 
-// TODO: make abstract
-class Mesh
+class Mesh : public Shape
 {
 public:
-    virtual float sample(glm::vec3& value, const glm::vec3& origin, const glm::vec3& origin_normal) const { return 0; }
-    
-    virtual float pdf(const glm::vec3& value, const glm::vec3& origin, const glm::vec3& origin_normal) const {
-        return std::fabs(glm::dot(value, value)) / (std::fabs(glm::dot(glm::normalize(value), origin_normal)) * (area() * 0.5f));
-    }
+    Mesh();
 
-    void transform(const Transform& t);
-    virtual float area() const { return 0; };
+public:
+    // Inherited via Shape
+    virtual glm::vec3 sample(const HitRecord& record, float& pdf) const override;
+    virtual float pdf(const glm::vec3& point, const HitRecord& record) const override;
+    virtual void transform(const Transform& t) override;
+    virtual float area() const override;
+    virtual void commitGeometry(RTCDevice device, RTCScene rtcScene) override;
 
 public:
     std::vector<Vertex> geometry;
     std::vector<unsigned int> indices;
     unsigned int materialId = 0;
+
 };

@@ -18,6 +18,7 @@
 #include "SceneData.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Triangle.h"
 
 
 static float max_green = 0;
@@ -81,11 +82,11 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
     //float russian_roulette_weight = 1.f;
-        while (!max_depth || depth < max_depth) {
+        while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
         if (_castRay(w_o, hit_record)) {
 
-            if (depth == 0) {  // Hitting lights on the first ray
+            if (depth == 1) {  // Hitting lights on the first ray
                 color += hit_record.emission;
             }
 
@@ -93,15 +94,15 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
 
             // Direct lighting
             for (unsigned int light_id : _lights) {
-                const std::shared_ptr<Mesh> &light = _scene->getMeshes().at(light_id);
-                glm::vec3 light_sample(0, 0, 0);
-                float light_sample_proba = light->sample(light_sample, hit_record.position, hit_record.normal);
+                const std::shared_ptr<Shape> &light = _scene->getShapes().at(light_id);
+                float light_sample_proba = 0;
+                glm::vec3 light_sample = light->sample(hit_record, light_sample_proba);
                 HitRecord occlusion_hit_record;
                 Ray direct_lighting_ray(hit_record.position, light_sample);
                 light_sample = glm::normalize(light_sample);
                 // If the light can be sampled from our position, we check if we hit the light:
                 // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay > 0.9999f) {
+                if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.shapeId == light_id) {
                     float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                     if (cos_light_surface > 0) {
                         glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
@@ -180,7 +181,6 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             break;  // The path is over. The ray didn't hit anything
         }
 
-        depth++;
     }
     return color;
 }
@@ -231,17 +231,32 @@ bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
         hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));;
         hit_record.tRay = rayhit.ray.tfar;
 
-        // Interpolation of vertex data
-        static struct alignas (16) interpolated_data {
-            float normals[4] = { 0 };
-            float uvs[4] = { 0 };
-        } interpolation;
-        RTCGeometry geometry = rtcGetGeometry(_rtcScene, rayhit.hit.geomID);
-        rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, &interpolation.normals[0], nullptr, nullptr, 4);
-        rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, &interpolation.uvs[0], nullptr, nullptr, 4);
+        std::shared_ptr<Shape> shape = _scene->getShapes().at(rayhit.hit.geomID);
 
-        // Shading coordinate system
-        hit_record.normal = glm::normalize(glm::vec3(interpolation.normals[0], interpolation.normals[1], interpolation.normals[2]));
+        hit_record.shapeId = rayhit.hit.geomID;
+        
+        if (shape->type == ShapeType::TRIANGLE || shape->type == ShapeType::MESH) {
+            // Interpolation of vertex data
+            static struct alignas (16) interpolated_data {
+                float normals[4] = { 0 };
+                float uvs[4] = { 0 };
+            } interpolation;
+            RTCGeometry geometry = rtcGetGeometry(_rtcScene, rayhit.hit.geomID);
+            rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, &interpolation.normals[0], nullptr, nullptr, 4);
+            rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, &interpolation.uvs[0], nullptr, nullptr, 4);
+
+            hit_record.normal = glm::normalize(glm::vec3(interpolation.normals[0], interpolation.normals[1], interpolation.normals[2]));
+
+            hit_record.u = interpolation.uvs[0];
+            hit_record.v = interpolation.uvs[1];
+        }
+        else if (shape->type == ShapeType::SPHERE) {
+            hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));
+            hit_record.u = rayhit.hit.u;
+            hit_record.v = rayhit.hit.v;
+        }
+
+        // Compute shading coordinate system
         if (glm::dot(hit_record.normal, ray.direction) > 0)
             hit_record.normal = -hit_record.normal;
         glm::vec3 a = glm::abs(hit_record.normal.x) > 0.9f ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
@@ -252,12 +267,9 @@ bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
         hit_record.shadingCoordinateSystem[1] = glm::vec3(hit_record.tangent.y, hit_record.bitangent.y, hit_record.normal.y);
         hit_record.shadingCoordinateSystem[2] = glm::vec3(hit_record.tangent.z, hit_record.bitangent.z, hit_record.normal.z);
 
-        hit_record.u = interpolation.uvs[0];
-        hit_record.v = interpolation.uvs[1];
-
         hit_record.ray = ray;
 
-        if (unsigned int material_id = _scene->getMeshes().at(rayhit.hit.geomID)->materialId) {
+        if (unsigned int material_id = shape->materialId) {
             hit_record.material = _scene->getMaterials().at(material_id).get();
             hit_record.material->getBSDF(hit_record);
             hit_record.material->emit(hit_record);
@@ -302,10 +314,12 @@ bool RayTracer::start() {
     }
 
     // Register meshes with emissive material as lights, to retrieve them by index in the scene geometry for importance sampling
-    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _scene->getMeshes()) {
-        std::shared_ptr<Material> mesh_material = _scene->getMaterials().at(pair.second->materialId);
-        if (pair.second->materialId && (dynamic_cast<const EmissiveMaterial *>(mesh_material.get()))) {  // Light source TODO: better check if a material is emissive
-            _lights.push_back(pair.first);
+    for (const std::pair<unsigned int, std::shared_ptr<Shape>>& pair : _scene->getShapes()) {
+        if (pair.second->materialId) {
+            std::shared_ptr<Material> mesh_material = _scene->getMaterials().at(pair.second->materialId);
+            if (pair.second->materialId && (dynamic_cast<const EmissiveMaterial*>(mesh_material.get()))) {  // Light source TODO: better check if a material is emissive
+                _lights.push_back(pair.first);
+            }
         }
     }
 
@@ -320,26 +334,8 @@ bool RayTracer::start() {
 
     _rtcScene = rtcNewScene(_rtcDevice);
 
-    for (const std::pair<unsigned int, std::shared_ptr<Mesh>>& pair : _scene->getMeshes()) {
-        RTCGeometry geom = rtcNewGeometry(_rtcDevice, RTC_GEOMETRY_TYPE_TRIANGLE);
-
-        // Vertices
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], 0, sizeof(Vertex), pair.second->geometry.size());
-
-        // Normals
-        rtcSetGeometryVertexAttributeCount(geom, 1);      
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], sizeof(glm::vec3), sizeof(Vertex), pair.second->geometry.size());
-
-        // UVs
-        rtcSetGeometryVertexAttributeCount(geom, 2);
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &pair.second->geometry[0], sizeof(glm::vec3) * 2, sizeof(Vertex), pair.second->geometry.size());
-
-        // Indices
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &pair.second->indices[0], 0, 3 * sizeof(unsigned int), pair.second->indices.size() / 3);
-
-        rtcCommitGeometry(geom);
-        rtcAttachGeometry(_rtcScene, geom);
-        rtcReleaseGeometry(geom);
+    for (const std::pair<unsigned int, std::shared_ptr<Shape>>& pair : _scene->getShapes()) {
+        pair.second->commitGeometry(_rtcDevice, _rtcScene);
     }
     
     rtcCommitScene(_rtcScene);
