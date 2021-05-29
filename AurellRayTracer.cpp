@@ -21,6 +21,7 @@
 #include "Distribution2D.h"
 #include "Utils.h"
 #include "Material.h"
+#include "Sphere.h"
 
 
 namespace {
@@ -78,7 +79,7 @@ namespace {
 
 		box_mesh->materialId = material_id;
 
-		return scene.addMesh(box_mesh);
+		return scene.addShape(box_mesh);
 	}
 
 	void cornell_box(SceneData &scene) {
@@ -110,7 +111,7 @@ namespace {
 		green_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
 		green_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		green_plane->materialId = fresnel_material_id;
-		scene.addMesh(green_plane);
+		scene.addShape(green_plane);
 
 		// Red plane
 		std::shared_ptr<Mesh> red_plane = std::make_shared<Mesh>();
@@ -120,7 +121,7 @@ namespace {
 		red_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
 		red_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		red_plane->materialId = fresnel_material_id;
-		scene.addMesh(red_plane);
+		scene.addShape(red_plane);
 
 		// White ceiling
 		std::shared_ptr<Mesh> white_ceiling = std::make_shared<Mesh>();
@@ -130,7 +131,7 @@ namespace {
 		white_ceiling->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
 		white_ceiling->indices = { 0, 1, 2, 3, 2, 1 };
 		white_ceiling->materialId = fresnel_material_id;
-		scene.addMesh(white_ceiling);
+		scene.addShape(white_ceiling);
 
 
 		// White plane in the back
@@ -141,7 +142,7 @@ namespace {
 		white_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
 		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		white_plane->materialId = fresnel_material_id;
-		scene.addMesh(white_plane);
+		scene.addShape(white_plane);
 
 		// White floor
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
@@ -151,7 +152,7 @@ namespace {
 		white_floor->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
 		white_floor->indices = { 0, 1, 2, 3, 2, 1 };
 		white_floor->materialId = fresnel_material_id;
-		scene.addMesh(white_floor);
+		scene.addShape(white_floor);
 
 		/*
 		// Light plane
@@ -208,7 +209,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
 		light_mesh0->materialId = light_material_id;
-		scene.addMesh(light_mesh0);
+		scene.addShape(light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 1, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -216,7 +217,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 		);
 		light_mesh1->materialId = light_material_id;
-		scene.addMesh(light_mesh1);
+		scene.addShape(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -247,7 +248,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
 		light_mesh0->materialId = light_material_id;
-		scene.addMesh(light_mesh0);
+		scene.addShape(light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 1, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -255,7 +256,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 			);
 		light_mesh1->materialId = light_material_id;
-		scene.addMesh(light_mesh1);
+		scene.addShape(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -269,8 +270,6 @@ namespace {
 	std::shared_ptr<Camera> cerberus_scene(SceneData &scene)
 	{
 		TransformParameters t;
-		//t.translation = glm::vec3(-50, 0, 200);
-		//t.rotation_rads = glm::vec3(0, -M_PI / 4, 0);
 		t.translation = glm::vec3(0, 0, 200);
 		t.rotation_rads = glm::vec3(0, -M_PI / 12, 0);
 		std::string model_path = "Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
@@ -278,14 +277,17 @@ namespace {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
-
 		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.56f);
 		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 1, 1)));
 		unsigned int matte_material_id = scene.addMaterial(matte_material);
 
-		scene.getMeshes()[0]->materialId = fresnel_material_id;
+		scene.getShapes()[0]->materialId = matte_material_id;
+
+		std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 100), 10);
+		sphere->materialId = fresnel_material_id;
+		scene.addShape(sphere);
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
 		unsigned int light_material_id = scene.addMaterial(light_material);
@@ -300,7 +302,7 @@ namespace {
 			);
 		light_mesh0->transform(Transform(light_transform));
 		light_mesh0->materialId = light_material_id;
-		//scene.addMesh(light_mesh0);
+		scene.addShape(light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(0, 0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -309,7 +311,7 @@ namespace {
 			);
 		light_mesh1->transform(Transform(light_transform));
 		light_mesh1->materialId = light_material_id;
-		//scene.addMesh(light_mesh1);
+		scene.addShape(light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);

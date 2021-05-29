@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <memory>
 
-class Mesh;
 class Material;
+class Shape;
 
 /*
 * Holds the data of every mesh throughout application lifetime
@@ -12,15 +12,15 @@ class Material;
 class SceneData
 {
 public:
-	const std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& getMeshes() const;
-	std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& getMeshes();
+	const std::unordered_map<unsigned int, std::shared_ptr<Shape>>& getShapes() const;
+	std::unordered_map<unsigned int, std::shared_ptr<Shape>>& getShapes();
 	const std::unordered_map<unsigned int, std::shared_ptr<Material>>& getMaterials() const;
 	std::unordered_map<unsigned int, std::shared_ptr<Material>>& getMaterials();
-	unsigned int addMesh(std::shared_ptr<Mesh> mesh);
+	unsigned int addShape(std::shared_ptr<Shape> mesh);
 	unsigned int addMaterial(std::shared_ptr<Material> material);
 
 private:
-	std::unordered_map<unsigned int, std::shared_ptr<Mesh>> _geometries;
+	std::unordered_map<unsigned int, std::shared_ptr<Shape>> _geometries;
 	std::unordered_map<unsigned int, std::shared_ptr<Material>> _materials;
 };
 

@@ -21,5 +21,6 @@ typedef struct HitRecord
     glm::vec3 emission = glm::vec3(0);
     glm::mat3 shadingCoordinateSystem = glm::mat3(1);
     Ray ray;
+    int shapeId = 0;
 } HitRecord;
 

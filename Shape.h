@@ -3,11 +3,22 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class HitRecord;
+#include "Embree.h"
+
+struct HitRecord;
 class Transform;
+
+enum class ShapeType {
+	TRIANGLE,
+	MESH,
+	SPHERE
+};
 
 class Shape
 {
+public:
+	Shape(ShapeType type);
+
 public:
 	// Gives area of the shape
 	virtual float area() const = 0;
@@ -20,5 +31,12 @@ public:
 
 	// Transform the shape using the given transformation matrix. The matrix is assumed not to be ill-formed. This function doesnt check for errors
 	virtual void transform(const Transform &transform) = 0;
+
+	// Commit geometry to buffers for primitive intersection acceleration on the GPU
+	virtual void commitGeometry(RTCDevice device, RTCScene rtcScene) = 0;
+
+public:
+	int materialId = 0;
+	ShapeType type;
 };
 

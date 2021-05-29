@@ -123,7 +123,7 @@ void ModelLoader::_processMesh(
 
     mesh->transform(transform);
 
-    scene.addMesh(mesh);
+    scene.addShape(mesh);
 }
 
 namespace {

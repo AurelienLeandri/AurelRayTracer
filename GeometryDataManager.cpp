@@ -2,12 +2,12 @@
 
 std::vector<SceneData> SceneFactory::_scenes;
 
-const std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& SceneData::getMeshes() const
+const std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes() const
 {
 	return _geometries;
 }
 
-std::unordered_map<unsigned int, std::shared_ptr<Mesh>>& SceneData::getMeshes()
+std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes()
 {
 	return _geometries;
 }
@@ -22,9 +22,9 @@ std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMater
 	return _materials;
 }
 
-unsigned int SceneData::addMesh(std::shared_ptr<Mesh> mesh)
+unsigned int SceneData::addShape(std::shared_ptr<Shape> shape)
 {
-	_geometries[_geometries.size()] = mesh;
+	_geometries[_geometries.size()] = shape;
 	return _geometries.size() - 1;
 }
 
