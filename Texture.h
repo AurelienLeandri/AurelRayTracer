@@ -33,17 +33,28 @@ public:
     static std::shared_ptr<ConstantTexture> blue;
 };
 
+enum class ImageTextureDataType {
+    UNSIGNED_CHAR,
+    FLOAT
+};
+
+enum class ImageTextureLayoutType {
+    RGB,
+    LUMINANCE
+};
+
 class ImageTexture :
     public Texture
 {
 public:
-    explicit ImageTexture(std::string path);
+    ImageTexture(std::string path, ImageTextureDataType type = ImageTextureDataType::FLOAT, ImageTextureLayoutType layoutType = ImageTextureLayoutType::RGB);
 
 public:
     virtual glm::vec3 getColor(const HitRecord& hit_record) const;
     int getWidth() const;
     int getHeight() const;
-    const unsigned char* getData() const;
+    const void* getData() const;
+    void* getData();
     int getNbChannels() const;
 
 private:
@@ -51,7 +62,7 @@ private:
         public Texture
     {
     public:
-        _ImageTextureData(std::string path);
+        _ImageTextureData(std::string path, ImageTextureDataType type, ImageTextureLayoutType layoutType);
         ~_ImageTextureData();
         _ImageTextureData(const ImageTexture& other) = delete;
         _ImageTextureData& operator=(const ImageTexture& other) = delete;
@@ -60,14 +71,19 @@ private:
 
         virtual glm::vec3 getColor(const HitRecord& hit_record) const;
 
+    private:
+        void freeTexels();
+
     public:
         // Owns
-        unsigned char* _data = nullptr;
+        void* texels = nullptr;
 
-        int _width = 0;
-        int _height = 0;
-        int _nbChannels = 0;
-        std::string _path;
+        int width = 0;
+        int height = 0;
+        int nbChannels = 0;
+        std::string path;
+        ImageTextureDataType dataType;
+        ImageTextureLayoutType layoutType;
     };
 
 private:

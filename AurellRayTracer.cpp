@@ -347,7 +347,7 @@ float *test_2D_sampling(int nb_samples, int &width, int &height, int &nb_channel
 	for (int i = 0; i < width * height * nb_channels; ++i)
 		buffer[i] = 0;
 	float* luminance_map = new float[(size_t)width * height];
-	const unsigned char* data = environment_emission_texture->getData();
+	const unsigned char* data = (const unsigned char*)environment_emission_texture->getData();
 	int k = 0;
 	glm::vec3 true_res(0);
 	for (int i = 0; i < width * height * nb_channels; i += nb_channels) {
