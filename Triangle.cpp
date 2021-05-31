@@ -39,8 +39,6 @@ glm::vec3 Triangle::sample(const HitRecord& record, float& pdf) const {
 	float light_cosine = glm::dot(glm::normalize(value), record.normal);
 	if (light_cosine < 0.1 || glm::dot(_normal, value) >= 0)
 		return value;
-	float length_squared = glm::dot(value, value);
-	float result = glm::dot(value, value) / (glm::dot(glm::normalize(value), record.normal) * (_parallelogramArea * 0.5f));
 	pdf = this->pdf(value, record);
 	return value;
 }

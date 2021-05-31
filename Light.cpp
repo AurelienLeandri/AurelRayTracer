@@ -16,9 +16,10 @@ void AreaLight::transform(const Transform& transform)
 {
 }
 
-glm::vec3 AreaLight::sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const
+glm::vec3 AreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const
 {
-    return glm::vec3();
+    wi = _shape->sample(hit_record, pdf);
+    return _emission;
 }
 
 glm::vec3 AreaLight::power() const
@@ -44,7 +45,7 @@ void InfiniteAreaLight::transform(const Transform& transform)
 {
 }
 
-glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const
+glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const
 {
     return glm::vec3();
 }
