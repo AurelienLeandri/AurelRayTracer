@@ -13,7 +13,8 @@ public:
 	virtual ~Texture() = default;;
 
 public:
-	virtual glm::vec3 getColor(const HitRecord &hit_record) const = 0;
+    virtual glm::vec3 getColor(const HitRecord& hit_record) const = 0;
+    virtual glm::vec3 getColor(float u, float v) const = 0;
 };
 
 class ConstantTexture :
@@ -25,6 +26,7 @@ public:
 
 public:
     virtual glm::vec3 getColor(const HitRecord& hit_record) const;
+    virtual glm::vec3 getColor(float u, float v) const;
 
 public:
     glm::vec3 color = glm::vec3(1);
@@ -51,6 +53,7 @@ public:
 
 public:
     virtual glm::vec3 getColor(const HitRecord& hit_record) const;
+    virtual glm::vec3 getColor(float u, float v) const;
     int getWidth() const;
     int getHeight() const;
     const void* getData() const;
@@ -70,6 +73,7 @@ private:
         _ImageTextureData& operator=(const ImageTexture&& other) = delete;
 
         virtual glm::vec3 getColor(const HitRecord& hit_record) const;
+        virtual glm::vec3 getColor(float u, float v) const;
 
     private:
         void freeTexels();
