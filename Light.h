@@ -24,7 +24,7 @@ public:
     virtual void transform(const Transform& transform) = 0;
 
     // Returns the incident radiance arriving at the point given by the hit record, along a sampled vector wi (which is set by the function).
-    virtual glm::vec3 sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const = 0;
+    virtual glm::vec3 sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const = 0;
 
     // Returns total emitted power of the light (or an estimation of it). Useful for importance sampling, for example.
     virtual glm::vec3 power() const = 0;
@@ -47,7 +47,7 @@ public:
 public:
     // Inherited via Light
     virtual void transform(const Transform& transform) override;
-    virtual glm::vec3 sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const override;
+    virtual glm::vec3 sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const override;
     virtual glm::vec3 power() const override;
 
     // Returns the radiance along w coming a point on the light described by the given "pointOnLight" HitRecord.
@@ -67,7 +67,7 @@ public:
 public:
     // Inherited via Light
     virtual void transform(const Transform& transform) override;
-    virtual glm::vec3 sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const override;
+    virtual glm::vec3 sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const override;
     virtual glm::vec3 power() const override;
     virtual glm::vec3 radianceTowards(const glm::vec3& w) const override;
 

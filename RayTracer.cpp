@@ -17,6 +17,7 @@
 #include "SceneData.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Light.h"
 #include "Triangle.h"
 
 
@@ -92,21 +93,21 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
             // Direct lighting
-            for (unsigned int light_id : _lights) {
-                const std::shared_ptr<Shape> &light = _scene->getShapes().at(light_id);
+            for (const std::shared_ptr<Light> light : _scene->getLights()) {
                 float light_sample_proba = 0;
-                glm::vec3 light_sample = light->sample(hit_record, light_sample_proba);
-                HitRecord occlusion_hit_record;
+                glm::vec3 light_sample(0, 0, 1);
+                glm::vec3 radiance = light->sampleLi(light_sample, hit_record, light_sample_proba);
                 Ray direct_lighting_ray(hit_record.position, light_sample);
                 light_sample = glm::normalize(light_sample);
+                HitRecord occlusion_hit_record;
                 // If the light can be sampled from our position, we check if we hit the light:
                 // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.shapeId == light_id) {
+                if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
                     float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                     if (cos_light_surface > 0) {
                         glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
                         glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                        glm::vec3 light_color = occlusion_hit_record.emission * path_accumulated_weight * light_scattering / light_sample_proba;
+                        glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
                         color += light_color;
                     }
                 }
@@ -287,16 +288,6 @@ namespace { // embree
 bool RayTracer::start() {
     if (!_scene || !_camera) {
         return false;
-    }
-
-    // Register meshes with emissive material as lights, to retrieve them by index in the scene geometry for importance sampling
-    for (const std::pair<unsigned int, std::shared_ptr<Shape>>& pair : _scene->getShapes()) {
-        if (pair.second->materialId) {
-            std::shared_ptr<Material> mesh_material = _scene->getMaterials().at(pair.second->materialId);
-            if (pair.second->materialId && (dynamic_cast<const EmissiveMaterial*>(mesh_material.get()))) {  // Light source TODO: better check if a material is emissive
-                _lights.push_back(pair.first);
-            }
-        }
     }
 
     _rtcDevice = rtcNewDevice(nullptr);

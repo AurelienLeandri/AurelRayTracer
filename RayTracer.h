@@ -15,6 +15,7 @@ class Ray;
 struct HitRecord;
 class Material;
 class SceneData;
+class Light;
 
 class RayTracer {
 public:
@@ -47,8 +48,6 @@ private:
     const size_t _PORTION_SIZE = (_WIDTH * _HEIGHT) / _NB_THREADS;
 
     std::shared_ptr<Camera> _camera;
-
-    std::vector<unsigned int> _lights;
 
     RTCScene _rtcScene = 0;
     RTCDevice _rtcDevice = 0;

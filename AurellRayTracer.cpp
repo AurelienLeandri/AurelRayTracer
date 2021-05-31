@@ -303,7 +303,9 @@ namespace {
 			);
 		light_mesh0->transform(Transform(light_transform));
 		light_mesh0->materialId = light_material_id;
-		scene.addShape(light_mesh0);
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh0);
+		//scene.addShape(light_mesh0);
+		scene.addLight(light0, light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(0, 0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -312,7 +314,9 @@ namespace {
 			);
 		light_mesh1->transform(Transform(light_transform));
 		light_mesh1->materialId = light_material_id;
-		scene.addShape(light_mesh1);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh1);
+		//scene.addShape(light_mesh1);
+		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -418,8 +422,6 @@ int main()
 	b = test_2D_sampling(1000000, w, h, n);
 	*/
 	//return 0;
-
-	InfiniteAreaLight light("lakeside_2k.hdr");
 
     std::clock_t main_clock(std::clock());
 
