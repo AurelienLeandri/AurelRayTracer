@@ -7,7 +7,7 @@
 class Transform;
 class HitRecord;
 class Shape;
-class Texture;
+class ImageTexture;
 
 enum class LightType {
     AREA,
@@ -28,6 +28,9 @@ public:
 
     // Returns total emitted power of the light (or an estimation of it). Useful for importance sampling, for example.
     virtual glm::vec3 power() const = 0;
+
+    // Returns radiance towards an arbitrary directions. Allows to get radiance for rays that did not hit anything, thus not relying on a HitRecord (for example for InfiniteAreaLights).
+    virtual glm::vec3 radianceTowards(const glm::vec3 &w) const;
 
 public:
     LightType getType() const;
@@ -59,15 +62,20 @@ private:
 class InfiniteAreaLight : public Light
 {
 public:
-    InfiniteAreaLight(const glm::vec3& emission, const std::string &texturePath);
+    InfiniteAreaLight(const std::string &texturePath);
 
 public:
     // Inherited via Light
     virtual void transform(const Transform& transform) override;
     virtual glm::vec3 sampleLi(glm::vec3* wi, const HitRecord& hit_record, float& pdf) const override;
     virtual glm::vec3 power() const override;
+    virtual glm::vec3 radianceTowards(const glm::vec3& w) const override;
+
 
 private:
-    const glm::vec3 _emission = glm::vec3(1);
-    std::unique_ptr<Texture> _luminanceMap;
+    std::unique_ptr<ImageTexture> _luminanceMap;
+
+    // TODO: compute the world's bounding sphere
+    glm::vec3 worldCenter = glm::vec3(0);
+    glm::vec3 worldradius = glm::vec3(2000);
 };

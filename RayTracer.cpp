@@ -12,7 +12,6 @@
 #include "Camera.h"
 #include "Utils.h"
 #include "HitRecord.h"
-#include "InfiniteAreaLight.h"
 #include "Embree.h"
 #include "Texture.h"
 #include "SceneData.h"
@@ -112,29 +111,6 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                     }
                 }
             }
-
-            /*
-            static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
-            static InfiniteAreaLight light(environment_emission_texture->getData(), environment_emission_texture->getWidth(), environment_emission_texture->getHeight(), environment_emission_texture->getNbChannels());
-            glm::vec3 light_sample(0, 0, 0);
-            float light_sample_proba = light.sample(light_sample, hit_record.position, hit_record.normal);
-            HitRecord occlusion_hit_record;
-            Ray direct_lighting_ray(hit_record.position, light_sample);
-            light_sample = glm::normalize(light_sample);
-            // If the light can be sampled from our position, we check if we hit the light:
-            // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-            bool hit_anything = _castRay(direct_lighting_ray, occlusion_hit_record);
-            if (light_sample_proba > 0.f && !hit_anything) {
-                float cos_light_surface = glm::dot(light_sample, hit_record.normal);
-                if (cos_light_surface > 0) {
-                    glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
-                    glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                    //glm::vec3 light_color = occlusion_hit_record.emission * path_accumulated_weight * light_scattering / light_sample_proba;
-                    glm::vec3 light_color = glm::vec3(1, 1, 1) * path_accumulated_weight * light_scattering / light_sample_proba;
-                    color += light_color;
-                }
-            }
-            */
 
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);

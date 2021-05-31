@@ -22,6 +22,7 @@
 #include "Utils.h"
 #include "Material.h"
 #include "Sphere.h"
+#include "Light.h"
 
 
 namespace {
@@ -417,6 +418,8 @@ int main()
 	b = test_2D_sampling(1000000, w, h, n);
 	*/
 	//return 0;
+
+	InfiniteAreaLight light("lakeside_2k.hdr");
 
     std::clock_t main_clock(std::clock());
 
