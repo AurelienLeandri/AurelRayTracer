@@ -8,6 +8,7 @@ class Transform;
 class HitRecord;
 class Shape;
 class ImageTexture;
+class Distribution2D;
 
 enum class LightType {
     AREA,
@@ -74,6 +75,8 @@ public:
 
 private:
     std::unique_ptr<ImageTexture> _luminanceMap;
+    std::unique_ptr<ImageTexture> _radianceMap;
+    std::unique_ptr<Distribution2D> _distribution;
 
     // TODO: compute the world's bounding sphere
     glm::vec3 worldCenter = glm::vec3(0);

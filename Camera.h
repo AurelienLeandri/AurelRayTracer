@@ -1,8 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 
 class Ray;
+class Film;
+struct CameraSample;
+class RayDifferential;
 
 class Camera
 {
@@ -10,6 +14,11 @@ public:
 	Camera(glm::vec3 position, glm::vec3 look_at, glm::vec3 up_axis, float fov, float aspect, float aperture = 1.f, float focus_dist = 1.f, float t0 = 0.f, float t1 = 0.f);
 
 	Ray getRay(float x, float y);
+
+public:
+	std::shared_ptr<const Film> getFilm() const;
+	std::shared_ptr<Film> getFilm();
+	float generateRayDifferential(const CameraSample& sample, RayDifferential& ray) const;
 
 private:
 	// Screen informations
@@ -33,5 +42,6 @@ private:
 	float _t0;
 	float _t1;
 
+	std::shared_ptr<Film> _film;
 };
 

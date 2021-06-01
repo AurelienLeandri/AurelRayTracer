@@ -28,3 +28,18 @@ Ray Camera::getRay(float x, float y)
 	float time = _t0 + (_t1 - _t0) * frand();
 	return Ray(_position + offset, _lowerLeftCorner + x * _screenDimensions.x * _right + y * _screenDimensions.y * _up - _position - offset, time);
 }
+
+std::shared_ptr<const Film> Camera::getFilm() const
+{
+	return _film;
+}
+
+std::shared_ptr<Film> Camera::getFilm()
+{
+	return _film;
+}
+
+float Camera::generateRayDifferential(const CameraSample& sample, RayDifferential& ray) const
+{
+	return 1.0f;
+}

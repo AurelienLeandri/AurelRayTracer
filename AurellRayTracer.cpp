@@ -104,6 +104,7 @@ namespace {
 		unsigned int diamond_material_id = scene.addMaterial(diamond_material);
 		*/
 
+		/*
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
 		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
@@ -144,6 +145,7 @@ namespace {
 		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		white_plane->materialId = fresnel_material_id;
 		scene.addShape(white_plane);
+		*/
 
 		// White floor
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
@@ -152,7 +154,7 @@ namespace {
 		white_floor->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(0, 1, 0), glm::vec2(1, 0) });
 		white_floor->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
 		white_floor->indices = { 0, 1, 2, 3, 2, 1 };
-		white_floor->materialId = fresnel_material_id;
+		white_floor->materialId = material_white_id;
 		scene.addShape(white_floor);
 
 		/*
@@ -169,6 +171,10 @@ namespace {
 		);
 		triangle_light_0->materialId = material_light_id;
 		triangle_light_1->materialId = material_light_id;
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_0);
+		scene.addLight(light0, triangle_light_0);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_1);
+		scene.addLight(light1, triangle_light_1);
 		scene.addMesh(triangle_light_0);
 		scene.addMesh(triangle_light_1);
 		*/
@@ -210,7 +216,8 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
 		light_mesh0->materialId = light_material_id;
-		scene.addShape(light_mesh0);
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(100, 100, 100), light_mesh0);
+		scene.addLight(light0, light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 1, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -218,7 +225,8 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 		);
 		light_mesh1->materialId = light_material_id;
-		scene.addShape(light_mesh1);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(100, 100, 100), light_mesh1);
+		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -249,7 +257,8 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
 		light_mesh0->materialId = light_material_id;
-		scene.addShape(light_mesh0);
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10, 10, 10), light_mesh0);
+		scene.addLight(light0, light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 1, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 1) }),
@@ -257,7 +266,8 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 			);
 		light_mesh1->materialId = light_material_id;
-		scene.addShape(light_mesh1);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10, 10, 10), light_mesh1);
+		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
@@ -304,7 +314,6 @@ namespace {
 		light_mesh0->transform(Transform(light_transform));
 		light_mesh0->materialId = light_material_id;
 		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh0);
-		//scene.addShape(light_mesh0);
 		scene.addLight(light0, light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
@@ -315,7 +324,6 @@ namespace {
 		light_mesh1->transform(Transform(light_transform));
 		light_mesh1->materialId = light_material_id;
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh1);
-		//scene.addShape(light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
@@ -442,7 +450,10 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
+	std::shared_ptr<Camera> camera =  cornell_box_scene(*scene);
+
+	std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr");
+	scene->addLight(environmentLight);
 
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);
