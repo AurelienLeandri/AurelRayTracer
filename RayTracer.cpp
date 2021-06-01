@@ -100,15 +100,28 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                 Ray direct_lighting_ray(hit_record.position, light_sample);
                 light_sample = glm::normalize(light_sample);
                 HitRecord occlusion_hit_record;
-                // If the light can be sampled from our position, we check if we hit the light:
-                // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
-                    float cos_light_surface = glm::dot(light_sample, hit_record.normal);
-                    if (cos_light_surface > 0) {
-                        glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
-                        glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                        glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
-                        color += light_color;
+                if (light->getType() == LightType::AREA) {
+                    // If the light can be sampled from our position, we check if we hit the light:
+                    // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
+                    if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
+                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
+                        if (cos_light_surface > 0) {
+                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
+                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                            glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
+                            color += light_color;
+                        }
+                    }
+                }
+                else if (light->getType() == LightType::INFINITE_AREA) {
+                    if (light_sample_proba > 0.000001f && !_castRay(direct_lighting_ray, occlusion_hit_record)) {
+                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
+                        if (cos_light_surface > 0) {
+                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
+                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                            glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
+                            color += light_color;
+                        }
                     }
                 }
             }
@@ -144,10 +157,8 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             //path_accumulated_weight /= russian_roulette_weight;
         }
         else {
-            /*
-            //color += path_accumulated_weight * glm::vec3(1);
-            return color;
-            */
+            if (depth > 1)
+                break;
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;
             get_sphere_uv(glm::normalize(w_o.direction), u, v);

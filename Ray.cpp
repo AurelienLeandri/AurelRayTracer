@@ -14,3 +14,7 @@ glm::vec3 Ray::pointAtParameter(float t) const
 {
     return origin + direction * t;
 }
+
+void RayDifferential::scaleDifferentials(float weight)
+{
+}
