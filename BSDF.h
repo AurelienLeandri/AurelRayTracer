@@ -18,8 +18,9 @@ public:
 public:
     glm::vec3 f(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record) const;
     float pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord &hit_record) const;
-    glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord &hit_record, float &pdf) const;
+    glm::vec3 sample_f(glm::vec3& w_i, const glm::vec3 &w_o, const HitRecord &hit_record, float &pdf, BxDF::Type bxdfTypes = BxDF::Type::BSDF_ALL) const;
     bool add(std::shared_ptr<const BxDF> bxdf);
+    int nbMatchingComponents(BxDF::Type type) const;
 
 private:
     std::vector<std::shared_ptr<const BxDF>> _bxdfs;

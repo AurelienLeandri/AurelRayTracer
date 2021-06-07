@@ -9,7 +9,7 @@
 #include <iostream>
 
 TorranceSparrowTransmission::TorranceSparrowTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model)
-	: BxDF(BxDF::BSDF_TRANSMISSION | BxDF::BSDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model)
+	: BxDF(BxDF::Type::BSDF_TRANSMISSION | BxDF::Type::BSDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model)
 {
 }
 

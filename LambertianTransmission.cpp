@@ -1,7 +1,7 @@
 #include "LambertianTransmission.h"
 
 LambertianTransmission::LambertianTransmission(glm::vec3 albedo, float refractionIndex, std::shared_ptr<Texture> albedoTexture)
-	: BxDF(BxDF::BSDF_TRANSMISSION | BxDF::BSDF_DIFFUSE), _albedoValue(albedo), _refractionIndex(refractionIndex), _albedoTexture(albedoTexture)
+	: BxDF(BxDF::Type::BSDF_TRANSMISSION | BxDF::Type::BSDF_DIFFUSE), _albedoValue(albedo), _refractionIndex(refractionIndex), _albedoTexture(albedoTexture)
 {
 }
 

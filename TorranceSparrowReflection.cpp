@@ -14,12 +14,12 @@
 
 
 TorranceSparrowReflection::TorranceSparrowReflection(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, float k)
-	: BxDF(BxDF::BSDF_REFLECTION | BxDF::BSDF_GLOSSY), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _reflectionModel(reflection_model), _k(glm::vec3(k))
+	: BxDF(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_GLOSSY), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _reflectionModel(reflection_model), _k(glm::vec3(k))
 {
 }
 
 TorranceSparrowReflection::TorranceSparrowReflection(const glm::vec3& etaRay, const glm::vec3& etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, const glm::vec3& k)
-	: BxDF(BxDF::BSDF_REFLECTION | BxDF::BSDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model), _k(k)
+	: BxDF(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model), _k(k)
 {
 }
 

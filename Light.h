@@ -5,7 +5,7 @@
 #include <string>
 
 class Transform;
-class HitRecord;
+struct HitRecord;
 class Shape;
 class ImageTexture;
 class Distribution2D;
@@ -31,7 +31,7 @@ public:
     virtual glm::vec3 power() const = 0;
 
     // Returns radiance towards an arbitrary directions. Allows to get radiance for rays that did not hit anything, thus not relying on a HitRecord (for example for InfiniteAreaLights).
-    virtual glm::vec3 radianceTowards(const glm::vec3 &w) const;
+    virtual glm::vec3 radianceInDirection(const glm::vec3 &w) const;
 
 public:
     LightType getType() const;
@@ -52,7 +52,7 @@ public:
     virtual glm::vec3 power() const override;
 
     // Returns the radiance along w coming a point on the light described by the given "pointOnLight" HitRecord.
-    virtual glm::vec3 radianceAlongDirection(const HitRecord& pointOnLight, const glm::vec3& w) const;
+    virtual glm::vec3 radianceFromPoint(const HitRecord& pointOnLight, const glm::vec3& w) const;
 
 private:
     const glm::vec3 _emission = glm::vec3(1);
@@ -70,7 +70,7 @@ public:
     virtual void transform(const Transform& transform) override;
     virtual glm::vec3 sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const override;
     virtual glm::vec3 power() const override;
-    virtual glm::vec3 radianceTowards(const glm::vec3& w) const override;
+    virtual glm::vec3 radianceInDirection(const glm::vec3& w) const override;
 
 
 private:

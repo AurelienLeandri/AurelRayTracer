@@ -33,7 +33,6 @@ public:
 
 private:
     glm::vec3 _getColor(const Ray& r, size_t max_depth = 0) const;
-    bool _castRay(const Ray& ray, HitRecord& hit_record) const;
 
 private:
     float* _imageBuffer = nullptr;
@@ -48,9 +47,6 @@ private:
     const size_t _PORTION_SIZE = (_WIDTH * _HEIGHT) / _NB_THREADS;
 
     std::shared_ptr<Camera> _camera;
-
-    RTCScene _rtcScene = 0;
-    RTCDevice _rtcDevice = 0;
 
     const SceneData* _scene = nullptr;
 

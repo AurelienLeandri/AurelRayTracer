@@ -14,7 +14,7 @@
 #include "HitRecord.h"
 #include "Embree.h"
 #include "Texture.h"
-#include "SceneData.h"
+#include "Scene.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Light.h"
@@ -28,12 +28,6 @@ RayTracer::~RayTracer()
     if (_imageBuffer) {
         delete[] _imageBuffer;
         _imageBuffer = nullptr;
-    }
-    if (_rtcScene) {
-        rtcReleaseScene(_rtcScene);
-    }
-    if (_rtcDevice) {
-        rtcReleaseDevice(_rtcDevice);
     }
 }
 
@@ -84,7 +78,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     //float russian_roulette_weight = 1.f;
         while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
-        if (_castRay(w_o, hit_record)) {
+        if (_scene->castRay(w_o, hit_record)) {
 
             if (depth == 1) {  // Hitting lights on the first ray
                 color += hit_record.emission;
@@ -93,7 +87,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
             // Direct lighting
-            for (const std::shared_ptr<Light> light : _scene->getLights()) {
+            for (std::shared_ptr<const Light> light : _scene->getLights()) {
                 float light_sample_proba = 0;
                 glm::vec3 light_sample(0, 0, 1);
                 glm::vec3 radiance = light->sampleLi(light_sample, hit_record, light_sample_proba);
@@ -103,7 +97,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                 if (light->getType() == LightType::AREA) {
                     // If the light can be sampled from our position, we check if we hit the light:
                     // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                    if (light_sample_proba > 0.000001f && _castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
+                    if (light_sample_proba > 0.000001f && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
                         float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                         if (cos_light_surface > 0) {
                             glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
@@ -112,9 +106,9 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                             color += light_color;
                         }
                     }
-                }
+                }/*
                 else if (light->getType() == LightType::INFINITE_AREA) {
-                    if (light_sample_proba > 0.000001f && !_castRay(direct_lighting_ray, occlusion_hit_record)) {
+                    if (light_sample_proba > 0.000001f && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
                         float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                         if (cos_light_surface > 0) {
                             glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
@@ -124,6 +118,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                         }
                     }
                 }
+                */
             }
 
             // Computing the next step of the path and updating the accumulated weight
@@ -157,8 +152,10 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             //path_accumulated_weight /= russian_roulette_weight;
         }
         else {
+            /*
             if (depth > 1)
                 break;
+            */
             static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
             float u = 0, v = 0;
             get_sphere_uv(glm::normalize(w_o.direction), u, v);
@@ -171,107 +168,6 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
 
     }
     return color;
-}
-
-
-/*
-* Cast a single ray with origin (ox, oy, oz) and direction
-* (dx, dy, dz).
-*/
-bool RayTracer::_castRay(const Ray& ray, HitRecord& hit_record) const
-{
-    /*
-     * The intersect context can be used to set intersection
-     * filters or flags, and it also contains the instance ID stack
-     * used in multi-level instancing.
-     */
-    struct RTCIntersectContext context;
-    rtcInitIntersectContext(&context);
-
-    /*
-     * The ray hit structure holds both the ray and the hit.
-     * The user must initialize it properly -- see API documentation
-     * for rtcIntersect1() for details.
-     */
-    struct RTCRayHit rayhit;
-    rayhit.ray.org_x = ray.origin.x;
-    rayhit.ray.org_y = ray.origin.y;
-    rayhit.ray.org_z = ray.origin.z;
-    rayhit.ray.dir_x = ray.direction.x;
-    rayhit.ray.dir_y = ray.direction.y;
-    rayhit.ray.dir_z = ray.direction.z;
-    rayhit.ray.tnear = 0.01f;
-    rayhit.ray.tfar = std::numeric_limits<float>::infinity();
-    rayhit.ray.mask = -1;
-    rayhit.ray.flags = 0;
-    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-    rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
-
-    /*
-     * There are multiple variants of rtcIntersect. This one
-     * intersects a single ray with the scene.
-     */
-    rtcIntersect1(_rtcScene, &context, &rayhit);
-
-    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID)
-    {
-        hit_record.position = ray.pointAtParameter(rayhit.ray.tfar);
-        hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));;
-        hit_record.tRay = rayhit.ray.tfar;
-
-        std::shared_ptr<Shape> shape = _scene->getShapes().at(rayhit.hit.geomID);
-
-        hit_record.shapeId = rayhit.hit.geomID;
-        
-        if (shape->type == ShapeType::TRIANGLE || shape->type == ShapeType::MESH) {
-            // Interpolation of vertex data
-            static struct alignas (16) interpolated_data {
-                float normals[4] = { 0 };
-                float uvs[4] = { 0 };
-            } interpolation;
-            RTCGeometry geometry = rtcGetGeometry(_rtcScene, rayhit.hit.geomID);
-            rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, &interpolation.normals[0], nullptr, nullptr, 4);
-            rtcInterpolate1(geometry, rayhit.hit.primID, rayhit.hit.u, rayhit.hit.v, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, &interpolation.uvs[0], nullptr, nullptr, 4);
-
-            hit_record.normal = glm::normalize(glm::vec3(interpolation.normals[0], interpolation.normals[1], interpolation.normals[2]));
-
-            hit_record.u = interpolation.uvs[0];
-            hit_record.v = interpolation.uvs[1];
-        }
-        else if (shape->type == ShapeType::SPHERE) {
-            hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));
-            hit_record.u = rayhit.hit.u;
-            hit_record.v = rayhit.hit.v;
-        }
-
-        // Compute shading coordinate system
-        if (glm::dot(hit_record.normal, ray.direction) > 0)
-            hit_record.normal = -hit_record.normal;
-        glm::vec3 a = glm::abs(hit_record.normal.x) > 0.9f ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
-        hit_record.bitangent = glm::normalize(glm::cross(a, hit_record.normal));
-        hit_record.tangent = glm::cross(hit_record.normal, hit_record.bitangent);
-
-        hit_record.shadingCoordinateSystem[0] = glm::vec3(hit_record.tangent.x, hit_record.bitangent.x, hit_record.normal.x);
-        hit_record.shadingCoordinateSystem[1] = glm::vec3(hit_record.tangent.y, hit_record.bitangent.y, hit_record.normal.y);
-        hit_record.shadingCoordinateSystem[2] = glm::vec3(hit_record.tangent.z, hit_record.bitangent.z, hit_record.normal.z);
-
-        hit_record.ray = ray;
-
-        if (unsigned int material_id = shape->materialId) {
-            hit_record.material = _scene->getMaterials().at(material_id).get();
-            hit_record.material->getBSDF(hit_record);
-            hit_record.material->emit(hit_record);
-        }
-        else {  // Default material
-            static MatteMaterial default_material(ConstantTexture::white);
-            hit_record.material = &default_material;
-            default_material.getBSDF(hit_record);
-            default_material.emit(hit_record);
-        }
-
-        return true;
-    }
-    return false;
 }
 
 const float* RayTracer::getImageBuffer() const
@@ -300,24 +196,7 @@ bool RayTracer::start() {
     if (!_scene || !_camera) {
         return false;
     }
-
-    _rtcDevice = rtcNewDevice(nullptr);
-
-    if (!_rtcDevice) {
-        printf("error %d: cannot create device\n", rtcGetDeviceError(nullptr));
-        return 1;
-    }
-
-    rtcSetDeviceErrorFunction(_rtcDevice, errorFunction, nullptr);
-
-    _rtcScene = rtcNewScene(_rtcDevice);
-
-    for (const std::pair<unsigned int, std::shared_ptr<Shape>>& pair : _scene->getShapes()) {
-        pair.second->commitGeometry(_rtcDevice, _rtcScene);
-    }
     
-    rtcCommitScene(_rtcScene);
-
     return true;
 }
 
