@@ -7,6 +7,8 @@
 #include "Film.h"
 #include "Sampler.h"
 #include "Ray.h"
+#include "BSDF.h"
+#include "HitRecord.h"
 
 SamplerIntegrator::SamplerIntegrator(std::shared_ptr<Sampler> sampler, std::shared_ptr<Camera> camera)
 	: _sampler(sampler), _camera(camera)
@@ -74,4 +76,40 @@ void SamplerIntegrator::render(const SceneData& sceneData)
 
 void SamplerIntegrator::preprocess(const SceneData& sceneData, Sampler& sampler)
 {
+}
+
+glm::vec3 SamplerIntegrator::specularReflect(const RayDifferential& ray, const HitRecord& record, const SceneData& scene, Sampler& sampler, int depth) const
+{
+    glm::vec3 wi(0, 0, 1);
+    float pdf = 0;
+    BxDF::Type type(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_SPECULAR);
+
+    glm::vec3 f = record.bsdf.sample_f(wi, -record.ray.direction, record, pdf, type);
+    float dot_wi_normal = glm::abs(glm::dot(wi, record.normal));
+
+    if (pdf > 0 && f != glm::vec3(0) && dot_wi_normal != 0) {
+        RayDifferential rd;
+        // TODO: compute ray differentials after reading the chapter
+        return f * Li(rd, scene, sampler, depth + 1) * dot_wi_normal / pdf;
+    }
+
+    return glm::vec3(0);
+}
+
+glm::vec3 SamplerIntegrator::specularTransmit(const RayDifferential& ray, const HitRecord& record, const SceneData& scene, Sampler& sampler, int depth) const
+{
+    glm::vec3 wi(0, 0, 1);
+    float pdf = 0;
+    BxDF::Type type(BxDF::Type::BSDF_TRANSMISSION | BxDF::Type::BSDF_SPECULAR);
+
+    glm::vec3 f = record.bsdf.sample_f(wi, -record.ray.direction, record, pdf, type);
+    float dot_wi_normal = glm::abs(glm::dot(wi, record.normal));
+
+    if (pdf > 0 && f != glm::vec3(0) && dot_wi_normal != 0) {
+        RayDifferential rd;
+        // TODO: compute ray differentials after reading the chapter
+        return f * Li(rd, scene, sampler, depth + 1) * dot_wi_normal / pdf;
+    }
+
+    return glm::vec3(0);
 }

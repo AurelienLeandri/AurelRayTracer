@@ -29,7 +29,7 @@ glm::vec3 AreaLight::power() const
     return _emission * _area * (float)M_PI;
 }
 
-glm::vec3 AreaLight::radianceAlongDirection(const HitRecord& pointOnLight, const glm::vec3& w) const
+glm::vec3 AreaLight::radianceFromPoint(const HitRecord& pointOnLight, const glm::vec3& w) const
 {
     if (glm::dot(w, pointOnLight.normal) < 0)
         return glm::vec3(0);
@@ -91,7 +91,7 @@ glm::vec3 InfiniteAreaLight::power() const
     return glm::vec3();
 }
 
-glm::vec3 InfiniteAreaLight::radianceTowards(const glm::vec3& w) const
+glm::vec3 InfiniteAreaLight::radianceInDirection(const glm::vec3& w) const
 {
     glm::vec3 local_w = glm::normalize(w);
     static float INV_M_PI = 1 / (float)M_PI;
@@ -108,7 +108,7 @@ Light::Light(LightType type)
 {
 }
 
-glm::vec3 Light::radianceTowards(const glm::vec3& w) const
+glm::vec3 Light::radianceInDirection(const glm::vec3& w) const
 {
     return glm::vec3(0);
 }

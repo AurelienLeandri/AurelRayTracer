@@ -7,7 +7,7 @@
 
 #include "Utils.h"
 
-BxDF::BxDF(int type) : type(type)
+BxDF::BxDF(Type type) : type(type)
 {
 }
 
@@ -32,4 +32,24 @@ glm::vec3 BxDF::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& 
         w_i.z *= -1;
     pdf = this->pdf(w_i, w_o, hit_record);
     return f(w_i, w_o, hit_record);
+}
+
+BxDF::Type::Type(int flags)
+    : flags(flags)
+{
+}
+
+bool BxDF::Type::isType(Type type2) const
+{
+    return (flags & type2.flags) == flags;
+}
+
+bool operator==(const BxDF::Type& lhs, const BxDF::Type& rhs)
+{
+    return lhs.flags == rhs.flags;
+}
+
+bool operator!=(const BxDF::Type& lhs, const BxDF::Type& rhs)
+{
+    return !(rhs == lhs);
 }

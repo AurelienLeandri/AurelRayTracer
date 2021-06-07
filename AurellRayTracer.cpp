@@ -14,7 +14,7 @@
 #include "Application.h"
 #include "RayTracer.h"
 #include "ModelLoader.h"
-#include "SceneData.h"
+#include "Scene.h"
 #include "Triangle.h"
 #include "Mesh.h"
 #include "Texture.h"
@@ -450,7 +450,7 @@ int main()
 
 	SceneData* scene = SceneFactory::createScene();
 
-	std::shared_ptr<Camera> camera =  cornell_box_scene(*scene);
+	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
 	std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr");
 	scene->addLight(environmentLight);
@@ -463,6 +463,7 @@ int main()
     sub_clock = std::clock();
     std::cout << "Started ray tracing:" << std::endl;
 
+	scene->computeAccelerationStructures();
 	ray_tracer.start();
 
     bool finished = false;

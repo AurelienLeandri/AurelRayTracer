@@ -13,7 +13,7 @@ namespace {
 }
 
 FresnelBlend::FresnelBlend(const glm::vec3& fresnel_reflection, const glm::vec3& diffuse_reflection, std::shared_ptr<MicrofacetDistribution> reflection_model)
-	: BxDF(BxDF::BSDF_REFLECTION | BxDF::BSDF_GLOSSY), _fresnelReflection(fresnel_reflection), _diffuseReflection(diffuse_reflection), _reflectionModel(reflection_model)
+	: BxDF(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_GLOSSY), _fresnelReflection(fresnel_reflection), _diffuseReflection(diffuse_reflection), _reflectionModel(reflection_model)
 {
 }
 

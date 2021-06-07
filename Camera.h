@@ -8,6 +8,12 @@ class Film;
 struct CameraSample;
 class RayDifferential;
 
+struct CameraSample {
+	glm::vec2 pFilm;
+	glm::vec2 pLens;
+	float time;
+};
+
 class Camera
 {
 public:

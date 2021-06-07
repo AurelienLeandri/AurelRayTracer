@@ -13,7 +13,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "SceneData.h"
+#include "Scene.h"
 
 namespace {
     std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::vector<std::shared_ptr<Texture>>& textures, const std::string &directory);

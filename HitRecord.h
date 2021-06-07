@@ -6,6 +6,7 @@
 #include "BSDF.h"
 
 class Material;
+class Light;
 
 typedef struct HitRecord
 {
@@ -22,5 +23,6 @@ typedef struct HitRecord
     glm::mat3 shadingCoordinateSystem = glm::mat3(1);
     Ray ray;
     int shapeId = 0;
+    std::shared_ptr<const Light> areaLight = nullptr;
 } HitRecord;
 
