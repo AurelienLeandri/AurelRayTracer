@@ -40,7 +40,7 @@ float BSDF::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit
     return pdf / _bxdfs.size();
 }
 
-glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record, float &pdf, BxDF::Type bxdfTypes) const
+glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record, float &pdf, BxDF::Type &sampled_type, BxDF::Type bxdfTypes) const
 {
     int nbComponents = nbMatchingComponents(bxdfTypes);
     if (!nbComponents) {
@@ -53,15 +53,16 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
         return glm::vec3(0);
 
     int random_index = frand() * nbComponents;
-    int i = 0;
+    int bxdf_index = 0;
     do {
-        while (!_bxdfs[i]->type.isType(bxdfTypes)) {
-            i++;
+        while (!_bxdfs[bxdf_index]->type.isType(bxdfTypes)) {
+            bxdf_index++;
         }
-    } while (random_index-- > 0);
+    } while (--random_index > 0);
 
     glm::vec3 w_i_local(0);
-    glm::vec3 f = _bxdfs[i]->sample_f(w_i_local, w_o_local, hit_record, pdf);
+    glm::vec3 f = _bxdfs[bxdf_index]->sample_f(w_i_local, w_o_local, hit_record, pdf);
+    sampled_type = _bxdfs[bxdf_index]->type;
 
     if (pdf == 0 || f == glm::vec3(0, 0, 0))
         return glm::vec3(0);
@@ -69,7 +70,7 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
     w_i = glm::transpose(hit_record.shadingCoordinateSystem) * w_i_local;
 
     for (int i = 0; i < _bxdfs.size(); ++i) {
-        if (i == random_index) continue;  // pdf already contains the value of the pdf we sampled from, plus its a nice way to get at least a value of 1 for pdf if we sampled using a specular BxDF
+        if (i == bxdf_index) continue;  // pdf already contains the value of the pdf we sampled from, plus its a nice way to get at least a value of 1 for pdf if we sampled using a specular BxDF
         pdf += _bxdfs[i]->pdf(w_i_local, w_o_local, hit_record);
     }
     pdf /= _bxdfs.size();
@@ -77,7 +78,7 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
     if (pdf == 0)
         return glm::vec3(0);
 
-    if (_bxdfs[random_index]->type.isType(BxDF::Type::BSDF_SPECULAR) || _bxdfs.size() == 1)
+    if (_bxdfs[bxdf_index]->type.isType(BxDF::Type::BSDF_SPECULAR) || _bxdfs.size() == 1)
         return f;
 
     bool reflected = w_i_local.z * w_o_local.z > 0;
@@ -90,8 +91,6 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
             f += _bxdfs[i]->f(w_i_local, w_o_local, hit_record);
     }
 
-    if (f.x < 0 || f.y < 0 || f.z < 0 || pdf < 0)
-        int a = 0;
     return f;
 }
 

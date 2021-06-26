@@ -288,19 +288,31 @@ namespace {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
 
+		std::shared_ptr<Dielectric> mirror_material = std::make_shared<Dielectric>(300.f);
+		unsigned int mirror_material_id = scene.addMaterial(mirror_material);
+
+		std::shared_ptr<MatteMaterial> material_white = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.1f, 0.1f, 0.1f)));
+		unsigned int material_white_id = scene.addMaterial(material_white);
+
 		std::shared_ptr<Dielectric> fresnel_material = std::make_shared<Dielectric>(2.56f);
 		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1, 1, 1)));
 		unsigned int matte_material_id = scene.addMaterial(matte_material);
 
-		scene.getShapes()[0]->materialId = matte_material_id;
+		//scene.getShapes()[0]->materialId = matte_material_id;
 
+		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10);
 		std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 100), 10);
 		sphere->materialId = fresnel_material_id;
 		scene.addShape(sphere);
 
-		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10000, 10000, 10000)), ConstantTexture::black);
+		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10);
+		std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3(0, 25, 100), 10);
+		sphere2->materialId = fresnel_material_id;
+		scene.addShape(sphere2);
+
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1.5, 1.5, 1.5)), ConstantTexture::black);
 		unsigned int light_material_id = scene.addMaterial(light_material);
 
 		TransformParameters light_transform;
@@ -327,6 +339,7 @@ namespace {
 		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+		//glm::vec3 look_from = glm::vec3(50, 0, 30);
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
 		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
@@ -453,6 +466,8 @@ int main()
 	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
 	std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr");
+	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_sun.hdr");
+	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_white.hdr");
 	scene->addLight(environmentLight);
 
 	ray_tracer.setCamera(camera);
