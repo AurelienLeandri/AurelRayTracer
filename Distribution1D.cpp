@@ -8,7 +8,7 @@ Distribution1D::Distribution1D(const float* values, size_t n)
 	float value_span = 1.f / _n;
 	_cdf[0] = 0;
 	for (size_t i = 0; i < _n; ++i) {
-		_cdf[i + 1] = _cdf[i] + _values[i] * value_span;
+		_cdf[i + 1] = _cdf[i] + _values[i] * value_span;  // _values[i] * value_span gives the integral over a piece of the distribution.
 	}
 
 	// "values" is not in pdf form, so we need to divide each term of the cdf by the integral of values.
@@ -46,5 +46,5 @@ float Distribution1D::sample(float e, int& index) const
 		du /= _cdf[i + 1] - _cdf[i];
 	*/
 	index = i;
-	return _values[i] / (integralValues * _n);
+	return _values[i] / (integralValues);
 }

@@ -64,26 +64,37 @@ void InfiniteAreaLight::transform(const Transform& transform)
 
 glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const
 {
-    pdf = 0;
-    int iu, iv;
-    pdf = _distribution->sample(frand(), frand(), iu, iv);
-    if (pdf == 0)
-        return glm::vec3(0);
+    float sinTheta = 0;
+    float u = 0, v = 0;
 
-    float u = (float)iu / _radianceMap->getWidth();
-    float v = (float)iv / _radianceMap->getHeight();
+    //do {
+        pdf = 0;
+        int i, j;
+        pdf = _distribution->sample(frand(), frand(), i, j);
 
-    float theta = v * (float)M_PI, phi = u * 2 * (float)M_PI;
-    float cosTheta = std::cos(theta), sinTheta = std::sin(theta);
-    float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
-    wi = glm::vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
+        if (pdf == 0)
+            return glm::vec3(0);
+
+        u = (float)j / _radianceMap->getWidth();
+        v = (float)i / _radianceMap->getHeight();
+        glm::vec3 color = _radianceMap->getColor(u, v);
+
+        float theta = v * (float)M_PI, phi = u * 2 * (float)M_PI;
+        float cosTheta = std::cos(theta);
+        sinTheta = std::sin(theta);
+        float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
+        wi = glm::vec3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
+    //} while (glm::dot(wi, hit_record.normal) < 0);
+
+    wi = glm::normalize(wi);
 
     if (sinTheta == 0)
         return glm::vec3(0);
 
-    pdf = pdf / (2 * (float)M_PI * (float)M_PI * sinTheta);
+    pdf /= (2 * (float)M_PI * (float)M_PI * sinTheta);
 
-    return _radianceMap->getColor(u, v);
+    //get_sphere_uv(glm::normalize(wi), u, v);
+    return _radianceMap->getColor(u, 1 - v);
 }
 
 glm::vec3 InfiniteAreaLight::power() const

@@ -41,7 +41,7 @@ BxDF::Type::Type(int flags)
 
 bool BxDF::Type::isType(Type type2) const
 {
-    return (flags & type2.flags) == flags;
+    return (flags | type2.flags);
 }
 
 bool operator==(const BxDF::Type& lhs, const BxDF::Type& rhs)

@@ -54,7 +54,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 10));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 20));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -75,18 +75,21 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
-    //float russian_roulette_weight = 1.f;
+    BxDF::Type last_bxdf_used = BxDF::Type::BSDF_GLOSSY;
         while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
         if (_scene->castRay(w_o, hit_record)) {
 
-            if (depth == 1) {  // Hitting lights on the first ray
+            // We add the emission at intersection in two exceptional cases:
+            // 1 - Rays starting from the camera that hit a light source immediately
+            // 2 - If the BxDF at the last surface intersection was specular, direct lighting contribution was not taken into account (f is always 0)
+            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BSDF_SPECULAR)) {
                 color += hit_record.emission;
             }
 
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
-            // Direct lighting
+            // Add contribution of direct lighting to the path
             for (std::shared_ptr<const Light> light : _scene->getLights()) {
                 float light_sample_proba = 0;
                 glm::vec3 light_sample(0, 0, 1);
@@ -97,73 +100,62 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
                 if (light->getType() == LightType::AREA) {
                     // If the light can be sampled from our position, we check if we hit the light:
                     // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                    if (light_sample_proba > 0.000001f && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
+                    if (light_sample_proba > 0 && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
                         float cos_light_surface = glm::dot(light_sample, hit_record.normal);
                         if (cos_light_surface > 0) {
                             glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
                             glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                            glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
-                            color += light_color;
-                        }
-                    }
-                }/*
-                else if (light->getType() == LightType::INFINITE_AREA) {
-                    if (light_sample_proba > 0.000001f && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
-                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
-                        if (cos_light_surface > 0) {
-                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
-                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                            glm::vec3 light_color = radiance * path_accumulated_weight * light_scattering / light_sample_proba;
+                            glm::vec3 light_color = radiance * ((path_accumulated_weight * light_scattering) / light_sample_proba);
                             color += light_color;
                         }
                     }
                 }
-                */
+                else if (light->getType() == LightType::INFINITE_AREA) {
+                    if (light_sample_proba > 0 && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
+                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
+                        if (cos_light_surface > 0) {
+                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
+                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                            glm::vec3 light_color = radiance * ((path_accumulated_weight * light_scattering) / light_sample_proba);
+                            color += light_color;
+                        }
+                    }
+                }
             }
 
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
             float sample_proba = 0;
-            glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba);  // Get a sample vector, gets the proba to pick it
+            glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba, last_bxdf_used);  // Get a sample vector, gets the proba to pick it
 
-            if (sample_proba < 0.000001f || (f == glm::vec3(0)))
+            if (sample_proba == 0 || f == glm::vec3(0))
                 break;
 
             w_o = Ray(hit_record.position, w_i);
-
             float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
-            if (glm::abs(sample_proba - light_attenuation_wrt_angle) < 1e-6f)
-                continue;
+            path_accumulated_weight *= (light_attenuation_wrt_angle * f) / sample_proba;
 
-
-            /*
-            if (depth >= 5) {
-                russian_roulette_weight = glm::max(0.f, 1.f - glm::min(0.0625f * depth, 1.f));
-                if (frand() > russian_roulette_weight) {
+            // Russian roulette
+            if (depth >= 4) {
+                float russian_roulette_weight = glm::max(0.05f, 1 - (0.3f * path_accumulated_weight.r + 0.59f * path_accumulated_weight.g + 0.11f * path_accumulated_weight.b));
+                if (frand() < russian_roulette_weight) {
                     break;
                 }
+                path_accumulated_weight /= 1 - russian_roulette_weight;
             }
-            */
-
-            glm::vec3 scattering = light_attenuation_wrt_angle * f;
-
-            glm::vec3 previous_weight = path_accumulated_weight;
-            path_accumulated_weight *= scattering / sample_proba;
-            //path_accumulated_weight /= russian_roulette_weight;
         }
         else {
-            /*
-            if (depth > 1)
-                break;
-            */
-            static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
-            float u = 0, v = 0;
-            get_sphere_uv(glm::normalize(w_o.direction), u, v);
-            HitRecord r;
-            r.u = u;
-            r.v = v;
-            color += path_accumulated_weight * environment_emission_texture->getColor(r);
-            break;  // The path is over. The ray didn't hit anything
+            // Same conditions as earlier to add the environment light contribution.
+            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BSDF_SPECULAR)) {
+                static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr", ImageTextureDataType::FLOAT, ImageTextureLayoutType::RGB);
+                float u = 0, v = 0;
+                get_sphere_uv(glm::normalize(w_o.direction), u, v);
+                HitRecord r;
+                r.u = u;
+                r.v = v;
+                color += path_accumulated_weight * environment_emission_texture->getColor(r);
+            }
+            break;
         }
 
     }
