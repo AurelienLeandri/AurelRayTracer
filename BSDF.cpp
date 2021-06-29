@@ -22,7 +22,7 @@ glm::vec3 BSDF::f(const glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord 
     bool reflected = w_o_local.z * w_i_local.z > 0;  // Both w_i and w_o are on the same side of the surface -> Reflection. If not -> Transmission.
     glm::vec3 f(0, 0, 0);
     for (int i = 0; i < _bxdfs.size(); ++i) {
-        if ((reflected && (_bxdfs[i]->type.isType(BxDF::Type::BSDF_REFLECTION))) || (!reflected && (_bxdfs[i]->type.isType(BxDF::Type::BSDF_TRANSMISSION)))) {
+        if ((reflected && (_bxdfs[i]->type.isType(BxDF::Type::BXDF_REFLECTION))) || (!reflected && (_bxdfs[i]->type.isType(BxDF::Type::BXDF_TRANSMISSION)))) {
             f += _bxdfs[i]->f(w_i_local, w_o_local, hit_record);
         }
     }
@@ -78,7 +78,7 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
     if (pdf == 0)
         return glm::vec3(0);
 
-    if (_bxdfs[bxdf_index]->type.isType(BxDF::Type::BSDF_SPECULAR) || _bxdfs.size() == 1)
+    if (_bxdfs[bxdf_index]->type.isType(BxDF::Type::BXDF_SPECULAR) || _bxdfs.size() == 1)
         return f;
 
     bool reflected = w_i_local.z * w_o_local.z > 0;
@@ -87,7 +87,7 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
 
     f = glm::vec3(0);
     for (int i = 0; i < _bxdfs.size(); ++i) {
-        if ((reflected && _bxdfs[i]->type.isType(BxDF::Type::BSDF_REFLECTION)) || (!reflected && _bxdfs[i]->type.isType(BxDF::Type::BSDF_TRANSMISSION)))
+        if ((reflected && _bxdfs[i]->type.isType(BxDF::Type::BXDF_REFLECTION)) || (!reflected && _bxdfs[i]->type.isType(BxDF::Type::BXDF_TRANSMISSION)))
             f += _bxdfs[i]->f(w_i_local, w_o_local, hit_record);
     }
 

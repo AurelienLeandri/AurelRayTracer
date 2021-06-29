@@ -82,7 +82,7 @@ glm::vec3 SamplerIntegrator::specularReflect(const RayDifferential& ray, const H
 {
     glm::vec3 wi(0, 0, 1);
     float pdf = 0;
-    BxDF::Type type(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_SPECULAR);
+    BxDF::Type type(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_SPECULAR);
 
     glm::vec3 f = record.bsdf.sample_f(wi, -record.ray.direction, record, pdf, type);
     float dot_wi_normal = glm::abs(glm::dot(wi, record.normal));
@@ -100,7 +100,7 @@ glm::vec3 SamplerIntegrator::specularTransmit(const RayDifferential& ray, const 
 {
     glm::vec3 wi(0, 0, 1);
     float pdf = 0;
-    BxDF::Type type(BxDF::Type::BSDF_TRANSMISSION | BxDF::Type::BSDF_SPECULAR);
+    BxDF::Type type(BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_SPECULAR);
 
     glm::vec3 f = record.bsdf.sample_f(wi, -record.ray.direction, record, pdf, type);
     float dot_wi_normal = glm::abs(glm::dot(wi, record.normal));

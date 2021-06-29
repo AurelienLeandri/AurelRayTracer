@@ -9,7 +9,7 @@
 #include "Utils.h"
 
 OrenNayarReflection::OrenNayarReflection(const glm::vec3& albedo, float sigma)
-	: BxDF(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_DIFFUSE), _albedo(albedo)
+	: BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_DIFFUSE), _albedo(albedo)
 {
 	float sigma2 = sigma * sigma;
 	_A = 1 - (sigma2 / (2 * (sigma2 + 0.33f)));

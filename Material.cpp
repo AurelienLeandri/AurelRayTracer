@@ -10,28 +10,57 @@
 #include "TorranceSparrowTransmission.h"
 #include "FresnelBlend.h"
 
-
-Material::~Material() {}
-
-MatteMaterial::MatteMaterial(std::shared_ptr<Texture> albedo) : _albedo(albedo) {
+void Material::emit(HitRecord& hitRecord) const
+{
+    hitRecord.emission = glm::vec3(0);
 }
 
-MatteMaterial::~MatteMaterial()
+PerfectDiffuseMaterial::PerfectDiffuseMaterial(std::shared_ptr<Texture> albedo)
+    : _albedo(albedo)
+{
+}
+
+void PerfectDiffuseMaterial::getBSDF(HitRecord& hitRecord) const
+{
+    hitRecord.bsdf = BSDF();
+    hitRecord.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hitRecord)));
+}
+
+PerfectSpecularMaterial::PerfectSpecularMaterial(std::shared_ptr<Texture> albedo)
+    : _albedo(albedo)
+{
+}
+
+void PerfectSpecularMaterial::getBSDF(HitRecord& hitRecord) const
+{
+    hitRecord.bsdf = BSDF();
+    hitRecord.bsdf.add(std::make_shared<TorranceSparrowReflection>(hitRecord.ray.eta, 0, _albedo->getColor(hitRecord), std::make_shared<TrowbridgeReitz>(0), 0));
+}
+
+PerfectTransparentMaterial::PerfectTransparentMaterial(std::shared_ptr<Texture> albedo)
+    : _albedo(albedo)
+{
+}
+
+void PerfectTransparentMaterial::getBSDF(HitRecord& hitRecord) const
+{
+    hitRecord.bsdf = BSDF();
+    // TODO: code labertian transmission BTDF
+    //hitRecord.bsdf.add(std::make_shared<Specular>(hitRecord.ray.eta, _eta, _albedo);
+}
+
+MatteMaterial::MatteMaterial(std::shared_ptr<Texture> albedo, float sigma)
+    : _albedo(albedo), _sigma(sigma)
 {
 }
 
 void MatteMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    //hit_record.bsdf.add(std::make_shared<OrenNayarReflection>(_albedo->getColor(hit_record), (float)(3.1415) / 2));
-    hit_record.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hit_record)));
+    hit_record.bsdf.add(std::make_shared<OrenNayarReflection>(_albedo->getColor(hit_record), _sigma));
 }
 
 EmissiveMaterial::EmissiveMaterial(std::shared_ptr<Texture> emission, std::shared_ptr<Texture> albedo) : _emission(emission), _albedo(albedo) {
-}
-
-EmissiveMaterial::~EmissiveMaterial()
-{
 }
 
 void EmissiveMaterial::getBSDF(HitRecord& hit_record) const
@@ -45,15 +74,32 @@ void EmissiveMaterial::emit(HitRecord& hit_record) const
     hit_record.emission = _emission->getColor(hit_record);
 }
 
-void Material::emit(HitRecord& hitRecord) const
+DielectricMaterial::DielectricMaterial(float eta, std::shared_ptr<Texture> albedo, float roughness, float k)
+    : _eta(eta), _roughness(roughness), _k(k), _albedo(albedo), _alpha(MicrofacetDistribution::roughnessToAlpha(_roughness))
 {
 }
 
-Dielectric::Dielectric(float eta, std::shared_ptr<Texture> albedo) : _eta(eta), _albedo(albedo)
+void DielectricMaterial::getBSDF(HitRecord& hit_record) const
+{
+    hit_record.bsdf = BSDF();
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha), _k));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha)));
+}
+
+GlossyMaterial::GlossyMaterial(float eta, std::shared_ptr<Texture> albedo, float roughness)
+    : _eta(eta), _roughness(roughness), _albedo(albedo), _alpha(MicrofacetDistribution::roughnessToAlpha(_roughness))
 {
 }
 
-void Dielectric::getBSDF(HitRecord& hit_record) const
+void GlossyMaterial::getBSDF(HitRecord& hit_record) const
+{
+    hit_record.bsdf = BSDF();
+    hit_record.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hit_record)));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, glm::vec3(1.f), std::make_shared<TrowbridgeReitz>(_alpha)));
+}
+
+/*
+void DielectricMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
     //hit_record.bsdf.add(std::make_shared<FresnelBlend>(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.5f, 0.3f, 0.5f), std::make_shared<TrowbridgeReitz>(MicrofacetDistribution::roughnessToAlpha(0.1f))));
@@ -68,4 +114,6 @@ void Dielectric::getBSDF(HitRecord& hit_record) const
     //hit_record.bsdf.add(std::make_shared<LambertianReflection>(glm::vec3(0.9f, 0.4f, 0.8f)));
     //hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, 1.5f, glm::vec3(1.f), std::make_shared<TrowbridgeReitz>(0.1f)));
 }
+*/
+
 

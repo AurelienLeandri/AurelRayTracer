@@ -6,7 +6,7 @@
 #include <iostream>
 
 float fresnelDielectric(float cos_w_normal, float eta_i, float eta_t) {
-	if (eta_t == 0)  // Special case for mirror TODO: remove once mirrors are handled physically correct
+	if (eta_t == 0)  // Special case for mirror
 		return 1;
 
 	float cos_i = glm::clamp(cos_w_normal, -1.f, 1.f);
@@ -57,7 +57,7 @@ glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm
 }
 
 SpecularTransmission::SpecularTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BSDF_SPECULAR | BxDF::Type::BSDF_TRANSMISSION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
 {
 }
 
@@ -93,11 +93,11 @@ glm::vec3 SpecularTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, c
 }
 
 SpecularReflection::SpecularReflection(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BSDF_SPECULAR | BxDF::Type::BSDF_REFLECTION), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _fromLight(fromLight), _k(glm::vec3(k))
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _fromLight(fromLight), _k(glm::vec3(k))
 {
 }
 SpecularReflection::SpecularReflection(const glm::vec3& etaRay, const glm::vec3& etaInterface, const glm::vec3& albedo, const glm::vec3& k, bool fromLight)
-	: BxDF(BxDF::Type::BSDF_SPECULAR | BxDF::Type::BSDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight), _k(k)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight), _k(k)
 {
 }
 
@@ -124,7 +124,7 @@ glm::vec3 SpecularReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, con
 }
 
 Specular::Specular(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BSDF_SPECULAR | BxDF::Type::BSDF_TRANSMISSION | BxDF::Type::BSDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
 {
 }
 

@@ -23,6 +23,11 @@
 
 static float max_green = 0;
 
+RayTracer::RayTracer(const Parameters& parameters)
+    : _parameters(parameters), _portionSize((_parameters.width * _parameters.height) / _parameters.nbThreads)
+{
+}
+
 RayTracer::~RayTracer()
 {
     if (_imageBuffer) {
@@ -33,8 +38,13 @@ RayTracer::~RayTracer()
 
 int RayTracer::init()
 {
-    _imageBuffer = new float[_WIDTH * _HEIGHT * _NB_CHANNELS];
-    for (int i = 0; i < _WIDTH * _HEIGHT * _NB_CHANNELS; ++i)
+    if (_imageBuffer) {
+        delete[] _imageBuffer;
+        _imageBuffer = nullptr;
+    }
+
+    _imageBuffer = new float[_parameters.width * _parameters.height * _parameters.nbChannels];
+    for (int i = 0; i < _parameters.width * _parameters.height * _parameters.nbChannels; ++i)
         _imageBuffer[i] = 1.f;
 
     return 0;
@@ -49,10 +59,10 @@ bool RayTracer::iterate() {
     float color_factor = (1.f / _currentSample);
 
 #pragma omp parallel for num_threads(NB_THREADS)
-    for (unsigned int portion = 0; portion < _NB_THREADS; portion++) {
-        for (size_t i = portion * _PORTION_SIZE; i < (portion + 1) * _PORTION_SIZE; i++) {
-            glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _WIDTH) / _WIDTH), (1.f - (static_cast<float>(i / _WIDTH) / _HEIGHT)), 0.f);  // y pointing upward
-            glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _WIDTH, frand() / _HEIGHT, 0.f);
+    for (unsigned int portion = 0; portion < _parameters.nbThreads; portion++) {
+        for (size_t i = portion * _portionSize; i < (portion + 1) * _portionSize; i++) {
+            glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
+            glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
             glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 20));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
@@ -66,7 +76,7 @@ bool RayTracer::iterate() {
     std::cout << " took " << (double(std::clock()) - start) / (double)CLOCKS_PER_SEC << " seconds." << std::endl;
 
     ++_currentSample;
-    return _currentSample > _NB_SAMPLES;
+    return _currentSample > _parameters.nbSamples;
 }
 
 
@@ -75,7 +85,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
-    BxDF::Type last_bxdf_used = BxDF::Type::BSDF_GLOSSY;
+    BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
         while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
         if (_scene->castRay(w_o, hit_record)) {
@@ -83,7 +93,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             // We add the emission at intersection in two exceptional cases:
             // 1 - Rays starting from the camera that hit a light source immediately
             // 2 - If the BxDF at the last surface intersection was specular, direct lighting contribution was not taken into account (f is always 0)
-            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BSDF_SPECULAR)) {
+            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BXDF_SPECULAR)) {
                 color += hit_record.emission;
             }
 
@@ -146,14 +156,11 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
         }
         else {
             // Same conditions as earlier to add the environment light contribution.
-            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BSDF_SPECULAR)) {
-                static std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr", ImageTextureDataType::FLOAT, ImageTextureLayoutType::RGB);
-                float u = 0, v = 0;
-                get_sphere_uv(glm::normalize(w_o.direction), u, v);
-                HitRecord r;
-                r.u = u;
-                r.v = v;
-                color += path_accumulated_weight * environment_emission_texture->getColor(r);
+            if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BXDF_SPECULAR)) {
+                const InfiniteAreaLight* environmentLight = _scene->getEnvironmentLight();
+                if (environmentLight) {
+                    color += path_accumulated_weight * environmentLight->radianceInDirection(w_o.direction);
+                }
             }
             break;
         }

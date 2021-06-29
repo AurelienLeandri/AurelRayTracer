@@ -18,8 +18,18 @@ class SceneData;
 class Light;
 
 class RayTracer {
+
 public:
-    RayTracer() = default;
+    struct Parameters {
+        size_t width = Application::WIDTH;
+        size_t height = Application::HEIGHT;
+        size_t nbChannels = Application::NB_CHANNELS;
+        size_t nbSamples = 2048;
+        int nbThreads = 32;
+    };
+
+public:
+    RayTracer(const Parameters& parameters = {});
     ~RayTracer();
 
 public:
@@ -37,19 +47,13 @@ private:
 private:
     float* _imageBuffer = nullptr;
 
-    const size_t _WIDTH = Application::WIDTH;
-    const size_t _HEIGHT = Application::HEIGHT;
-    const size_t _NB_CHANNELS = Application::NB_CHANNELS;
-
-    const size_t _NB_SAMPLES = 1024;
-    const float _INV_NB_SAMPLES = 1.f / _NB_SAMPLES;
-    const size_t _NB_THREADS = omp_get_max_threads();
-    const size_t _PORTION_SIZE = (_WIDTH * _HEIGHT) / _NB_THREADS;
-
     std::shared_ptr<Camera> _camera;
 
     const SceneData* _scene = nullptr;
 
+    const Parameters _parameters;
+
     unsigned int _currentSample = 1;
+    const size_t _portionSize;
 };
 
