@@ -13,13 +13,14 @@ public:
 
     public:
         enum Flags {
-            BSDF_REFLECTION = 1 << 0,
-            BSDF_TRANSMISSION = 1 << 1,
-            BSDF_DIFFUSE = 1 << 2,
-            BSDF_GLOSSY = 1 << 3,
-            BSDF_SPECULAR = 1 << 4,
-            BSDF_ALL = BSDF_DIFFUSE | BSDF_GLOSSY | BSDF_SPECULAR |
-            BSDF_REFLECTION | BSDF_TRANSMISSION,
+            BXDF_NONE = 0,
+            BXDF_REFLECTION = 1 << 0,
+            BXDF_TRANSMISSION = 1 << 1,
+            BXDF_DIFFUSE = 1 << 2,
+            BXDF_GLOSSY = 1 << 3,
+            BXDF_SPECULAR = 1 << 4,
+            BXDF_ALL = BXDF_DIFFUSE | BXDF_GLOSSY | BXDF_SPECULAR |
+            BXDF_REFLECTION | BXDF_TRANSMISSION,
         };
 
     public:

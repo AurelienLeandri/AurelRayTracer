@@ -8,7 +8,7 @@
 #include "Texture.h"
 
 LambertianReflection::LambertianReflection(const glm::vec3 &albedo) :
-    BxDF(BxDF::Type::BSDF_REFLECTION | BxDF::Type::BSDF_DIFFUSE),
+    BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_DIFFUSE),
     _albedo(albedo)
 {
 }

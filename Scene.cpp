@@ -5,8 +5,10 @@
 #include "Ray.h"
 #include "HitRecord.h"
 #include "Material.h"
+#include "Light.h"
+#include "Distribution2D.h"
 
-std::vector<SceneData> SceneFactory::_scenes;
+std::vector<std::unique_ptr<SceneData>> SceneFactory::_scenes;
 
 namespace { // embree
 
@@ -21,9 +23,11 @@ SceneData::~SceneData()
 {
     if (_rtcScene) {
         rtcReleaseScene(_rtcScene);
+        _rtcScene = 0;
     }
     if (_rtcDevice) {
         rtcReleaseDevice(_rtcDevice);
+        _rtcDevice = 0;
     }
 }
 
@@ -183,6 +187,11 @@ std::vector<std::shared_ptr<const Light>>& SceneData::getLights()
 	return _lights;
 }
 
+const InfiniteAreaLight* SceneData::getEnvironmentLight() const
+{
+    return _environmentLight;
+}
+
 unsigned int SceneData::addShape(std::shared_ptr<Shape> shape)
 {
 	_geometries[_geometries.size()] = shape;
@@ -191,6 +200,9 @@ unsigned int SceneData::addShape(std::shared_ptr<Shape> shape)
 
 unsigned int SceneData::addLight(std::shared_ptr<Light> light, std::shared_ptr<Shape> lightShape)
 {
+    if (light->getType() == LightType::INFINITE_AREA) {
+        _environmentLight = static_cast<InfiniteAreaLight*>(light.get());
+    }
 	_lights.push_back(light);
 	if (lightShape) {
         int shapeId = _geometries.size();
@@ -209,6 +221,6 @@ unsigned int SceneData::addMaterial(std::shared_ptr<Material> material)
 
 SceneData *SceneFactory::createScene()
 {
-	_scenes.push_back(SceneData());
-	return &_scenes.back();
+	_scenes.push_back(std::make_unique<SceneData>());
+	return _scenes.back().get();
 }
