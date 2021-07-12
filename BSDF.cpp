@@ -40,7 +40,7 @@ float BSDF::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit
     return pdf / _bxdfs.size();
 }
 
-glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record, float &pdf, BxDF::Type &sampled_type, BxDF::Type bxdfTypes) const
+glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord& hit_record, float &pdf, BxDF::Type &sampled_type, const BxDF::Type& bxdfTypes) const
 {
     int nbComponents = nbMatchingComponents(bxdfTypes);
     if (!nbComponents) {
