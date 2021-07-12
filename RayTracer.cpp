@@ -64,7 +64,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 20));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 1));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -79,6 +79,12 @@ bool RayTracer::iterate() {
     return _currentSample > _parameters.nbSamples;
 }
 
+// NOTE: taken from pbr
+float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
+    float f = nf * fPdf, g = ng * gPdf;
+    return (f * f) / (f * f + g * g);
+}
+
 
 glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     size_t depth = 0;
@@ -86,7 +92,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
     BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
-        while (!max_depth || depth++ < max_depth) {
+    while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
         if (_scene->castRay(w_o, hit_record)) {
 
@@ -99,39 +105,58 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
 
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
-            // Add contribution of direct lighting to the path
-            for (std::shared_ptr<const Light> light : _scene->getLights()) {
-                float light_sample_proba = 0;
-                glm::vec3 light_sample(0, 0, 1);
-                glm::vec3 radiance = light->sampleLi(light_sample, hit_record, light_sample_proba);
-                Ray direct_lighting_ray(hit_record.position, light_sample);
-                light_sample = glm::normalize(light_sample);
-                HitRecord occlusion_hit_record;
-                if (light->getType() == LightType::AREA) {
-                    // If the light can be sampled from our position, we check if we hit the light:
-                    // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-                    if (light_sample_proba > 0 && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
-                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
-                        if (cos_light_surface > 0) {
-                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
-                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                            glm::vec3 light_color = radiance * ((path_accumulated_weight * light_scattering) / light_sample_proba);
-                            color += light_color;
-                        }
-                    }
-                }
-                else if (light->getType() == LightType::INFINITE_AREA) {
-                    if (light_sample_proba > 0 && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
-                        float cos_light_surface = glm::dot(light_sample, hit_record.normal);
-                        if (cos_light_surface > 0) {
-                            glm::vec3 light_f = hit_record.bsdf.f(light_sample, w_o_calculations, hit_record);
-                            glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
-                            glm::vec3 light_color = radiance * ((path_accumulated_weight * light_scattering) / light_sample_proba);
-                            color += light_color;
-                        }
+            // Add contribution of direct lighting to the path:
+            // Light sampling using light distribution
+            const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
+            int nbLights = sceneLights.size();
+            std::shared_ptr<const Light> light = sceneLights[int(frand() * nbLights)];
+            float pdfDirectLighting = 0;
+            glm::vec3 light_sample_dl(0, 0, 1);
+            glm::vec3 radiance = light->sampleLi(light_sample_dl, hit_record, pdfDirectLighting);
+            Ray direct_lighting_ray(hit_record.position, light_sample_dl);
+            light_sample_dl = glm::normalize(light_sample_dl);
+            HitRecord occlusion_hit_record;
+            glm::vec3 light_color(0);
+            if (light->getType() == LightType::AREA) {
+                // If the light can be sampled from our position, we check if we hit the light:
+                // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
+                if (pdfDirectLighting > 0 && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
+                    float cos_light_surface = glm::dot(light_sample_dl, hit_record.normal);
+                    if (cos_light_surface > 0) {
+                        glm::vec3 light_f = hit_record.bsdf.f(light_sample_dl, w_o_calculations, hit_record);
+                        glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                        light_color = radiance * ((path_accumulated_weight * light_scattering) / pdfDirectLighting) * float(nbLights);
                     }
                 }
             }
+            else if (light->getType() == LightType::INFINITE_AREA) {
+                if (pdfDirectLighting > 0 && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
+                    float cos_light_surface = glm::dot(light_sample_dl, hit_record.normal);
+                    if (cos_light_surface > 0) {
+                        glm::vec3 light_f = hit_record.bsdf.f(light_sample_dl, w_o_calculations, hit_record);
+                        glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
+                        light_color = radiance * ((path_accumulated_weight * light_scattering) / pdfDirectLighting) * float(nbLights);
+                    }
+                }
+            }
+
+            // Light sampling using BSDF
+            glm::vec3 bsdf_color(0);
+            glm::vec3 light_sample_bsdf(0, 0, 1);
+            float pdfBSDF = 0;
+            glm::vec3 bsdf_scattering = hit_record.bsdf.sample_f(light_sample_bsdf, w_o_calculations, hit_record, pdfBSDF, last_bxdf_used);  // Get a sample vector, gets the proba to pick it
+            light_sample_bsdf = glm::normalize(light_sample_bsdf);
+            Ray bsdf_light_sampling_ray(hit_record.position, light_sample_bsdf);
+            HitRecord bsdf_sample_hit_record;
+            if (pdfBSDF > 0 && _scene->castRay(bsdf_light_sampling_ray, bsdf_sample_hit_record)) {
+                bsdf_color = bsdf_sample_hit_record.emission;
+            }
+            else {
+                bsdf_color = _scene->getEnvironmentLight()->radianceInDirection(light_sample_bsdf);
+            }
+            bsdf_color *= path_accumulated_weight * (glm::abs(glm::dot(hit_record.normal, light_sample_bsdf)) * bsdf_scattering) / pdfBSDF;
+
+            color += Power2Heuristic(1, pdfDirectLighting, 1, pdfBSDF) * light_color + Power2Heuristic(1, pdfBSDF, 1, pdfDirectLighting) * bsdf_color;
 
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
@@ -146,7 +171,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             path_accumulated_weight *= (light_attenuation_wrt_angle * f) / sample_proba;
 
             // Russian roulette
-            if (depth >= 4) {
+            if (depth >= 21) {  // 4
                 float russian_roulette_weight = glm::max(0.05f, 1 - (0.3f * path_accumulated_weight.r + 0.59f * path_accumulated_weight.g + 0.11f * path_accumulated_weight.b));
                 if (frand() < russian_roulette_weight) {
                     break;
