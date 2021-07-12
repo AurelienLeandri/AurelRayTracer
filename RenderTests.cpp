@@ -29,19 +29,19 @@ namespace {
 
 int main() {
 	std::vector<int> scenes = {
-		//0,
+		0,
 		1,
 		2,
-		//3,
+		3,
 		4,
 	};
 
 	std::vector<int> nbSamples = {
-		64,
-		64,
-		64,
-		64,
-		64
+		256,
+		256,
+		256,
+		256,
+		256
 	};
 
 	std::vector<std::string> sceneNames = {
