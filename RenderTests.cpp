@@ -29,11 +29,11 @@ namespace {
 
 int main() {
 	std::vector<int> scenes = {
-		0,
-		/*1,
+		//0,
+		1,
 		2,
-		3,
-		4,*/
+		//3,
+		4,
 	};
 
 	std::vector<int> nbSamples = {
@@ -139,6 +139,8 @@ int main() {
 
 		const float *image_buffer = ray_tracer.getImageBuffer();
 
+		bool clampColors = true;
+
 		std::ofstream os;
 		os.open("RenderTests/" + sceneNames[i] + ".ppm");
 		os << "P3" << std::endl;
@@ -149,9 +151,16 @@ int main() {
 				float r = image_buffer[i * Application::WIDTH * 3 + j] * 255;
 				float g = image_buffer[i * Application::WIDTH * 3 + j + 1] * 255;
 				float b = image_buffer[i * Application::WIDTH * 3 + j + 2] * 255;
-				os << int(r) << " ";
-				os << int(g) << " ";
-				os << int(b) << " ";
+				if (clampColors) {
+					os << int(glm::min(255.f, r)) << " ";
+					os << int(glm::min(255.f, g)) << " ";
+					os << int(glm::min(255.f, b)) << " ";
+				}
+				else {
+					os << int(r) << " ";
+					os << int(g) << " ";
+					os << int(b) << " ";
+				}
 			}
 			os << std::endl;
 		}

@@ -82,7 +82,7 @@ DielectricMaterial::DielectricMaterial(float eta, std::shared_ptr<Texture> albed
 void DielectricMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha), _k));
+    //hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha), _k));
     hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha)));
 }
 
