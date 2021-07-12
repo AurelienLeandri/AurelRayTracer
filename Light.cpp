@@ -60,6 +60,7 @@ InfiniteAreaLight::InfiniteAreaLight(const std::string& texturePath)
 
 void InfiniteAreaLight::transform(const Transform& transform)
 {
+    _worldTransform = transform;
 }
 
 glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const
@@ -90,7 +91,7 @@ glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record
 
     pdf /= (2 * (float)M_PI * (float)M_PI * sinTheta);
 
-    return _radianceMap->getColor(u, 1 - v);
+    return radianceInDirection(wi);
 }
 
 glm::vec3 InfiniteAreaLight::power() const
@@ -100,14 +101,15 @@ glm::vec3 InfiniteAreaLight::power() const
 
 glm::vec3 InfiniteAreaLight::radianceInDirection(const glm::vec3& w) const
 {
-    glm::vec3 local_w = glm::normalize(w);
+    auto w2 = glm::normalize(w);
+    glm::vec3 local_w = glm::normalize(_worldTransform.getMatrix() * glm::vec4(w2.x, w2.y, w2.z, 0));
     static const float TWO_PI = 2 * (float)M_PI;
     static const float INV_PI = 1 / (float)M_PI;
     static const float INV_TWO_PI = 1 / TWO_PI;
-    float u = std::atan2(local_w.y, local_w.x);
+    float u = std::atan2(local_w.z, local_w.x);
     if (u < 0) u += TWO_PI;
     u *= INV_TWO_PI;
-    float v = glm::acos(glm::clamp(local_w.z, -1.f, 1.f));
+    float v = glm::acos(glm::clamp(local_w.y, -1.f, 1.f));
     v *= INV_PI;
     return _radianceMap->getColor(u, 1 - v);
 }

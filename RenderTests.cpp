@@ -29,11 +29,11 @@ namespace {
 
 int main() {
 	std::vector<int> scenes = {
-		0,
-		1,
-		2,
+		//0,
+		//1,
+		//2,
 		3,
-		4,
+		//4,
 	};
 
 	std::vector<int> nbSamples = {
@@ -105,9 +105,11 @@ int main() {
 		std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr"),
 		std::make_shared<InfiniteAreaLight>("test_sun.hdr"),
 		std::make_shared<InfiniteAreaLight>("test_white.hdr"),
+		std::make_shared<InfiniteAreaLight>("test_directions.hdr"),
 	};
+	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 0, 1
+		0, 0, 0, 3, 1
 	};
 
 	for (int i : scenes) {
