@@ -67,24 +67,21 @@ glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record
     float sinTheta = 0;
     float u = 0, v = 0;
 
-    //do {
-        pdf = 0;
-        int i, j;
-        pdf = _distribution->sample(frand(), frand(), i, j);
+    pdf = 0;
+    int i, j;
+    pdf = _distribution->sample(frand(), frand(), i, j);
 
-        if (pdf == 0)
-            return glm::vec3(0);
+    if (pdf == 0)
+        return glm::vec3(0);
 
-        u = (float)j / _radianceMap->getWidth();
-        v = (float)i / _radianceMap->getHeight();
-        glm::vec3 color = _radianceMap->getColor(u, v);
+    u = (float)j / _radianceMap->getWidth();
+    v = (float)i / _radianceMap->getHeight();
 
-        float theta = v * (float)M_PI, phi = u * 2 * (float)M_PI;
-        float cosTheta = std::cos(theta);
-        sinTheta = std::sin(theta);
-        float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
-        wi = glm::vec3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
-    //} while (glm::dot(wi, hit_record.normal) < 0);
+    float theta = v * (float)M_PI, phi = u * 2 * (float)M_PI;
+    float cosTheta = std::cos(theta);
+    sinTheta = std::sin(theta);
+    float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
+    wi = glm::vec3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
 
     wi = glm::normalize(wi);
 
@@ -93,7 +90,6 @@ glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record
 
     pdf /= (2 * (float)M_PI * (float)M_PI * sinTheta);
 
-    //get_sphere_uv(glm::normalize(wi), u, v);
     return _radianceMap->getColor(u, 1 - v);
 }
 
@@ -105,13 +101,15 @@ glm::vec3 InfiniteAreaLight::power() const
 glm::vec3 InfiniteAreaLight::radianceInDirection(const glm::vec3& w) const
 {
     glm::vec3 local_w = glm::normalize(w);
-    static float INV_M_PI = 1 / (float)M_PI;
-    float u = glm::pow(glm::atan(local_w.y, local_w.x), 2);
-    if (u < 0) u += 2 * (float)M_PI;
-    u *= INV_M_PI;
+    static const float TWO_PI = 2 * (float)M_PI;
+    static const float INV_PI = 1 / (float)M_PI;
+    static const float INV_TWO_PI = 1 / TWO_PI;
+    float u = std::atan2(local_w.y, local_w.x);
+    if (u < 0) u += TWO_PI;
+    u *= INV_TWO_PI;
     float v = glm::acos(glm::clamp(local_w.z, -1.f, 1.f));
-    v *= INV_M_PI;
-    return _radianceMap->getColor(u, v);
+    v *= INV_PI;
+    return _radianceMap->getColor(u, 1 - v);
 }
 
 Light::Light(LightType type)

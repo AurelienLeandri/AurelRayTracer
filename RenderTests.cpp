@@ -80,6 +80,10 @@ int main() {
 	for (int i = 0; i < 9; ++i) {
 		sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f)), (i + 1) * (1.f / 90)));
 	}
+	/*
+	sceneMaterials.push_back({});
+	sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, ConstantTexture::white, 0.f));
+	*/
 
 	std::vector<std::shared_ptr<Camera>> cameras;
 	float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
@@ -100,6 +104,7 @@ int main() {
 	std::vector<std::shared_ptr<InfiniteAreaLight>> environmentLights = {
 		std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr"),
 		std::make_shared<InfiniteAreaLight>("test_sun.hdr"),
+		std::make_shared<InfiniteAreaLight>("test_white.hdr"),
 	};
 	std::vector<int> sceneEnvironments = {
 		0, 0, 0, 0, 1
