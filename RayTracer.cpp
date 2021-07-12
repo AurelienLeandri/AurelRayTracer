@@ -64,7 +64,7 @@ bool RayTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 1));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 10));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -102,22 +102,18 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
             // If the light can be sampled from our position, we check if we hit the light:
             // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
             if (pdfDirectLighting > 0 && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
-                float cos_light_surface = glm::dot(light_sample_dl, surfaceRecord.normal);
-                if (cos_light_surface > 0) {
+                float cos_light_surface = glm::abs(glm::dot(light_sample_dl, surfaceRecord.normal));
                     glm::vec3 light_f = surfaceRecord.bsdf.f(light_sample_dl, wo, surfaceRecord);
                     glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
                     light_color = radiance * ((pathWeight * light_scattering) / pdfDirectLighting) * float(nbLights);
-                }
             }
         }
         else if (light->getType() == LightType::INFINITE_AREA) {
             if (pdfDirectLighting > 0 && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
-                float cos_light_surface = glm::dot(light_sample_dl, surfaceRecord.normal);
-                if (cos_light_surface > 0) {
+                float cos_light_surface = glm::abs(glm::dot(light_sample_dl, surfaceRecord.normal));
                     glm::vec3 light_f = surfaceRecord.bsdf.f(light_sample_dl, wo, surfaceRecord);
                     glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
                     light_color = radiance * ((pathWeight * light_scattering) / pdfDirectLighting) * float(nbLights);
-                }
             }
         }
     }
@@ -140,8 +136,7 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
             else {
                 radianceFromLight = _scene->getEnvironmentLight()->radianceInDirection(light_sample_bsdf);
             }
-            float lightAttenuationWrtAngle = glm::dot(surfaceRecord.normal, light_sample_bsdf);
-            float lightAttenuationWrtAngleAbs = glm::abs(glm::dot(surfaceRecord.normal, light_sample_bsdf));
+            float lightAttenuationWrtAngle = glm::abs(glm::dot(surfaceRecord.normal, light_sample_bsdf));
             bsdf_color = radianceFromLight * ((pathWeight * lightAttenuationWrtAngle * bsdf_scattering) / pdfBSDF);
             if (bsdf_color.r > 1 || bsdf_color.g > 1 || bsdf_color.b > 1)
                 int a = 0;
