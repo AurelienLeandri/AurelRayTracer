@@ -9,6 +9,7 @@
 
 #include "Application.h"
 #include "Vertex.h"
+#include "BxDF.h"
 
 class Camera;
 class Ray;
@@ -18,6 +19,12 @@ class SceneData;
 class Light;
 
 class RayTracer {
+private:
+    enum DirectLightingSamplingStrategy {
+        LightsOnly = 1 << 0,
+        BSDFOnly = 1 << 1,
+        LightsAndBSDF = 1 << 2
+    };
 
 public:
     struct Parameters {
@@ -39,6 +46,7 @@ public:
     void setCamera(std::shared_ptr<Camera> camera);
     void setScene(const SceneData& scene);
     bool start();
+    glm::vec3 _directLighting(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const DirectLightingSamplingStrategy& strategy = DirectLightingSamplingStrategy::LightsAndBSDF) const;
 
 
 private:

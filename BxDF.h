@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "BxDF.h"
+
 struct HitRecord;
 
 class BxDF

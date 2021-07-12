@@ -29,19 +29,19 @@ namespace {
 
 int main() {
 	std::vector<int> scenes = {
-		//0,
-		//1,
-		//2,
+		0,
+		/*1,
+		2,
 		3,
-		//4,
+		4,*/
 	};
 
 	std::vector<int> nbSamples = {
-		256,
-		256,
-		256,
-		256,
-		256
+		64,
+		64,
+		64,
+		64,
+		64
 	};
 
 	std::vector<std::string> sceneNames = {
@@ -80,10 +80,6 @@ int main() {
 	for (int i = 0; i < 9; ++i) {
 		sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f)), (i + 1) * (1.f / 90)));
 	}
-	/*
-	sceneMaterials.push_back({});
-	sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, ConstantTexture::white, 0.f));
-	*/
 
 	std::vector<std::shared_ptr<Camera>> cameras;
 	float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
@@ -109,7 +105,7 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 3, 1
+		0, 0, 0, 0, 1
 	};
 
 	for (int i : scenes) {
