@@ -40,6 +40,9 @@ protected:
     LightType _type;
 };
 
+
+#include "Transform.h"
+
 class AreaLight : public Light
 {
 public:
@@ -79,6 +82,5 @@ private:
     std::unique_ptr<Distribution2D> _distribution;
 
     // TODO: compute the world's bounding sphere
-    glm::vec3 worldCenter = glm::vec3(0);
-    glm::vec3 worldradius = glm::vec3(2000);
+    Transform _worldTransform;
 };
