@@ -53,12 +53,14 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
         return glm::vec3(0);
 
     int random_index = frand() * nbComponents;
-    int bxdf_index = 0;
+    int bxdf_index = -1;
     do {
-        while (!_bxdfs[bxdf_index]->type.isType(bxdfTypes)) {
-            bxdf_index++;
-        }
-    } while (--random_index > 0);
+        bxdf_index++;
+        if (bxdf_index >= nbComponents)
+            return glm::vec3(0);
+        if (_bxdfs[bxdf_index]->type.isType(bxdfTypes))
+            random_index--;
+    } while (random_index >= 0);
 
     glm::vec3 w_i_local(0);
     glm::vec3 f = _bxdfs[bxdf_index]->sample_f(w_i_local, w_o_local, hit_record, pdf);
