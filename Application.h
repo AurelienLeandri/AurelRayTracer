@@ -35,16 +35,42 @@ public:
     void run();
 
 private:
+    struct QueueFamilyIndices {
+        std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentationFamily;
+
+        bool hasMandatoryFamilies() {
+            return graphicsFamily.has_value() && presentationFamily.has_value();
+        }
+    };
+
+    struct SwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
+private:
     void mainLoop();
     void cleanup();
     int initWindow();
     void createInstance();
     bool checkValidationLayerSupport(const std::vector<const char*>& requiredLayers);
-    bool checkRequiredExtensionsSupport(const std::vector<const char*>& requiredExtensions);
+    bool checkInstanceRequiredExtensionsSupport(const std::vector<const char*>& requiredExtensions);
+    bool checkDeviceRequiredExtensionSupport(VkPhysicalDevice device);
     void setupDebugMessenger();
     void pickPhysicalDevice();
     void createLogicalDevice();
-// END TODO
+    void createSurface();
+    QueueFamilyIndices findRequiredQueueFamilies(VkPhysicalDevice device);
+    int ratePhysicalDevice(VkPhysicalDevice device);
+    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+    void createSwapChain();
+    void createImageViews();
+        // END TODO
 
 private:
     // Application window
@@ -58,6 +84,13 @@ private:
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkQueue graphicsQueue = VK_NULL_HANDLE;
+    VkQueue presentationQueue = VK_NULL_HANDLE;
+    VkSwapchainKHR swapChain;
+    std::vector<VkImage> swapChainImages;
+    VkFormat swapChainImageFormat;
+    VkExtent2D swapChainExtent;
+    std::vector<VkImageView> swapChainImageViews;
 // END TODO
 };
