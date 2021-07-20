@@ -73,6 +73,11 @@ private:
     void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char>& code);
     void createRenderPass();
+    void createFramebuffers();
+    void createCommandPool();
+    void createCommandBuffers();
+    void drawFrame();
+    void createSyncObjects();
         // END TODO
 
 private:
@@ -98,5 +103,14 @@ private:
     VkRenderPass renderPass;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+    VkCommandPool commandPool;
+    std::vector<VkCommandBuffer> commandBuffers;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+    std::vector<VkFence> inFlightFences;
+    std::vector<VkFence> imagesInFlight;
+    size_t currentFrame = 0;
 // END TODO
 };
