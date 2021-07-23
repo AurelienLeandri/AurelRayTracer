@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "stb_image.h"
+
 struct HitRecord;
 
 class Texture
