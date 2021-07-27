@@ -112,6 +112,74 @@ namespace {
     }
 }
 
+void Application::processKeyboard(CameraMovement direction, float deltaTime)
+{
+    float velocity = movementSpeed * deltaTime;
+    if (direction == FORWARD)
+        cameraPos += glm::vec3(cameraFront.x, 0, cameraFront.z) * velocity;
+    if (direction == BACKWARD)
+        cameraPos -= glm::vec3(cameraFront.x, 0, cameraFront.z) * velocity;
+    if (direction == LEFT)
+        cameraPos -= glm::vec3(cameraRight.x, 0, cameraRight.z) * velocity;
+    if (direction == RIGHT)
+        cameraPos += glm::vec3(cameraRight.x, 0, cameraRight.z) * velocity;
+    if (direction == UP)
+        cameraPos += glm::vec3(0, velocity, 0);
+    if (direction == DOWN)
+        cameraPos -= glm::vec3(0, velocity, 0);
+}
+
+void Application::processMouseMovement(float xoffset, float yoffset)
+{
+    static const float MOUSE_SENSITIVITY = 0.1f;
+    xoffset *= MOUSE_SENSITIVITY;
+    yoffset *= MOUSE_SENSITIVITY;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    // update Front, Right and Up Vectors using the updated Euler angles
+    updateCameraVectors();
+}
+
+void Application::updateCameraVectors()
+{
+    // calculate the new Front vector
+    cameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront.y = sin(glm::radians(pitch));
+    cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(cameraFront);
+    // also re-calculate the Right and Up vector
+    cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+}
+
+bool Application::_processInput()
+{
+    float deltaTime = (float(std::clock()) - frameClock) / (float)CLOCKS_PER_SEC;
+    frameClock = std::clock();
+    if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+        processKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+        processKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+        processKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+        processKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        processKeyboard(DOWN, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        processKeyboard(UP, deltaTime);
+    return !(glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(_window));
+}
+
+
 Application::~Application()
 {
     cleanup();
@@ -280,7 +348,10 @@ void Application::run()
 
 void Application::mainLoop()
 {
+    frameClock = std::clock();
+
     while (!glfwWindowShouldClose(_window)) {
+        _processInput();
         glfwPollEvents();
         drawFrame();
     }
@@ -409,6 +480,27 @@ namespace {
         Application* app = (Application*)(glfwGetWindowUserPointer(window));
         app->framebufferResized = true;
     }
+
+    void mouseCallback(GLFWwindow* window, double xpos, double ypos)
+    {
+        static bool firstTime = true;
+        static float lastX = 0, lastY = 0;
+        if (firstTime)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstTime = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+        lastX = xpos;
+        lastY = ypos;
+
+        Application* app = (Application*)(glfwGetWindowUserPointer(window));
+        app->processMouseMovement(xoffset, yoffset);
+    }
 }
 
 int Application::initWindow()
@@ -418,8 +510,10 @@ int Application::initWindow()
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     _window = glfwCreateWindow(WIDTH * _zoomFactor, HEIGHT * _zoomFactor, "AurellRayTracer", nullptr, nullptr);
+    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetWindowUserPointer(_window, this);
     glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
+    glfwSetCursorPosCallback(_window, mouseCallback);
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -1472,8 +1566,9 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    //ubo.model = glm::mat4(1.0f);
+    ubo.view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
 
     ubo.proj[1][1] *= -1;  // Need to invert the Y axis for vulkan. GLM was designed for OpenGL.
@@ -1954,9 +2049,4 @@ void Application::idle() {
         _processInput();
         glfwPollEvents();
     }
-}
-
-bool Application::_processInput()
-{
-    return !(glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(_window));
 }

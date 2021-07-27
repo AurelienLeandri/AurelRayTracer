@@ -12,6 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 #include <array>
+#include <ctime>
 
 #include "Vertex.h"
 
@@ -36,7 +37,7 @@ private:
     bool _processInput();
     int _openglInit();
 
-// TODO: refactor this once it runs
+    // TODO: refactor this once it runs
 public:
     void run();
 
@@ -99,7 +100,7 @@ private:
     void createDescriptorPool();
     void createDescriptorSets();
     void createTextureImage();
-    void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples,  VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     VkCommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(VkCommandBuffer commandBuffer);
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
@@ -116,7 +117,21 @@ private:
     void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
     VkSampleCountFlagBits getMaxUsableSampleCount();
     void createColorResources();
-        // END TODO
+    // Camera
+    enum CameraMovement {
+        FORWARD,
+        BACKWARD,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
+    };
+    void processKeyboard(CameraMovement direction, float deltaTime);
+    void updateCameraVectors();
+
+public:
+    void processMouseMovement(float xoffset, float yoffset);
+    // END TODO
 
 private:
     // Application window
@@ -124,7 +139,7 @@ private:
     unsigned int _zoomFactor = 2;
 
 
-// TODO: refactor this once it runs
+    // TODO: refactor this once it runs
 private:
     VkInstance instance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
@@ -173,6 +188,16 @@ private:
     VkImage colorImage;
     VkDeviceMemory colorImageMemory;
     VkImageView colorImageView;
+    float movementSpeed = 5.f;
+
+    glm::vec3 cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
+    glm::vec3 cameraFront = glm::normalize(glm::vec3(-2.0f, -2.0f, -2.0f));
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraRight));
+    float yaw = -90.0f;
+    float pitch = 0.0f;
+
+    std::clock_t frameClock;
 
 
     // TODO: refactor Vertex.h
