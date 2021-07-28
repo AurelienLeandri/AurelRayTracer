@@ -12,7 +12,7 @@ struct HitRecord;
 class InfiniteAreaLight;
 
 /*
-* Holds the data of every mesh throughout application lifetime
+* Holds the data of every mesh throughout ApplicationOld lifetime
 */
 class SceneData
 {

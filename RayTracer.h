@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <embree3/rtcore.h>
 
-#include "Application.h"
+#include "ApplicationOld.h"
 #include "Vertex.h"
 #include "BxDF.h"
 
@@ -28,9 +28,9 @@ private:
 
 public:
     struct Parameters {
-        size_t width = Application::WIDTH;
-        size_t height = Application::HEIGHT;
-        size_t nbChannels = Application::NB_CHANNELS;
+        size_t width = ApplicationOld::WIDTH;
+        size_t height = ApplicationOld::HEIGHT;
+        size_t nbChannels = ApplicationOld::NB_CHANNELS;
         size_t nbSamples = 2048;
         int nbThreads = 32;
     };

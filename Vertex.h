@@ -1,8 +1,7 @@
 #pragma once
 
 // TODO: remove after refactor (Vulkan)
-#define GLFW_INCLUDE_VULKAN
-#include <glfw3.h>
+#include "InputManager.h"
 
 #include <glm/glm.hpp>
 #include <array>

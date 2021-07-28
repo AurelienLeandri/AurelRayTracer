@@ -11,7 +11,7 @@
 
 #include "Camera.h"
 #include "Texture.h"
-#include "Application.h"
+#include "ApplicationOld.h"
 #include "RayTracer.h"
 #include "ModelLoader.h"
 #include "Scene.h"
@@ -216,7 +216,7 @@ namespace {
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(100, 100, 100), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
-		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+		float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
 		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
@@ -257,7 +257,7 @@ namespace {
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10, 10, 10), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
-		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+		float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
 		glm::vec3 look_at = glm::vec3(0);
 		float dist_to_focus = 10.f;
@@ -329,7 +329,7 @@ namespace {
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
-		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+		float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
 		//glm::vec3 look_from = glm::vec3(50, 0, 30);
 		glm::vec3 look_from = glm::vec3(0, 0, -6);
 		glm::vec3 look_at = glm::vec3(0);
@@ -342,7 +342,7 @@ namespace {
 	std::shared_ptr<Camera> cornell_box_scene(SceneData& scene) {
 		cornell_box(scene);
 
-		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+		float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
 		glm::vec3 look_from = glm::vec3(278, 278, -800);  // Cornell box
 		glm::vec3 look_at = glm::vec3(278, 278, 0);  // Cornell box
 		float dist_to_focus = 10.f;  // Cornell box
@@ -430,8 +430,8 @@ int main()
 
     std::clock_t sub_clock(std::clock());
     std::cout << "Initializing window and OpenGL context...";
-    Application application;
-    application.init();
+    ApplicationOld ApplicationOld;
+    ApplicationOld.init();
     std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
     
     sub_clock = std::clock();
@@ -466,17 +466,17 @@ int main()
     bool finished = false;
     do {
 		finished = ray_tracer.iterate();
-		finished |= !application.refreshWindow(ray_tracer.getImageBuffer());
+		finished |= !ApplicationOld.refreshWindow(ray_tracer.getImageBuffer());
     } while (!finished);
 	
 	std::fstream file_stream;
 	file_stream.open("image_buffer.txt", std::ios::out);
 	const float* image_buffer = ray_tracer.getImageBuffer();
-	for (int y = 0; y < Application::HEIGHT; ++y) {
-		for (int x = 0; x < Application::WIDTH * 3; x+=3) {
-			file_stream << image_buffer[y * Application::WIDTH * 3 + x] << " ";
-			file_stream << image_buffer[y * Application::WIDTH * 3 + x + 1] << " ";
-			file_stream << image_buffer[y * Application::WIDTH * 3 + x + 2] << std::endl;
+	for (int y = 0; y < ApplicationOld::HEIGHT; ++y) {
+		for (int x = 0; x < ApplicationOld::WIDTH * 3; x+=3) {
+			file_stream << image_buffer[y * ApplicationOld::WIDTH * 3 + x] << " ";
+			file_stream << image_buffer[y * ApplicationOld::WIDTH * 3 + x + 1] << " ";
+			file_stream << image_buffer[y * ApplicationOld::WIDTH * 3 + x + 2] << std::endl;
 		}
 	}
 	file_stream.close();
@@ -485,7 +485,7 @@ int main()
 	
 	std::cout << "End. Process took " << (double(std::clock()) - main_clock) / (double)CLOCKS_PER_SEC << " seconds." << std::endl;
 
-    application.idle();
+    ApplicationOld.idle();
 
     return 0;
 }

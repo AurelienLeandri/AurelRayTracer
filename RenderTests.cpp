@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "Application.h"
+#include "ApplicationOld.h"
 #include "RayTracer.h"
 #include "Scene.h"
 #include "Light.h"
@@ -82,7 +82,7 @@ int main() {
 	}
 
 	std::vector<std::shared_ptr<Camera>> cameras;
-	float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;
+	float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
 	glm::vec3 look_from = glm::vec3(0, 50, -35);
 	look_from /= 1.5f;
 	glm::vec3 look_at = glm::vec3(0, 0, 0);
@@ -109,8 +109,8 @@ int main() {
 	};
 
 	for (int i : scenes) {
-		Application application;
-		application.init();
+		ApplicationOld ApplicationOld;
+		ApplicationOld.init();
 
 		RayTracer::Parameters params;
 		params.nbSamples = nbSamples[i];
@@ -134,7 +134,7 @@ int main() {
 		bool finished = false;
 		do {
 			finished = ray_tracer.iterate();
-			finished |= !application.refreshWindow(ray_tracer.getImageBuffer());
+			finished |= !ApplicationOld.refreshWindow(ray_tracer.getImageBuffer());
 		} while (!finished);
 
 		const float *image_buffer = ray_tracer.getImageBuffer();
@@ -144,13 +144,13 @@ int main() {
 		std::ofstream os;
 		os.open("RenderTests/" + sceneNames[i] + ".ppm");
 		os << "P3" << std::endl;
-		os << Application::WIDTH << " " << Application::HEIGHT << std::endl;
+		os << ApplicationOld::WIDTH << " " << ApplicationOld::HEIGHT << std::endl;
 		os << "255" << std::endl;
-		for (int i = 0; i < Application::HEIGHT; ++i) {
-			for (int j = 0; j < Application::WIDTH * 3; j += 3) {
-				float r = image_buffer[i * Application::WIDTH * 3 + j] * 255;
-				float g = image_buffer[i * Application::WIDTH * 3 + j + 1] * 255;
-				float b = image_buffer[i * Application::WIDTH * 3 + j + 2] * 255;
+		for (int i = 0; i < ApplicationOld::HEIGHT; ++i) {
+			for (int j = 0; j < ApplicationOld::WIDTH * 3; j += 3) {
+				float r = image_buffer[i * ApplicationOld::WIDTH * 3 + j] * 255;
+				float g = image_buffer[i * ApplicationOld::WIDTH * 3 + j + 1] * 255;
+				float b = image_buffer[i * ApplicationOld::WIDTH * 3 + j + 2] * 255;
 				if (clampColors) {
 					os << int(glm::min(255.f, r)) << " ";
 					os << int(glm::min(255.f, g)) << " ";
