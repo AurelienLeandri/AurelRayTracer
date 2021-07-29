@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
+
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3.h>
 
@@ -12,6 +14,10 @@ public:
 
 public:
 	void init(GLFWwindow* window);
+
+public:
+	// TODO: refactor this
+	static bool framebufferResized;
 
 private:
 	static void _framebufferResizeCallback(GLFWwindow* window, int width, int height);

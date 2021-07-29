@@ -62,6 +62,25 @@ int VulkanInstance::init(GLFWwindow* window)
     return 0;
 }
 
+void VulkanInstance::recreateSwapChain()
+{
+    // Minimization: we wait until the window is expanded
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(_window, &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(_window, &width, &height);
+        glfwWaitEvents();
+    }
+
+    vkDeviceWaitIdle(_device);
+
+    // TODO
+    //cleanupSwapChain();
+
+    _createSwapChain();
+    _createSwapChainImageViews();
+}
+
 void VulkanInstance::_createInstance()
 {
     VkApplicationInfo appInfo = {};
@@ -150,6 +169,8 @@ void VulkanInstance::_pickPhysicalDevice()
     }
 
     _physicalDevice = *candidateDevice;
+    _properties.maxNbMsaaSamples = _getMaxUsableSampleCount();
+
     _queueFamilyIndices = candidateIndices;
     _swapChainSupportDetails = candidateSwapChainSupportDetails;
 }
@@ -368,8 +389,8 @@ void VulkanInstance::_createSwapChain() {
     _swapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, _swapChainImages.data());
 
-    _swapChainImageFormat = surfaceFormat.format;
-    _swapChainExtent = extent;
+    _properties.swapChainImageFormat = surfaceFormat.format;
+    _properties.swapChainExtent = extent;
 }
 
 VkSurfaceFormatKHR VulkanInstance::_chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
@@ -422,7 +443,7 @@ void VulkanInstance::_createSwapChainImageViews() {
     _swapChainImageViews.resize(_swapChainImages.size());
 
     for (uint32_t i = 0; i < _swapChainImages.size(); i++) {
-        _swapChainImageViews[i] = createImageView(_swapChainImages[i], _swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+        _swapChainImageViews[i] = createImageView(_swapChainImages[i], _properties.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
     }
 }
 
@@ -446,6 +467,82 @@ VkImageView VulkanInstance::createImageView(
     }
 
     return imageView;
+}
+
+VkSampleCountFlagBits VulkanInstance::_getMaxUsableSampleCount() const {
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    vkGetPhysicalDeviceProperties(_physicalDevice, &physicalDeviceProperties);
+
+    VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+    if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+    if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+    if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+    if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+    if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+    return VK_SAMPLE_COUNT_1_BIT;
+}
+
+VkFormat VulkanInstance::findSupportedFormat(const std::vector<VkFormat>& candidates,
+    VkImageTiling tiling, VkFormatFeatureFlags features) const
+{
+    for (VkFormat format : candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        }
+        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+
+    throw std::runtime_error("Failed to find supported format");
+}
+
+uint32_t VulkanInstance::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("Failed to find suitable memory type");
+}
+
+const VulkanInstance::Properties& VulkanInstance::getProperties() const {
+    return _properties;
+}
+
+VkDevice& VulkanInstance::getLogicalDevice() {
+    return _device;
+}
+
+const VulkanInstance::QueueFamilyIndices& VulkanInstance::getQueueFamilyIndices() const {
+    return _queueFamilyIndices;
+}
+
+const std::vector<VkImageView>& VulkanInstance::getSwapChainImageViews() const
+{
+    return _swapChainImageViews;
+}
+
+VkQueue& VulkanInstance::getGraphicsQueue()
+{
+    return _graphicsQueue;
+}
+
+VkQueue& VulkanInstance::getPresentationQueue()
+{
+    return _presentationQueue;
+}
+
+VkSwapchainKHR& VulkanInstance::getSwapChain() {
+    return _swapChain;
 }
 
 namespace {

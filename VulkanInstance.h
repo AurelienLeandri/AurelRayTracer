@@ -7,7 +7,14 @@
 
 class VulkanInstance
 {
-private:
+public:
+	// Vulkan instance properties that should be shared with renderers
+	struct Properties {
+		VkFormat swapChainImageFormat;
+		VkExtent2D swapChainExtent;
+		VkSampleCountFlagBits maxNbMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+	};
+
 	struct QueueFamilyIndices {
 		std::optional<unsigned int> graphicsFamily;
 		std::optional<unsigned int> presentationFamily;
@@ -22,7 +29,22 @@ private:
 
 public:
 	int init(GLFWwindow* window);
+	void recreateSwapChain();
+
+	// Utility
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) const;
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
+		VkImageTiling tiling, VkFormatFeatureFlags features) const;
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+
+	// Accessors
+	const Properties& getProperties() const;
+	VkDevice& getLogicalDevice();
+	const QueueFamilyIndices& getQueueFamilyIndices() const;
+	const std::vector<VkImageView>& getSwapChainImageViews() const;
+	VkQueue& getGraphicsQueue();
+	VkQueue& getPresentationQueue();
+	VkSwapchainKHR& getSwapChain();
 
 private:
 	void _createInstance();
@@ -43,6 +65,7 @@ private:
 	VkPresentModeKHR _chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D _chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	void _createSwapChainImageViews();
+	VkSampleCountFlagBits _getMaxUsableSampleCount() const;
 
 private:
 	GLFWwindow* _window = nullptr;
@@ -61,7 +84,7 @@ private:
 	// Swap chain
 	VkSwapchainKHR _swapChain;
 	std::vector<VkImage> _swapChainImages;
-	VkFormat _swapChainImageFormat;
-	VkExtent2D _swapChainExtent;
 	std::vector<VkImageView> _swapChainImageViews;
+
+	Properties _properties;
 };

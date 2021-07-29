@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "InputManager.h"
 
 #include <vector>
 #include <optional>

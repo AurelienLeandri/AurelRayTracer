@@ -14,6 +14,7 @@
 #include "ModelLoader.h"
 #include "Scene.h"
 #include "Mesh.h"
+#include "Renderer.h"
 
 
 namespace {
@@ -322,6 +323,7 @@ void ApplicationOld::run()
         createLogicalDevice();
         createSwapChain();
         createImageViews();
+
         createRenderPass();
         createDescriptorSetLayout();
         createGraphicsPipeline();
@@ -329,13 +331,16 @@ void ApplicationOld::run()
         createColorResources();
         createDepthResources();
         createFramebuffers();
+
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
         loadModel();
         createVertexBuffer();
         createIndexBuffer();
+        
         createUniformBuffers();
+
         createDescriptorPool();
         createDescriptorSets();
         createCommandBuffers();
@@ -424,8 +429,6 @@ void ApplicationOld::drawFrame() {
     else if (result) {
         throw std::runtime_error("failed to present swap chain image!");
     }
-
-    currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
@@ -1082,8 +1085,8 @@ void ApplicationOld::createGraphicsPipeline() {
     // Fixed-function stages
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    auto bindingDescription = Vertex::getBindingDescription();
-    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+    auto bindingDescription = Renderer::_getVertexBindingDescription();
+    auto attributeDescriptions = Renderer::_getVertexAttributeDescriptions();
     vertexInputInfo.vertexBindingDescriptionCount = 1;
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;

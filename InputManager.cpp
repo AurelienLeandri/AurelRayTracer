@@ -2,6 +2,8 @@
 
 #include "Application.h"
 
+bool InputManager::framebufferResized = false;
+
 InputManager::InputManager(Application& application) :
     _application(application)
 {
@@ -19,7 +21,7 @@ void InputManager::init(GLFWwindow* window)
 
 void InputManager::_framebufferResizeCallback(GLFWwindow* window, int width, int height) {
     Application* app = (Application*)(glfwGetWindowUserPointer(window));
-    //app->framebufferResized = true;
+    framebufferResized = true;
 }
 
 void InputManager::_mouseCallback(GLFWwindow* window, double xpos, double ypos)

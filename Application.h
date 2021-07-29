@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "InputManager.h"
 #include "VulkanInstance.h"
+#include "Renderer.h"
 
 class Scene;
 class Renderer;
@@ -21,8 +22,8 @@ public:
 
 private:
 	int _initWindow();
-	void _initRenderers();
-	void _loadScene(const char* fileName);
+	int _initRenderers(std::string& failed);
+	void _loadScene(const std::string& fileName);
 	void _mainLoop();
 	void _cleanUp();
 
@@ -32,7 +33,7 @@ private:
 
 private:
 	//std::unique_ptr<Scene> _scene = nullptr;
-	//std::unordered_map<const char*, std::unique_ptr<Renderer>> _renderers;
+	std::unordered_map<std::string, std::unique_ptr<Renderer>> _renderers;
 	InputManager _inputManager;
 	VulkanInstance _vulkan;
 	Camera _camera;
