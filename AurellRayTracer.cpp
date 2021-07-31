@@ -23,10 +23,11 @@
 #include "Material.h"
 #include "Sphere.h"
 #include "Light.h"
+#include "Application.h"
 
 
 namespace {
-	unsigned int make_box(SceneData& scene, unsigned int material_id, const Transform& t = {})
+	unsigned int make_box(Scene& scene, unsigned int material_id, const Transform& t = {})
 	{
 		std::shared_ptr<Mesh> box_mesh = std::make_shared<Mesh>();
 
@@ -83,7 +84,7 @@ namespace {
 		return scene.addShape(box_mesh);
 	}
 
-	void cornell_box(SceneData &scene) {
+	void cornell_box(Scene &scene) {
 		std::shared_ptr<PerfectDiffuseMaterial> material_red = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.65f, 0.05f, 0.05f)));
 		std::shared_ptr<PerfectDiffuseMaterial> material_white = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.73f, 0.73f, 0.73f)));
 		std::shared_ptr<PerfectDiffuseMaterial> material_green = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.12f, 0.45f, 0.15f)));
@@ -184,7 +185,7 @@ namespace {
 		make_box(scene, fresnel_material_id, Transform(tall_box_transform));
 	}
 
-	std::shared_ptr<Camera> backpack_scene(SceneData &scene)
+	std::shared_ptr<Camera> backpack_scene(Scene &scene)
 	{
 		TransformParameters t;
 		t.translation = glm::vec3(0.5f, 0, 3);
@@ -225,7 +226,7 @@ namespace {
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
 
-	std::shared_ptr<Camera> teapot_scene(SceneData &scene)
+	std::shared_ptr<Camera> teapot_scene(Scene &scene)
 	{
 		TransformParameters t;
 		t.translation = glm::vec3(0, 0, 3);
@@ -266,7 +267,7 @@ namespace {
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
 
-	std::shared_ptr<Camera> cerberus_scene(SceneData &scene)
+	std::shared_ptr<Camera> cerberus_scene(Scene &scene)
 	{
 		TransformParameters t;
 		t.translation = glm::vec3(0, 0, 200);
@@ -339,7 +340,7 @@ namespace {
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
 
-	std::shared_ptr<Camera> cornell_box_scene(SceneData& scene) {
+	std::shared_ptr<Camera> cornell_box_scene(Scene& scene) {
 		cornell_box(scene);
 
 		float aspect_ratio = static_cast<float>(ApplicationOld::WIDTH) / ApplicationOld::HEIGHT;
@@ -413,23 +414,12 @@ float *test_2D_sampling(int nb_samples, int &width, int &height, int &nb_channel
 
 int main()
 {
-	//int w = -1, h = -1, n = -1;
-	//float* b = test_2D_sampling(1000000, w, h, n);
 	/*
-	float* b = test_2D_sampling(1, w, h, n);
-	b = test_2D_sampling(10, w, h, n);
-	b = test_2D_sampling(100, w, h, n);
-	b = test_2D_sampling(1000, w, h, n);
-	b = test_2D_sampling(10000, w, h, n);
-	b = test_2D_sampling(100000, w, h, n);
-	b = test_2D_sampling(1000000, w, h, n);
-	*/
-	//return 0;
-
-    std::clock_t main_clock(std::clock());
+	std::clock_t main_clock(std::clock());
 
     std::clock_t sub_clock(std::clock());
-    std::cout << "Initializing window and OpenGL context...";
+    
+	std::cout << "Initializing window and OpenGL context...";
     ApplicationOld ApplicationOld;
     ApplicationOld.init();
     std::cout << " done (took " << (double(std::clock()) - sub_clock) / (double)CLOCKS_PER_SEC << " seconds)." << std::endl;
@@ -442,8 +432,9 @@ int main()
 
 	sub_clock = std::clock();
 	std::cout << "Loading scene data...";
+	*/
 
-	SceneData* scene = SceneFactory::createScene();
+	Scene* scene = SceneFactory::createScene();
 
 	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
@@ -452,6 +443,12 @@ int main()
 	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_white.hdr");
 	scene->addLight(environmentLight);
 
+	Application application;
+	application.loadScene("blabla");
+	application.init();
+	application.mainLoop();
+
+	/*
 	ray_tracer.setCamera(camera);
 	ray_tracer.setScene(*scene);
 
@@ -486,6 +483,7 @@ int main()
 	std::cout << "End. Process took " << (double(std::clock()) - main_clock) / (double)CLOCKS_PER_SEC << " seconds." << std::endl;
 
     ApplicationOld.idle();
+	*/
 
     return 0;
 }

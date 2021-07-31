@@ -19,12 +19,12 @@ public:
 
 public:
 	int init();
+	void loadScene(const std::string& fileName);
+	void mainLoop();
 
 private:
 	int _initWindow();
 	int _initRenderers(std::string& failed);
-	void _loadScene(const std::string& fileName);
-	void _mainLoop();
 	void _cleanUp();
 
 private:
@@ -38,6 +38,7 @@ private:
 	VulkanInstance _vulkan;
 	Camera _camera;
 	GLFWwindow* _window = nullptr;
+	Scene* _scene = nullptr;
 
 	friend class InputManager;
 };

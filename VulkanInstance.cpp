@@ -74,11 +74,40 @@ void VulkanInstance::recreateSwapChain()
 
     vkDeviceWaitIdle(_device);
 
-    // TODO
-    //cleanupSwapChain();
+    cleanupSwapChain();
 
     _createSwapChain();
     _createSwapChainImageViews();
+}
+
+int VulkanInstance::cleanup()
+{
+    cleanupSwapChain();
+
+    vkDestroyDevice(_device, nullptr);
+
+    if (_debugMessenger) {
+        if (auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT")) {
+            vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
+            _debugMessenger = VK_NULL_HANDLE;
+        }
+        else
+            std::cerr << "Failed to load extension function vkDestroyDebugUtilsMessengerEXT" << std::endl;
+        return -1;
+    }
+
+    vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    vkDestroyInstance(_instance, nullptr);
+
+    return 0;
+}
+
+void VulkanInstance::cleanupSwapChain() {
+    for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
+        vkDestroyImageView(_device, _swapChainImageViews[i], nullptr);
+    }
+
+    vkDestroySwapchainKHR(_device, _swapChain, nullptr);
 }
 
 void VulkanInstance::_createInstance()
@@ -160,6 +189,7 @@ void VulkanInstance::_pickPhysicalDevice()
         if (score && score > maxScore) {
             candidateDevice = &device;
             candidateIndices = indices;
+            candidateSwapChainSupportDetails = swapChainSupportDetails;
             maxScore = score;
         }
     }
@@ -170,6 +200,9 @@ void VulkanInstance::_pickPhysicalDevice()
 
     _physicalDevice = *candidateDevice;
     _properties.maxNbMsaaSamples = _getMaxUsableSampleCount();
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(_physicalDevice, &properties);
+    _properties.maxSamplerAnisotropy = properties.limits.maxSamplerAnisotropy;
 
     _queueFamilyIndices = candidateIndices;
     _swapChainSupportDetails = candidateSwapChainSupportDetails;
@@ -201,8 +234,8 @@ int VulkanInstance::_ratePhysicalDevice(VkPhysicalDevice device, QueueFamilyIndi
     }
 
     bool swapChainAdequate = false;
-    SwapChainSupportDetails swapChainSupport = _querySwapChainSupport(device);
-    if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
+    swapChainSupportDetails = _querySwapChainSupport(device);
+    if (swapChainSupportDetails.formats.empty() || swapChainSupportDetails.presentModes.empty()) {
         return 0;
     }
 
@@ -543,6 +576,10 @@ VkQueue& VulkanInstance::getPresentationQueue()
 
 VkSwapchainKHR& VulkanInstance::getSwapChain() {
     return _swapChain;
+}
+
+size_t VulkanInstance::getSwapChainSize() const {
+    return _swapChainImages.size();
 }
 
 namespace {

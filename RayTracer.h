@@ -15,7 +15,7 @@ class Camera;
 class Ray;
 struct HitRecord;
 class Material;
-class SceneData;
+class Scene;
 class Light;
 
 class RayTracer {
@@ -44,7 +44,7 @@ public:
     bool iterate();
     const float* getImageBuffer() const;
     void setCamera(std::shared_ptr<Camera> camera);
-    void setScene(const SceneData& scene);
+    void setScene(const Scene& scene);
     bool start();
     glm::vec3 _directLighting(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const DirectLightingSamplingStrategy& strategy = DirectLightingSamplingStrategy::LightsAndBSDF) const;
 
@@ -57,7 +57,7 @@ private:
 
     std::shared_ptr<Camera> _camera;
 
-    const SceneData* _scene = nullptr;
+    const Scene* _scene = nullptr;
 
     const Parameters _parameters;
 

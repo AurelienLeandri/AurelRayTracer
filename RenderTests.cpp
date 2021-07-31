@@ -15,7 +15,7 @@
 
 
 namespace {
-	void material_test_scene(SceneData& scene, const std::vector<std::shared_ptr<Material>>& materials) {
+	void material_test_scene(Scene& scene, const std::vector<std::shared_ptr<Material>>& materials) {
 		int nbSpheres = materials.size();
 		int x_offset = nbSpheres >= 5 ? -20 : -(nbSpheres / 2) * 10;
 		for (int i = 0; i < nbSpheres; ++i) {
@@ -117,7 +117,7 @@ int main() {
 		RayTracer ray_tracer(params);
 
 		ray_tracer.init();
-		SceneData* scene = SceneFactory::createScene();
+		Scene* scene = SceneFactory::createScene();
 
 		material_test_scene(*scene, sceneMaterials[i]);
 

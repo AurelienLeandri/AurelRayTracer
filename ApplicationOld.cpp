@@ -1985,7 +1985,7 @@ VkFormat ApplicationOld::findDepthFormat() {
 
 void ApplicationOld::loadModel()
 {
-    SceneData* scene = SceneFactory::createScene();
+    Scene* scene = SceneFactory::createScene();
     TransformParameters t;
     /*
     t.translation = glm::vec3(0.5f, 0, 3);

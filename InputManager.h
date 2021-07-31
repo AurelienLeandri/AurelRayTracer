@@ -5,19 +5,37 @@
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3.h>
 
+#include <ctime>
+
 class Application;
+class Camera;
 
 class InputManager
 {
+private:
+	enum CameraMovement {
+		FORWARD,
+		BACKWARD,
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN
+	};
+
 public:
 	InputManager(Application& application);
 
 public:
-	void init(GLFWwindow* window);
+	void init(GLFWwindow* window, Camera* camera);
+	bool processInput();
+	void processMouseMovement(float xoffset, float yoffset);
 
 public:
 	// TODO: refactor this
 	static bool framebufferResized;
+
+private:
+	void _processKeyboard(CameraMovement direction, float deltaTime);
 
 private:
 	static void _framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -25,6 +43,13 @@ private:
 
 private:
 	Application& _application;
+	Camera* _camera = nullptr;
 	GLFWwindow* _window = nullptr;
+	std::clock_t _frameClock = std::clock();
+	float _currentYaw = 0;
+	float _currentPitch = 0;
+
+private:
+	static const float _MOVEMENT_SPEED;
 };
 

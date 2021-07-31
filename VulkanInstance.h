@@ -13,6 +13,7 @@ public:
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		VkSampleCountFlagBits maxNbMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+		float maxSamplerAnisotropy = 0.f;
 	};
 
 	struct QueueFamilyIndices {
@@ -30,6 +31,7 @@ public:
 public:
 	int init(GLFWwindow* window);
 	void recreateSwapChain();
+	int cleanup();
 
 	// Utility
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) const;
@@ -45,6 +47,8 @@ public:
 	VkQueue& getGraphicsQueue();
 	VkQueue& getPresentationQueue();
 	VkSwapchainKHR& getSwapChain();
+	size_t getSwapChainSize() const;
+	void cleanupSwapChain();
 
 private:
 	void _createInstance();

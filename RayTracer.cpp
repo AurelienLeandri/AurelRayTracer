@@ -212,7 +212,7 @@ void RayTracer::setCamera(std::shared_ptr<Camera> camera) {
     _camera = camera;
 }
 
-void RayTracer::setScene(const SceneData& scene) {
+void RayTracer::setScene(const Scene& scene) {
     _scene = &scene;
 }
 

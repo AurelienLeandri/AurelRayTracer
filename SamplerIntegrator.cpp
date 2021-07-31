@@ -18,7 +18,7 @@ SamplerIntegrator::SamplerIntegrator(std::shared_ptr<Sampler> sampler, std::shar
 void SamplerIntegrator::_renderTile(const glm::ivec2& tile) {
 }
 
-void SamplerIntegrator::render(const SceneData& sceneData)
+void SamplerIntegrator::render(const Scene& sceneData)
 {
 	preprocess(sceneData, *_sampler);
 
@@ -74,11 +74,11 @@ void SamplerIntegrator::render(const SceneData& sceneData)
     */
 }
 
-void SamplerIntegrator::preprocess(const SceneData& sceneData, Sampler& sampler)
+void SamplerIntegrator::preprocess(const Scene& sceneData, Sampler& sampler)
 {
 }
 
-glm::vec3 SamplerIntegrator::specularReflect(const RayDifferential& ray, const HitRecord& record, const SceneData& scene, Sampler& sampler, int depth) const
+glm::vec3 SamplerIntegrator::specularReflect(const RayDifferential& ray, const HitRecord& record, const Scene& scene, Sampler& sampler, int depth) const
 {
     glm::vec3 wi(0, 0, 1);
     float pdf = 0;
@@ -96,7 +96,7 @@ glm::vec3 SamplerIntegrator::specularReflect(const RayDifferential& ray, const H
     return glm::vec3(0);
 }
 
-glm::vec3 SamplerIntegrator::specularTransmit(const RayDifferential& ray, const HitRecord& record, const SceneData& scene, Sampler& sampler, int depth) const
+glm::vec3 SamplerIntegrator::specularTransmit(const RayDifferential& ray, const HitRecord& record, const Scene& scene, Sampler& sampler, int depth) const
 {
     glm::vec3 wi(0, 0, 1);
     float pdf = 0;

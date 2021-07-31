@@ -20,7 +20,7 @@ namespace {
     std::unordered_map<std::string, std::shared_ptr<Texture>> _texturesCache;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 }
    
-bool ModelLoader::loadModel(std::string path, SceneData& scene, const Transform& transform)
+bool ModelLoader::loadModel(std::string path, Scene& scene, const Transform& transform)
 {
     Assimp::Importer importer;
     const aiScene* ai_scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
@@ -42,7 +42,7 @@ void ModelLoader::_processNode(
     aiNode* node,
     const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    const std::string& directory, SceneData& scene, const Transform& transform)
+    const std::string& directory, Scene& scene, const Transform& transform)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -60,7 +60,7 @@ void ModelLoader::_processMesh(
     aiMesh* assimp_mesh,
     const aiScene* ai_scene,
     std::unordered_map<aiMaterial*, unsigned int>& model_materials,
-    const std::string& directory, SceneData& scene, const Transform& transform)
+    const std::string& directory, Scene& scene, const Transform& transform)
 {
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 

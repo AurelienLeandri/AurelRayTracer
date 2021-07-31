@@ -8,7 +8,7 @@
 #include "Light.h"
 #include "Distribution2D.h"
 
-std::vector<std::unique_ptr<SceneData>> SceneFactory::_scenes;
+std::vector<std::unique_ptr<Scene>> SceneFactory::_scenes;
 
 namespace { // embree
 
@@ -19,7 +19,7 @@ namespace { // embree
 
 }
 
-SceneData::~SceneData()
+Scene::~Scene()
 {
     if (_rtcScene) {
         rtcReleaseScene(_rtcScene);
@@ -31,7 +31,7 @@ SceneData::~SceneData()
     }
 }
 
-bool SceneData::computeAccelerationStructures()
+bool Scene::computeAccelerationStructures()
 {
 	_rtcDevice = rtcNewDevice(nullptr);
 
@@ -57,7 +57,7 @@ bool SceneData::computeAccelerationStructures()
 * Cast a single ray with origin (ox, oy, oz) and direction
 * (dx, dy, dz).
 */
-bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
+bool Scene::castRay(const Ray& ray, HitRecord& hit_record) const
 {
     /*
      * The intersect context can be used to set intersection
@@ -157,48 +157,48 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
     return false;
 }
 
-const std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes() const
+const std::unordered_map<unsigned int, std::shared_ptr<Shape>>& Scene::getShapes() const
 {
 	return _geometries;
 }
 
-std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes()
+std::unordered_map<unsigned int, std::shared_ptr<Shape>>& Scene::getShapes()
 {
 	return _geometries;
 }
 
-const std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials() const
+const std::unordered_map<unsigned int, std::shared_ptr<Material>>& Scene::getMaterials() const
 {
 	return _materials;
 }
 
-std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials()
+std::unordered_map<unsigned int, std::shared_ptr<Material>>& Scene::getMaterials()
 {
 	return _materials;
 }
 
-const std::vector<std::shared_ptr<const Light>>& SceneData::getLights() const
+const std::vector<std::shared_ptr<const Light>>& Scene::getLights() const
 {
 	return _lights;
 }
 
-std::vector<std::shared_ptr<const Light>>& SceneData::getLights()
+std::vector<std::shared_ptr<const Light>>& Scene::getLights()
 {
 	return _lights;
 }
 
-const InfiniteAreaLight* SceneData::getEnvironmentLight() const
+const InfiniteAreaLight* Scene::getEnvironmentLight() const
 {
     return _environmentLight;
 }
 
-unsigned int SceneData::addShape(std::shared_ptr<Shape> shape)
+unsigned int Scene::addShape(std::shared_ptr<Shape> shape)
 {
 	_geometries[_geometries.size()] = shape;
 	return _geometries.size() - 1;
 }
 
-unsigned int SceneData::addLight(std::shared_ptr<Light> light, std::shared_ptr<Shape> lightShape)
+unsigned int Scene::addLight(std::shared_ptr<Light> light, std::shared_ptr<Shape> lightShape)
 {
     if (light->getType() == LightType::INFINITE_AREA) {
         _environmentLight = static_cast<InfiniteAreaLight*>(light.get());
@@ -213,14 +213,14 @@ unsigned int SceneData::addLight(std::shared_ptr<Light> light, std::shared_ptr<S
 	return 0;
 }
 
-unsigned int SceneData::addMaterial(std::shared_ptr<Material> material)
+unsigned int Scene::addMaterial(std::shared_ptr<Material> material)
 {
 	_materials[_materials.size() + 1] = material;
 	return _materials.size();
 }
 
-SceneData *SceneFactory::createScene()
+Scene *SceneFactory::createScene()
 {
-	_scenes.push_back(std::make_unique<SceneData>());
+	_scenes.push_back(std::make_unique<Scene>());
 	return _scenes.back().get();
 }

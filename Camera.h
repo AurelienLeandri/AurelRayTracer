@@ -25,6 +25,12 @@ public:
 	std::shared_ptr<const Film> getFilm() const;
 	std::shared_ptr<Film> getFilm();
 	float generateRayDifferential(const CameraSample& sample, RayDifferential& ray) const;
+	const glm::vec3& getPosition() const;
+	const glm::vec3& getUp() const;
+	const glm::vec3& getRight() const;
+	const glm::vec3& getFront() const;
+	void setPosition(const glm::vec3& position);
+	void setFront(const glm::vec3& front);
 
 private:
 	// Screen informations

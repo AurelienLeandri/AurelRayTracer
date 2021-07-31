@@ -9,7 +9,7 @@ WhittedIntegrator::WhittedIntegrator(int maxDepth, std::shared_ptr<Camera> camer
 {
 }
 
-glm::vec3 WhittedIntegrator::Li(const RayDifferential& ray, const SceneData& scene, Sampler& sampler, int depth) const
+glm::vec3 WhittedIntegrator::Li(const RayDifferential& ray, const Scene& scene, Sampler& sampler, int depth) const
 {
 	glm::vec3 radiance(0);
 	HitRecord record;

@@ -20,6 +20,21 @@ int Renderer::cleanup()
 	return 0;
 }
 
+void Renderer::setCamera(const Camera& camera)
+{
+    _camera = &camera;
+}
+
+void Renderer::setCamera(const Camera* camera)
+{
+    _camera = camera;
+}
+
+void Renderer::setScene(const Scene* scene)
+{
+    _scene = scene;
+}
+
 void Renderer::_createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -106,6 +121,62 @@ void Renderer::_createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     }
 
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
+}
+
+void Renderer::_createCommandPool() {
+    const VulkanInstance::QueueFamilyIndices& queueFamilyIndices = _vulkan.getQueueFamilyIndices();
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.flags = 0;
+
+    if (vkCreateCommandPool(_vulkan.getLogicalDevice(), &poolInfo, nullptr, &_commandPool)) {
+        throw std::runtime_error("failed to create command pool!");
+    }
+}
+
+void Renderer::_copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+    VkCommandBuffer commandBuffer = _beginSingleTimeCommands();
+
+    VkBufferCopy copyRegion{};
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    _endSingleTimeCommands(commandBuffer);
+}
+
+VkCommandBuffer Renderer::_beginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = _commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(_vulkan.getLogicalDevice(), &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void Renderer::_endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(_vulkan.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(_vulkan.getGraphicsQueue());
+
+    vkFreeCommandBuffers(_vulkan.getLogicalDevice(), _commandPool, 1, &commandBuffer);
 }
 
 VkVertexInputBindingDescription Renderer::_getVertexBindingDescription() {

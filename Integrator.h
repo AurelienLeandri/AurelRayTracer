@@ -1,11 +1,11 @@
 #pragma once
 
-class SceneData;
+class Scene;
 
 class Integrator
 {
 public:
 	virtual ~Integrator() = default;
-	virtual void render(const SceneData &sceneData) = 0;
+	virtual void render(const Scene &sceneData) = 0;
 };
 

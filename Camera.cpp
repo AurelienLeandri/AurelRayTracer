@@ -42,3 +42,37 @@ float Camera::generateRayDifferential(const CameraSample& sample, RayDifferentia
 {
 	return 1.0f;
 }
+
+const glm::vec3& Camera::getPosition() const
+{
+	return _position;
+}
+
+const glm::vec3& Camera::getUp() const
+{
+	return _up;
+}
+
+const glm::vec3& Camera::getRight() const
+{
+	return _right;
+}
+
+const glm::vec3& Camera::getFront() const
+{
+	return _front;
+}
+
+void Camera::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
+void Camera::setFront(const glm::vec3& front)
+{
+	_front = glm::normalize(front);
+	// Also re-calculate the Right and Up vector
+	_right = glm::normalize(glm::cross(_front, glm::vec3(0, 1, 0)));
+	// Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	_up = glm::normalize(glm::cross(_right, _front));
+}

@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "NavigationRenderer.h"
+#include "Scene.h"
+#include "ModelLoader.h"
 
 Application::Application() :
     _camera(glm::vec3(0, 0, -1), glm::vec3(0), glm::vec3(0, 1, 0), (40.f * float(M_PI)) / 180.f, static_cast<float>(DEFAULT_WINDOW_WIDTH) / DEFAULT_WINDOW_HEIGHT),
@@ -15,6 +17,25 @@ Application::Application() :
 
 Application::~Application()
 {
+    std::string failed;
+    for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
+        std::unique_ptr<Renderer>& renderer = pair.second;
+        if (renderer->cleanup()) {
+            failed = pair.first;
+            break;
+        }
+    }
+
+    if (failed.size()) {
+        std::cerr << "Failed to cleanup renderer " << failed << std::endl;
+    }
+
+    _vulkan.cleanup();
+
+    glfwDestroyWindow(_window);
+    _window = nullptr;
+
+    glfwTerminate();
 }
 
 int Application::init()
@@ -24,7 +45,7 @@ int Application::init()
         return -1;
     }
 
-    _inputManager.init(_window);
+    _inputManager.init(_window, &_camera);
 
     if (_vulkan.init(_window)) {
         std::cerr << "Failed to initialize Vulkan instance" << std::endl;
@@ -62,7 +83,13 @@ int Application::_initWindow()
 int Application::_initRenderers(std::string& failed)
 {
     _renderers["NavigationRenderer"] = std::make_unique<NavigationRenderer>(*_window, _vulkan);
-    
+
+    for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
+        std::unique_ptr<Renderer>& renderer = pair.second;
+        renderer->setCamera(_camera);
+        renderer->setScene(_scene);
+    }
+
     for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
         std::unique_ptr<Renderer>& renderer = pair.second;
         if (renderer->init()) {
@@ -72,4 +99,31 @@ int Application::_initRenderers(std::string& failed)
     }
 
     return failed.size() ? -1 : 0;
+}
+
+void Application::_cleanUp()
+{
+}
+
+void Application::loadScene(const std::string& fileName)
+{
+    // TODO: load scene and remove this temp code
+    auto s = SceneFactory::createScene();
+    TransformParameters t;
+    const std::string MODEL_PATH = "viking_room/viking_room.obj";
+    std::string model_path = MODEL_PATH;
+    if (!ModelLoader::loadModel(model_path, *s, Transform(t))) {
+        std::cerr << "Could not load model " << model_path << std::endl;
+        return;
+    }
+
+    _scene = s;
+
+}
+
+void Application::mainLoop()
+{
+    while (_inputManager.processInput()) {
+        _renderers["NavigationRenderer"]->iterate();
+    }
 }

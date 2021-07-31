@@ -14,10 +14,10 @@ class InfiniteAreaLight;
 /*
 * Holds the data of every mesh throughout ApplicationOld lifetime
 */
-class SceneData
+class Scene
 {
 public:
-	~SceneData();
+	~Scene();
 
 public:
 	bool computeAccelerationStructures();
@@ -53,8 +53,8 @@ private:
 
 class SceneFactory {
 public:
-	static SceneData *createScene();
+	static Scene *createScene();
 private:
-	static std::vector<std::unique_ptr<SceneData>> _scenes;
+	static std::vector<std::unique_ptr<Scene>> _scenes;
 };
 

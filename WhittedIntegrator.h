@@ -9,7 +9,7 @@ public:
 
 public:
     // Inherited via SamplerIntegrator
-    virtual glm::vec3 Li(const RayDifferential& ray, const SceneData& scene, Sampler& sampler, int depth = 0) const override;
+    virtual glm::vec3 Li(const RayDifferential& ray, const Scene& scene, Sampler& sampler, int depth = 0) const override;
 
 private:
     int _maxDepth = 0;
