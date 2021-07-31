@@ -91,15 +91,23 @@ int VulkanInstance::cleanup()
             vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
             _debugMessenger = VK_NULL_HANDLE;
         }
-        else
+        else {
             std::cerr << "Failed to load extension function vkDestroyDebugUtilsMessengerEXT" << std::endl;
-        return -1;
+            return -1;
+        }
     }
 
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    _surface = VK_NULL_HANDLE;
     vkDestroyInstance(_instance, nullptr);
+    _instance = VK_NULL_HANDLE;
 
     return 0;
+}
+
+void VulkanInstance::waitForIdleDevice() const
+{
+    vkDeviceWaitIdle(_device);
 }
 
 void VulkanInstance::cleanupSwapChain() {
@@ -372,6 +380,8 @@ void VulkanInstance::_createLogicalDevice() {
 }
 
 void VulkanInstance::_createSwapChain() {
+    _swapChainSupportDetails = _querySwapChainSupport(_physicalDevice);
+
     VkSurfaceFormatKHR surfaceFormat = _chooseSwapSurfaceFormat(_swapChainSupportDetails.formats);
     VkPresentModeKHR presentMode = _chooseSwapPresentMode(_swapChainSupportDetails.presentModes);
     VkExtent2D extent = _chooseSwapExtent(_swapChainSupportDetails.capabilities);

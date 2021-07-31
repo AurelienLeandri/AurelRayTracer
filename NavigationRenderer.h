@@ -34,6 +34,7 @@ private:
 	void _createUniformBuffers();
 	void _createCommandBuffers();
 	void _createSyncObjects();
+	void _cleanupSwapChainDependentResources();
 	void _recreateSwapChainDependentResources();
 	void _createTextureImage();
 	void _createTextureImageView();
@@ -44,10 +45,10 @@ private:
 	void _createDescriptorPool();
 	void _createDescriptorSets();
 	void _updateUniformBuffer(uint32_t currentImage);
+	void _createCommandPool();
+	void _copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 	void _drawFrame();
-
-	void _cleanupSwapChain();
 
 private:
 	struct UniformBufferObject {
@@ -62,15 +63,15 @@ private:
 	in Renderer
 	*/
 	VkFormat _depthBufferFormat = VK_FORMAT_UNDEFINED;
-	VkDescriptorSetLayout _descriptorSetLayout;
-	VkPipelineLayout _pipelineLayout;
-	VkPipeline _graphicsPipeline;
-	VkImage _colorImage;
-	VkDeviceMemory _colorImageMemory;
-	VkImageView _colorImageView;
-	VkImage _depthImage;
-	VkDeviceMemory _depthImageMemory;
-	VkImageView _depthImageView;
+	VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
+	VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
+	VkImage _colorImage = VK_NULL_HANDLE;
+	VkDeviceMemory _colorImageMemory = VK_NULL_HANDLE;
+	VkImageView _colorImageView = VK_NULL_HANDLE;
+	VkImage _depthImage = VK_NULL_HANDLE;
+	VkDeviceMemory _depthImageMemory = VK_NULL_HANDLE;
+	VkImageView _depthImageView = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _swapChainFramebuffers;
 	std::vector<VkBuffer> _uniformBuffers;
 	std::vector<VkDeviceMemory> _uniformBuffersMemory;
@@ -81,18 +82,20 @@ private:
 	std::vector<VkFence> _inFlightFences;
 	std::vector<VkFence> _imagesInFlight;
 	size_t _currentFrame = 0;
-	VkBuffer _vertexBuffer;
-	VkDeviceMemory _vertexBufferMemory;
-	VkBuffer _indexBuffer;
-	VkDeviceMemory _indexBufferMemory;
-	VkDescriptorPool _descriptorPool;
+	VkBuffer _vertexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory _vertexBufferMemory = VK_NULL_HANDLE;
+	VkBuffer _indexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory _indexBufferMemory = VK_NULL_HANDLE;
+	VkDescriptorPool _descriptorPool = VK_NULL_HANDLE;
 	std::vector<VkDescriptorSet> _descriptorSets;
+	VkRenderPass _renderPass = VK_NULL_HANDLE;
+	VkCommandPool _commandPool = VK_NULL_HANDLE;
 
 	// TODO: Should be removed
-	VkImage _textureImage;
-	VkDeviceMemory _textureImageMemory;
-	VkImageView _textureImageView;
-	VkSampler _textureSampler;
+	VkImage _textureImage = VK_NULL_HANDLE;
+	VkDeviceMemory _textureImageMemory = VK_NULL_HANDLE;
+	VkImageView _textureImageView = VK_NULL_HANDLE;
+	VkSampler _textureSampler = VK_NULL_HANDLE;
 	unsigned int _mipLevels = 0;
 };
 

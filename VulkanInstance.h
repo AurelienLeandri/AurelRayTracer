@@ -10,8 +10,8 @@ class VulkanInstance
 public:
 	// Vulkan instance properties that should be shared with renderers
 	struct Properties {
-		VkFormat swapChainImageFormat;
-		VkExtent2D swapChainExtent;
+		VkFormat swapChainImageFormat = VK_FORMAT_UNDEFINED;
+		VkExtent2D swapChainExtent = { 0 };
 		VkSampleCountFlagBits maxNbMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
 		float maxSamplerAnisotropy = 0.f;
 	};
@@ -23,7 +23,7 @@ public:
 	};
 
 	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
+		VkSurfaceCapabilitiesKHR capabilities = { 0 };
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
 	};
@@ -32,6 +32,7 @@ public:
 	int init(GLFWwindow* window);
 	void recreateSwapChain();
 	int cleanup();
+	void waitForIdleDevice() const;
 
 	// Utility
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) const;
@@ -73,20 +74,20 @@ private:
 
 private:
 	GLFWwindow* _window = nullptr;
-	VkInstance _instance;
-	VkDebugUtilsMessengerEXT _debugMessenger;
-	VkSurfaceKHR _surface;
+	VkInstance _instance = VK_NULL_HANDLE;
+	VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
+	VkSurfaceKHR _surface = VK_NULL_HANDLE;
 
 	// Device
-	VkPhysicalDevice _physicalDevice;
+	VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
 	QueueFamilyIndices _queueFamilyIndices;
 	SwapChainSupportDetails _swapChainSupportDetails;
-	VkDevice _device;
-	VkQueue _graphicsQueue;
-	VkQueue _presentationQueue;
+	VkDevice _device = VK_NULL_HANDLE;
+	VkQueue _graphicsQueue = VK_NULL_HANDLE;
+	VkQueue _presentationQueue = VK_NULL_HANDLE;
 
 	// Swap chain
-	VkSwapchainKHR _swapChain;
+	VkSwapchainKHR _swapChain = VK_NULL_HANDLE;
 	std::vector<VkImage> _swapChainImages;
 	std::vector<VkImageView> _swapChainImageViews;
 

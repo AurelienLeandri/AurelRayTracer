@@ -123,34 +123,11 @@ void Renderer::_createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
 
-void Renderer::_createCommandPool() {
-    const VulkanInstance::QueueFamilyIndices& queueFamilyIndices = _vulkan.getQueueFamilyIndices();
-
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-    poolInfo.flags = 0;
-
-    if (vkCreateCommandPool(_vulkan.getLogicalDevice(), &poolInfo, nullptr, &_commandPool)) {
-        throw std::runtime_error("failed to create command pool!");
-    }
-}
-
-void Renderer::_copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
-    VkCommandBuffer commandBuffer = _beginSingleTimeCommands();
-
-    VkBufferCopy copyRegion{};
-    copyRegion.size = size;
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    _endSingleTimeCommands(commandBuffer);
-}
-
-VkCommandBuffer Renderer::_beginSingleTimeCommands() {
+VkCommandBuffer Renderer::_beginSingleTimeCommands(VkCommandPool& commandPool) {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = _commandPool;
+    allocInfo.commandPool = commandPool;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -165,7 +142,7 @@ VkCommandBuffer Renderer::_beginSingleTimeCommands() {
     return commandBuffer;
 }
 
-void Renderer::_endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+void Renderer::_endSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool& commandPool) {
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo submitInfo{};
@@ -176,7 +153,7 @@ void Renderer::_endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkQueueSubmit(_vulkan.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(_vulkan.getGraphicsQueue());
 
-    vkFreeCommandBuffers(_vulkan.getLogicalDevice(), _commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(_vulkan.getLogicalDevice(), commandPool, 1, &commandBuffer);
 }
 
 VkVertexInputBindingDescription Renderer::_getVertexBindingDescription() {

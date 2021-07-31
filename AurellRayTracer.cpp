@@ -434,7 +434,10 @@ int main()
 	std::cout << "Loading scene data...";
 	*/
 
-	Scene* scene = SceneFactory::createScene();
+	Scene* scene = nullptr;
+
+	/*
+	scene = SceneFactory::createScene();
 
 	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
@@ -442,10 +445,17 @@ int main()
 	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_sun.hdr");
 	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_white.hdr");
 	scene->addLight(environmentLight);
+	*/
 
 	Application application;
-	application.loadScene("blabla");
-	application.init();
+	if (int result = application.loadScene("viking_room/viking_room.obj")) {
+		return result;
+	}
+
+	if (int result = application.start()) {
+		return result;
+	}
+
 	application.mainLoop();
 
 	/*

@@ -18,8 +18,10 @@ public:
 	~Application();
 
 public:
-	int init();
-	void loadScene(const std::string& fileName);
+	int start();
+	int loadScene(const std::string& filePath);
+	int loadScene(Scene* scene);
+	void setCamera(const Camera& camera);
 	void mainLoop();
 
 private:
@@ -32,13 +34,14 @@ private:
 	static const unsigned int DEFAULT_WINDOW_HEIGHT = 1200;
 
 private:
-	//std::unique_ptr<Scene> _scene = nullptr;
 	std::unordered_map<std::string, std::unique_ptr<Renderer>> _renderers;
 	InputManager _inputManager;
 	VulkanInstance _vulkan;
 	Camera _camera;
 	GLFWwindow* _window = nullptr;
 	Scene* _scene = nullptr;
+	std::vector<std::string> _rendererNames;
+	unsigned int _activeRenderer = -1;
 
 	friend class InputManager;
 };

@@ -17,20 +17,9 @@ Application::Application() :
 
 Application::~Application()
 {
-    std::string failed;
-    for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
-        std::unique_ptr<Renderer>& renderer = pair.second;
-        if (renderer->cleanup()) {
-            failed = pair.first;
-            break;
-        }
-    }
+    _vulkan.waitForIdleDevice();
 
-    if (failed.size()) {
-        std::cerr << "Failed to cleanup renderer " << failed << std::endl;
-    }
-
-    _vulkan.cleanup();
+    _cleanUp();
 
     glfwDestroyWindow(_window);
     _window = nullptr;
@@ -38,7 +27,7 @@ Application::~Application()
     glfwTerminate();
 }
 
-int Application::init()
+int Application::start()
 {
     if (_initWindow()) {
         std::cerr << "Failed to initialize window context" << std::endl;
@@ -83,6 +72,8 @@ int Application::_initWindow()
 int Application::_initRenderers(std::string& failed)
 {
     _renderers["NavigationRenderer"] = std::make_unique<NavigationRenderer>(*_window, _vulkan);
+    _rendererNames.push_back("NavigationRenderer");
+    _activeRenderer = 0;
 
     for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
         std::unique_ptr<Renderer>& renderer = pair.second;
@@ -103,27 +94,65 @@ int Application::_initRenderers(std::string& failed)
 
 void Application::_cleanUp()
 {
-}
+    _vulkan.waitForIdleDevice();
 
-void Application::loadScene(const std::string& fileName)
-{
-    // TODO: load scene and remove this temp code
-    auto s = SceneFactory::createScene();
-    TransformParameters t;
-    const std::string MODEL_PATH = "viking_room/viking_room.obj";
-    std::string model_path = MODEL_PATH;
-    if (!ModelLoader::loadModel(model_path, *s, Transform(t))) {
-        std::cerr << "Could not load model " << model_path << std::endl;
-        return;
+    std::string failed;
+    for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
+        std::unique_ptr<Renderer>& renderer = pair.second;
+        if (renderer->cleanup()) {
+            failed = pair.first;
+            break;
+        }
     }
 
-    _scene = s;
+    if (failed.size()) {
+        std::cerr << "Failed to cleanup renderer " << failed << std::endl;
+    }
 
+    _renderers.clear();
+
+    _vulkan.cleanup();
+}
+
+int Application::loadScene(const std::string& filePath)
+{
+    _scene = SceneFactory::createScene();
+
+    TransformParameters t;
+    if (!ModelLoader::loadModel(filePath, *_scene, Transform(t))) {
+        std::cerr << "Could not load model " << filePath << std::endl;
+        return -1;
+    }
+
+    return 0;
+}
+
+int Application::loadScene(Scene* scene)
+{
+    _scene = scene;
+    return 0;
+}
+
+void Application::setCamera(const Camera& camera)
+{
+    _camera = camera;
 }
 
 void Application::mainLoop()
 {
+    int previouslyActive = _activeRenderer;
+    _renderers[_rendererNames[_activeRenderer]]->start();
+
     while (_inputManager.processInput()) {
+
+        if (_activeRenderer != previouslyActive) {
+            _renderers[_rendererNames[previouslyActive]]->stop();
+            _renderers[_rendererNames[_activeRenderer]]->start();
+            previouslyActive = _activeRenderer;
+        }
+
         _renderers["NavigationRenderer"]->iterate();
     }
+
+    _renderers[_rendererNames[_activeRenderer]]->stop();
 }

@@ -72,59 +72,47 @@ int NavigationRenderer::cleanup()
 {
     VkDevice& device = _vulkan.getLogicalDevice();
 
-    _cleanupSwapChain();
+    vkDeviceWaitIdle(device);
+
+    _cleanupSwapChainDependentResources();
 
     vkDestroySampler(device, _textureSampler, nullptr);
+    _textureSampler = VK_NULL_HANDLE;
     vkDestroyImageView(device, _textureImageView, nullptr);
+    _textureImageView = VK_NULL_HANDLE;
 
     vkDestroyImage(device, _textureImage, nullptr);
+    _textureImage = VK_NULL_HANDLE;
     vkFreeMemory(device, _textureImageMemory, nullptr);
+    _textureImageMemory = VK_NULL_HANDLE;
 
     vkDestroyDescriptorSetLayout(device, _descriptorSetLayout, nullptr);
+    _descriptorSetLayout = VK_NULL_HANDLE;
 
     vkDestroyBuffer(device, _indexBuffer, nullptr);
+    _indexBuffer = VK_NULL_HANDLE;
     vkFreeMemory(device, _indexBufferMemory, nullptr);
+    _indexBufferMemory = VK_NULL_HANDLE;
 
     vkDestroyBuffer(device, _vertexBuffer, nullptr);
+    _vertexBuffer = VK_NULL_HANDLE;
     vkFreeMemory(device, _vertexBufferMemory, nullptr);
+    _vertexBufferMemory = VK_NULL_HANDLE;
 
+    _imagesInFlight.clear();
     for (size_t i = 0; i < _MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(device, _renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(device, _imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(device, _inFlightFences[i], nullptr);
     }
+    _renderFinishedSemaphores.clear();
+    _imageAvailableSemaphores.clear();
+    _inFlightFences.clear();
 
     vkDestroyCommandPool(device, _commandPool, nullptr);
+    _commandPool = VK_NULL_HANDLE;
 
 	return 0;
-}
-
-void NavigationRenderer::_cleanupSwapChain() {
-    VkDevice device = _vulkan.getLogicalDevice();
-    vkDestroyImageView(device, _colorImageView, nullptr);
-    vkDestroyImage(device, _colorImage, nullptr);
-    vkFreeMemory(device, _colorImageMemory, nullptr);
-
-    vkDestroyImageView(device, _depthImageView, nullptr);
-    vkDestroyImage(device, _depthImage, nullptr);
-    vkFreeMemory(device, _depthImageMemory, nullptr);
-
-    for (size_t i = 0; i < _swapChainFramebuffers.size(); i++) {
-        vkDestroyFramebuffer(device, _swapChainFramebuffers[i], nullptr);
-    }
-
-    vkFreeCommandBuffers(device, _commandPool, static_cast<uint32_t>(_commandBuffers.size()), _commandBuffers.data());
-
-    vkDestroyPipeline(device, _graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device, _pipelineLayout, nullptr);
-    vkDestroyRenderPass(device, _renderPass, nullptr);
-
-    for (size_t i = 0; i < _vulkan.getSwapChainSize(); i++) {
-        vkDestroyBuffer(device, _uniformBuffers[i], nullptr);
-        vkFreeMemory(device, _uniformBuffersMemory[i], nullptr);
-    }
-
-    vkDestroyDescriptorPool(device, _descriptorPool, nullptr);
 }
 
 int NavigationRenderer::iterate()
@@ -408,7 +396,9 @@ void NavigationRenderer::_createGraphicsPipeline() {
     }
 
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    fragShaderModule = VK_NULL_HANDLE;
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    vertShaderModule = VK_NULL_HANDLE;
 }
 
 VkShaderModule NavigationRenderer::_createShaderModule(const std::vector<char>& code) {
@@ -576,7 +566,9 @@ void NavigationRenderer::_createTextureImage() {
     _generateMipmaps(_textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, _mipLevels);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
+    stagingBuffer = VK_NULL_HANDLE;
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+    stagingBufferMemory = VK_NULL_HANDLE;
 }
 
 void NavigationRenderer::_generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels) {
@@ -593,7 +585,7 @@ void NavigationRenderer::_generateMipmaps(VkImage image, VkFormat imageFormat, i
     }
     */
 
-    VkCommandBuffer commandBuffer = _beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = _beginSingleTimeCommands(_commandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -668,11 +660,11 @@ void NavigationRenderer::_generateMipmaps(VkImage image, VkFormat imageFormat, i
         0, nullptr,
         1, &barrier);
 
-    _endSingleTimeCommands(commandBuffer);
+    _endSingleTimeCommands(commandBuffer, _commandPool);
 }
 
 void NavigationRenderer::_transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) {
-    VkCommandBuffer commandBuffer = _beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = _beginSingleTimeCommands(_commandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -719,12 +711,12 @@ void NavigationRenderer::_transitionImageLayout(VkImage image, VkFormat format, 
         1, &barrier
     );
 
-    _endSingleTimeCommands(commandBuffer);
+    _endSingleTimeCommands(commandBuffer, _commandPool);
 }
 
 void NavigationRenderer::_copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
     // TODO: Try to setup a command buffer to record several operations and then flush everything once, instead of calling beginSingleTimeCommands and endSingleTimeCommands each time. Could also be done for uniforms and other stuff that creates single-time command buffers several times.
-    VkCommandBuffer commandBuffer = _beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = _beginSingleTimeCommands(_commandPool);
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -752,7 +744,7 @@ void NavigationRenderer::_copyBufferToImage(VkBuffer buffer, VkImage image, uint
         &region
     );
 
-    _endSingleTimeCommands(commandBuffer);
+    _endSingleTimeCommands(commandBuffer, _commandPool);
 }
 
 void NavigationRenderer::_createTextureImageView() {
@@ -807,7 +799,9 @@ void NavigationRenderer::_createVertexBuffer()
     _copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
+    stagingBuffer = VK_NULL_HANDLE;
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+    stagingBufferMemory = VK_NULL_HANDLE;
 }
 
 void NavigationRenderer::_createIndexBuffer()
@@ -830,7 +824,9 @@ void NavigationRenderer::_createIndexBuffer()
     _copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
+    stagingBuffer = VK_NULL_HANDLE;
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+    stagingBufferMemory = VK_NULL_HANDLE;
 }
 
 void NavigationRenderer::_createDescriptorPool() {
@@ -938,6 +934,7 @@ void NavigationRenderer::_drawFrame() {
 
     // Swap chain is invalid or suboptimal (for example because of a window resize)
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        _cleanupSwapChainDependentResources();
         _vulkan.recreateSwapChain();
         _recreateSwapChainDependentResources();
         return;
@@ -990,6 +987,7 @@ void NavigationRenderer::_drawFrame() {
     result = vkQueuePresentKHR(_vulkan.getPresentationQueue(), &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || InputManager::framebufferResized) {
         InputManager::framebufferResized = false;
+        _cleanupSwapChainDependentResources();
         _vulkan.recreateSwapChain();
         _recreateSwapChainDependentResources();
     }
@@ -1012,6 +1010,53 @@ void NavigationRenderer::_recreateSwapChainDependentResources() {
     _createCommandBuffers();
 }
 
+void NavigationRenderer::_cleanupSwapChainDependentResources()
+{
+    VkDevice& device = _vulkan.getLogicalDevice();
+
+    vkDeviceWaitIdle(device);
+
+    vkDestroyImageView(device, _colorImageView, nullptr);
+    _colorImageView = VK_NULL_HANDLE;
+    vkDestroyImage(device, _colorImage, nullptr);
+    _colorImage = VK_NULL_HANDLE;
+    vkFreeMemory(device, _colorImageMemory, nullptr);
+    _colorImageMemory = VK_NULL_HANDLE;
+
+    vkDestroyImageView(device, _depthImageView, nullptr);
+    _depthImageView = VK_NULL_HANDLE;
+    vkDestroyImage(device, _depthImage, nullptr);
+    _depthImage = VK_NULL_HANDLE;
+    vkFreeMemory(device, _depthImageMemory, nullptr);
+    _depthImageMemory = VK_NULL_HANDLE;
+
+    for (size_t i = 0; i < _swapChainFramebuffers.size(); i++) {
+        vkDestroyFramebuffer(device, _swapChainFramebuffers[i], nullptr);
+    }
+    _swapChainFramebuffers.clear();
+
+    vkFreeCommandBuffers(device, _commandPool, static_cast<uint32_t>(_commandBuffers.size()), _commandBuffers.data());
+    _commandBuffers.clear();
+
+    vkDestroyPipeline(device, _graphicsPipeline, nullptr);
+    _graphicsPipeline = VK_NULL_HANDLE;
+    vkDestroyPipelineLayout(device, _pipelineLayout, nullptr);
+    _pipelineLayout = VK_NULL_HANDLE;
+    vkDestroyRenderPass(device, _renderPass, nullptr);
+    _renderPass = VK_NULL_HANDLE;
+
+    for (size_t i = 0; i < _vulkan.getSwapChainSize(); i++) {
+        vkDestroyBuffer(device, _uniformBuffers[i], nullptr);
+        vkFreeMemory(device, _uniformBuffersMemory[i], nullptr);
+    }
+    _uniformBuffers.clear();
+    _uniformBuffersMemory.clear();
+
+    vkDestroyDescriptorPool(device, _descriptorPool, nullptr);
+    _descriptorPool = VK_NULL_HANDLE;
+    _descriptorSets.clear();
+}
+
 void NavigationRenderer::_updateUniformBuffer(uint32_t currentImage) {
     // TODO: use Push constant for small buffers that are frequently updated.
     UniformBufferObject ubo{};
@@ -1025,6 +1070,29 @@ void NavigationRenderer::_updateUniformBuffer(uint32_t currentImage) {
     vkMapMemory(device, _uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
     memcpy(data, &ubo, sizeof(ubo));
     vkUnmapMemory(device, _uniformBuffersMemory[currentImage]);
+}
+
+void NavigationRenderer::_createCommandPool() {
+    const VulkanInstance::QueueFamilyIndices& queueFamilyIndices = _vulkan.getQueueFamilyIndices();
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.flags = 0;
+
+    if (vkCreateCommandPool(_vulkan.getLogicalDevice(), &poolInfo, nullptr, &_commandPool)) {
+        throw std::runtime_error("failed to create command pool!");
+    }
+}
+
+void NavigationRenderer::_copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+    VkCommandBuffer commandBuffer = _beginSingleTimeCommands(_commandPool);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    _endSingleTimeCommands(commandBuffer, _commandPool);
 }
 
 VkFormat NavigationRenderer::_findDepthFormat() const {
