@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "NavigationRenderer.h"
+#include "RayTracerCPU.h"
 #include "Scene.h"
 #include "ModelLoader.h"
 
@@ -72,8 +73,10 @@ int Application::_initWindow()
 int Application::_initRenderers(std::string& failed)
 {
     _renderers["NavigationRenderer"] = std::make_unique<NavigationRenderer>(*_window, _vulkan);
+    _renderers["RayTracerCPU"] = std::make_unique<RayTracerCPU>(*_window, _vulkan);
     _rendererNames.push_back("NavigationRenderer");
-    _activeRenderer = 0;
+    _rendererNames.push_back("RayTracerCPU");
+    _activeRenderer = 1;
 
     for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
         std::unique_ptr<Renderer>& renderer = pair.second;
@@ -151,7 +154,7 @@ void Application::mainLoop()
             previouslyActive = _activeRenderer;
         }
 
-        _renderers["NavigationRenderer"]->iterate();
+        _renderers[_rendererNames[_activeRenderer]]->iterate();
     }
 
     _renderers[_rendererNames[_activeRenderer]]->stop();
