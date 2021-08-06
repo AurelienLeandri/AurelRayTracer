@@ -12,7 +12,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "ApplicationOld.h"
-#include "RayTracer.h"
+#include "PathTracer.h"
 #include "ModelLoader.h"
 #include "Scene.h"
 #include "Triangle.h"

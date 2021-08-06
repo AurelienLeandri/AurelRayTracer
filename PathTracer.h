@@ -10,6 +10,7 @@
 #include "ApplicationOld.h"
 #include "Vertex.h"
 #include "BxDF.h"
+#include "Integrator.h"
 
 class Camera;
 class Ray;
@@ -18,7 +19,8 @@ class Material;
 class Scene;
 class Light;
 
-class RayTracer {
+class PathTracer : public Integrator
+{
 private:
     enum DirectLightingSamplingStrategy {
         LightsOnly = 1 << 0,
@@ -36,16 +38,16 @@ public:
     };
 
 public:
-    RayTracer(const Parameters& parameters = {});
-    ~RayTracer();
+    PathTracer(const Parameters& parameters = {});
 
 public:
-    int init();
-    bool iterate();
+    virtual int init();
+    virtual bool iterate();
+    virtual int cleanup();
+
     const float* getImageBuffer() const;
     void setCamera(std::shared_ptr<Camera> camera);
     void setScene(const Scene& scene);
-    bool start();
     glm::vec3 _directLighting(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const DirectLightingSamplingStrategy& strategy = DirectLightingSamplingStrategy::LightsAndBSDF) const;
 
 
@@ -53,12 +55,6 @@ private:
     glm::vec3 _getColor(const Ray& r, size_t max_depth = 0) const;
 
 private:
-    float* _imageBuffer = nullptr;
-
-    std::shared_ptr<Camera> _camera;
-
-    const Scene* _scene = nullptr;
-
     const Parameters _parameters;
 
     unsigned int _currentSample = 1;

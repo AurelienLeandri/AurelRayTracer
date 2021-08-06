@@ -4,10 +4,10 @@
 #include <fstream>
 
 #include "ApplicationOld.h"
-#include "RayTracer.h"
+#include "PathTracer.h"
 #include "Scene.h"
 #include "Light.h"
-#include "RayTracer.h"
+#include "PathTracer.h"
 #include "Material.h"
 #include "Sphere.h"
 #include "Camera.h"
@@ -112,9 +112,9 @@ int main() {
 		ApplicationOld ApplicationOld;
 		ApplicationOld.init();
 
-		RayTracer::Parameters params;
+		PathTracer::Parameters params;
 		params.nbSamples = nbSamples[i];
-		RayTracer ray_tracer(params);
+		PathTracer ray_tracer(params);
 
 		ray_tracer.init();
 		Scene* scene = SceneFactory::createScene();

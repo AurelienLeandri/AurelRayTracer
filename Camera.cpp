@@ -21,7 +21,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 look_at, glm::vec3 up_axis, float f
 	_lowerLeftCorner = _position - 0.5f * _screenDimensions.x * _right - 0.5f * _screenDimensions.y * _up + _front * _focusDist;
 }
 
-Ray Camera::getRay(float x, float y)
+Ray Camera::getRay(float x, float y) const
 {
 	glm::vec3 random = _lensRadius * random_in_unit_disc();
 	glm::vec3 offset(0.f, 0.f, 0.f);

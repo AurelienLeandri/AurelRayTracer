@@ -19,7 +19,7 @@ class Camera
 public:
 	Camera(glm::vec3 position, glm::vec3 look_at, glm::vec3 up_axis, float fov, float aspect, float aperture = 1.f, float focus_dist = 1.f, float t0 = 0.f, float t1 = 0.f);
 
-	Ray getRay(float x, float y);
+	Ray getRay(float x, float y) const;
 
 public:
 	std::shared_ptr<const Film> getFilm() const;

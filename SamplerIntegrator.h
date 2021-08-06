@@ -1,5 +1,5 @@
 #pragma once
-#include "Integrator.h"
+#include "IntegratorOld.h"
 
 #include <glm/glm.hpp>
 
@@ -11,7 +11,7 @@ class RayDifferential;
 struct HitRecord;
 
 class SamplerIntegrator :
-    public Integrator
+    public IntegratorOld
 {
 public:
     SamplerIntegrator(std::shared_ptr<Sampler> sampler, std::shared_ptr<Camera> camera);

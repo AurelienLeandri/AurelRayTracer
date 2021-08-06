@@ -1,4 +1,4 @@
-#include "RayTracer.h"
+#include "PathTracer.h"
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -23,34 +23,23 @@
 
 static float max_green = 0;
 
-RayTracer::RayTracer(const Parameters& parameters)
-    : _parameters(parameters), _portionSize((_parameters.width * _parameters.height) / _parameters.nbThreads)
+PathTracer::PathTracer(const Parameters& parameters) :
+    Integrator(parameters.width, parameters.height, parameters.nbChannels),
+    _parameters(parameters), _portionSize((_parameters.width * _parameters.height) / _parameters.nbThreads)
 {
 }
 
-RayTracer::~RayTracer()
+int PathTracer::init()
 {
-    if (_imageBuffer) {
-        delete[] _imageBuffer;
-        _imageBuffer = nullptr;
-    }
-}
-
-int RayTracer::init()
-{
-    if (_imageBuffer) {
-        delete[] _imageBuffer;
-        _imageBuffer = nullptr;
-    }
-
-    _imageBuffer = new float[_parameters.width * _parameters.height * _parameters.nbChannels];
-    for (int i = 0; i < _parameters.width * _parameters.height * _parameters.nbChannels; ++i)
-        _imageBuffer[i] = 1.f;
-
     return 0;
 }
 
-bool RayTracer::iterate() {
+bool PathTracer::iterate() {
+    for (unsigned char& c : _imageBuffer) {
+        if (c > 0)
+            c--;
+    }
+    return false;
     std::cout << "\tSample " << _currentSample;
 
     std::clock_t start(std::clock());
@@ -79,13 +68,18 @@ bool RayTracer::iterate() {
     return _currentSample > _parameters.nbSamples;
 }
 
+int PathTracer::cleanup()
+{
+    return 0;
+}
+
 // NOTE: taken from pbr
 float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
     float f = nf * fPdf, g = ng * gPdf;
     return (f * f) / (f * f + g * g);
 }
 
-glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const DirectLightingSamplingStrategy& strategy) const {
+glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const DirectLightingSamplingStrategy& strategy) const {
     float pdfDirectLighting = 0;
     glm::vec3 light_color(0);
     if (strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::LightsOnly)) {
@@ -146,7 +140,7 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
     return Power2Heuristic(1, pdfDirectLighting, 1, pdfBSDF) * light_color + Power2Heuristic(1, pdfBSDF, 1, pdfDirectLighting) * bsdf_color;
 }
 
-glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
+glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     size_t depth = 0;
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
@@ -203,19 +197,6 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     return color;
 }
 
-const float* RayTracer::getImageBuffer() const
-{
-    return _imageBuffer;
-}
-
-void RayTracer::setCamera(std::shared_ptr<Camera> camera) {
-    _camera = camera;
-}
-
-void RayTracer::setScene(const Scene& scene) {
-    _scene = &scene;
-}
-
 namespace { // embree
 
     void errorFunction(void* userPtr, enum RTCError error, const char* str)
@@ -223,13 +204,5 @@ namespace { // embree
         printf("error %d: %s\n", error, str);
     }
 
-}
-
-bool RayTracer::start() {
-    if (!_scene || !_camera) {
-        return false;
-    }
-    
-    return true;
 }
 
