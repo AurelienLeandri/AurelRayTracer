@@ -891,7 +891,7 @@ void RayTracerCPU::_cleanupSwapChainDependentResources()
     vkDestroyRenderPass(device, _renderPass, nullptr);
     _renderPass = VK_NULL_HANDLE;
 
-    for (size_t i = 0; i < _vulkan.getSwapChainSize(); i++) {
+    for (size_t i = 0; i < _uniformBuffers.size(); i++) {
         vkDestroyBuffer(device, _uniformBuffers[i], nullptr);
         vkFreeMemory(device, _uniformBuffersMemory[i], nullptr);
     }
