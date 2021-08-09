@@ -206,7 +206,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RenderTestsDebug|Win32'">
@@ -225,7 +225,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">
@@ -244,7 +244,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -263,7 +263,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RenderTestsDebug|x64'">
@@ -282,7 +282,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">
@@ -301,7 +301,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -324,7 +324,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RenterTests|Win32'">
@@ -347,7 +347,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -370,7 +370,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RenterTests|x64'">
@@ -393,11 +393,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc142-mt.lib;embree3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ApplicationOld.cpp" />
     <ClCompile Include="AurellRayTracer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">true</ExcludedFromBuild>
@@ -415,10 +416,15 @@
     <ClCompile Include="Embree.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="FresnelBlend.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Integrator.cpp" />
+    <ClCompile Include="IntegratorOld.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="NavigationRenderer.cpp" />
+    <ClCompile Include="PathTracer.cpp" />
     <ClCompile Include="PixelSampler.cpp" />
-    <ClCompile Include="RayTracer.cpp" />
+    <ClCompile Include="RayTracerCPU.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderTests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RenderTestsDebug|Win32'">false</ExcludedFromBuild>
@@ -467,10 +473,12 @@
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="TrowbridgeReitz.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="VulkanInstance.cpp" />
     <ClCompile Include="WhittedIntegrator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="ApplicationOld.h" />
     <ClInclude Include="BeckmannSpizzichino.h" />
     <ClInclude Include="BSDF.h" />
     <ClInclude Include="BxDF.h" />
@@ -480,10 +488,16 @@
     <ClInclude Include="Embree.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="FresnelBlend.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Integrator.h" />
+    <ClInclude Include="IntegratorOld.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="NavigationRenderer.h" />
+    <ClInclude Include="PathTracer.h" />
+    <ClInclude Include="PDF.h" />
     <ClInclude Include="PixelSampler.h" />
-    <ClInclude Include="RayTracer.h" />
+    <ClInclude Include="RayTracerCPU.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="SamplerIntegrator.h" />
     <ClInclude Include="Shape.h" />
@@ -514,6 +528,7 @@
     <ClInclude Include="TrowbridgeReitz.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VulkanInstance.h" />
     <ClInclude Include="WhittedIntegrator.h" />
   </ItemGroup>
   <ItemGroup>

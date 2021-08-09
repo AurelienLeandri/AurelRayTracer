@@ -138,7 +138,28 @@
     <ClCompile Include="Integrator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RayTracer.cpp">
+    <ClCompile Include="ApplicationOld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegratorOld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NavigationRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PathTracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RayTracerCPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanInstance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -275,7 +296,31 @@
     <ClInclude Include="Integrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RayTracer.h">
+    <ClInclude Include="ApplicationOld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IntegratorOld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NavigationRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PathTracer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PDF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerCPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
