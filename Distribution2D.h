@@ -9,7 +9,7 @@ class Distribution2D
 {
 public:
 	Distribution2D(const float* values, size_t nu, size_t nv);
-	float sample(float e1, float e2, int& u, int& v) const;
+	float sample(float e1, float e2, size_t& u, size_t& v) const;
 
 private:
 	const float* _values;

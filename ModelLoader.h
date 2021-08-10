@@ -24,13 +24,13 @@ private:
     static void _processNode(
         aiNode* node,
         const aiScene* ai_scene,
-        std::unordered_map<aiMaterial*, unsigned int>& model_materials,
+        std::unordered_map<aiMaterial*, int>& model_materials,
         const std::string& directory, SceneData& scene, const Transform& transform);
     
     static void _processMesh(
         aiMesh* assimp_mesh,
         const aiScene* ai_scene,
-        std::unordered_map<aiMaterial*, unsigned int>& model_materials,
+        std::unordered_map<aiMaterial*, int>& model_materials,
         const std::string& directory, SceneData& scene, const Transform& transform);
 };
 

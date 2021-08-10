@@ -16,9 +16,9 @@ public:
 
 public:
     // Window information
-    static const unsigned int WIDTH = 600;
-    static const unsigned int HEIGHT = 600;
-    static const unsigned int NB_CHANNELS = 3;
+    static const int WIDTH = 600;
+    static const int HEIGHT = 600;
+    static const int NB_CHANNELS = 3;
 
 private:
     bool _processInput();
@@ -26,5 +26,5 @@ private:
 private:
     // Application window
     GLFWwindow* _window = nullptr;
-    unsigned int _zoomFactor = 2;
+    int _zoomFactor = 2;
 };

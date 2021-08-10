@@ -37,7 +37,7 @@ void Mesh::commitGeometry(RTCDevice device, RTCScene rtcScene)
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &geometry[0], sizeof(glm::vec3) * 2, sizeof(Vertex), geometry.size());
 
     // Indices
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(unsigned int), indices.size() / 3);
+    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(int), indices.size() / 3);
 
     rtcCommitGeometry(geom);
     rtcAttachGeometry(rtcScene, geom);

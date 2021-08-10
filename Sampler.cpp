@@ -14,13 +14,13 @@ void Sampler::startPixel(const glm::ivec2& pixel)
     array1DOffset = array2DOffset = 0;
 }
 
-void Sampler::request1DArray(int n)
+void Sampler::request1DArray(size_t n)
 {
     _samples1DArraySizes.push_back(n);
     _sampleArray1D.push_back(std::vector<float>(n * _samplesPerPixel)); 
 }
 
-void Sampler::request2DArray(int n)
+void Sampler::request2DArray(size_t n)
 {
     _samples2DArraySizes.push_back(n);
     _sampleArray2D.push_back(std::vector<glm::vec2>(n * _samplesPerPixel));
@@ -49,7 +49,7 @@ CameraSample Sampler::generateCameraSample(const glm::ivec2& pixel)
     return cs;
 }
 
-int Sampler::getSamplesPerPixel() const
+size_t Sampler::getSamplesPerPixel() const
 {
     return _samplesPerPixel;
 }

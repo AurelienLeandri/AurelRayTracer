@@ -28,7 +28,7 @@ void SimpleRandomSampler::startPixel(const glm::ivec2& pixel)
 
 	// Create 1D array sample values
 	for (int arrayIndex = 0; arrayIndex < _sampleArray1D.size(); ++arrayIndex) {
-		int arraySize = _samples1DArraySizes[arrayIndex];
+		size_t arraySize = _samples1DArraySizes[arrayIndex];
 		for (int j = 0; j < _samplesPerPixel; j++) {
 			for (int sample = 0; sample < arraySize; ++sample) {
 				_sampleArray1D[arrayIndex][j * arraySize + sample] = frand();
@@ -38,7 +38,7 @@ void SimpleRandomSampler::startPixel(const glm::ivec2& pixel)
 
 	// Create 2D array sample values
 	for (int arrayIndex = 0; arrayIndex < _sampleArray2D.size(); ++arrayIndex) {
-		int arraySize = _samples2DArraySizes[arrayIndex];
+		size_t arraySize = _samples2DArraySizes[arrayIndex];
 		for (int s = 0; s < _samplesPerPixel; ++s) {
 			for (int j = 0; j < arraySize; ++j) {
 				_sampleArray2D[arrayIndex][s * arraySize + j] = glm::vec2(frand(), frand());

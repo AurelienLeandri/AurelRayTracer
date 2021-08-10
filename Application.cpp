@@ -110,11 +110,11 @@ int Application::init()
              1,  1,  1, 1,  // top right
     };
 
-    unsigned int quad_ebo[] = {
+    int quad_ebo[] = {
         3, 1, 2, 1, 0, 2
     };
 
-    unsigned int VBO, VAO, EBO;
+    GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -136,7 +136,7 @@ int Application::init()
 
     glBindVertexArray(0);
 
-    unsigned int texture;
+    GLuint texture;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

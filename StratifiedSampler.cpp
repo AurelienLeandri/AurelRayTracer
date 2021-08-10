@@ -42,22 +42,22 @@ void StratifiedSampler::startPixel(const glm::ivec2& pixel)
 
 	// Create 1D array sample values
 	for (int i = 0; i < _sampleArray1D.size(); ++i) {
-		int arraySize = _samples1DArraySizes[i];
+		size_t arraySize = _samples1DArraySizes[i];
 		float invSampleArraySize = 1.f / arraySize;
 		for (int j = 0; j < _samplesPerPixel; j++) {
 			for (int sample = 0; sample < arraySize; ++sample) {
 				float delta = frand();
 				_sampleArray1D[i][j * arraySize + sample] = (sample + delta) * invSampleArraySize;
 			}
-			std::shuffle(_sampleArray1D[i].begin() + (arraySize * j), _sampleArray1D[i].begin() + (arraySize * (j + 1)), rngShuffle);
+			std::shuffle(_sampleArray1D[i].begin() + (arraySize * j), _sampleArray1D[i].begin() + (arraySize * (static_cast<size_t>(j) + 1)), rngShuffle);
 		}
 	}
 
 	// Create 2D array sample values
 	for (int i = 0; i < _sampleArray2D.size(); ++i) {
-		int arraySize = _samples2DArraySizes[i];
+		size_t arraySize = _samples2DArraySizes[i];
 		for (int j = 0; j < _samplesPerPixel; j++) {
-			_latinHypercubeSampling2D(&_sampleArray2D[i][j * arraySize], arraySize);
+			_latinHypercubeSampling2D(&_sampleArray2D[i][j * arraySize], static_cast<int>(arraySize));
 		}
 	}
 
