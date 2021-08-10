@@ -30,7 +30,7 @@ bool ModelLoader::loadModel(std::string path, Scene& scene, const Transform& tra
         return false;
     }
 
-    std::unordered_map<aiMaterial*, unsigned int> model_materials;
+    std::unordered_map<aiMaterial*, int> model_materials;
     std::string directory = path.substr(0, path.find_last_of('/'));
     _processNode(ai_scene->mRootNode, ai_scene, model_materials, directory, scene, transform);
 
@@ -41,7 +41,7 @@ bool ModelLoader::loadModel(std::string path, Scene& scene, const Transform& tra
 void ModelLoader::_processNode(
     aiNode* node,
     const aiScene* ai_scene,
-    std::unordered_map<aiMaterial*, unsigned int>& model_materials,
+    std::unordered_map<aiMaterial*, int>& model_materials,
     const std::string& directory, Scene& scene, const Transform& transform)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -59,7 +59,7 @@ void ModelLoader::_processNode(
 void ModelLoader::_processMesh(
     aiMesh* assimp_mesh,
     const aiScene* ai_scene,
-    std::unordered_map<aiMaterial*, unsigned int>& model_materials,
+    std::unordered_map<aiMaterial*, int>& model_materials,
     const std::string& directory, Scene& scene, const Transform& transform)
 {
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();

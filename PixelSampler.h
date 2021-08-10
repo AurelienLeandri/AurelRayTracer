@@ -5,7 +5,7 @@ class PixelSampler :
     public Sampler
 {
 public:
-    PixelSampler(size_t samplesPerPixel, int nSampledDimensions);
+    PixelSampler(size_t samplesPerPixel, size_t nSampledDimensions);
 
 public:
     // Inherited via Sampler
@@ -16,6 +16,6 @@ public:
 protected:
     std::vector<std::vector<float>> _samples1D;
     std::vector<std::vector<glm::vec2>> _samples2D;
-    int _current1DDimension = 0, _current2DDimension = 0;
+    size_t _current1DDimension = 0, _current2DDimension = 0;
 };
 

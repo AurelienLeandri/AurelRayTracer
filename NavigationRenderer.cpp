@@ -806,7 +806,7 @@ void NavigationRenderer::_createVertexBuffer()
 
 void NavigationRenderer::_createIndexBuffer()
 {
-    const std::vector<unsigned int>& indices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->indices;
+    const std::vector<int>& indices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->indices;
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;

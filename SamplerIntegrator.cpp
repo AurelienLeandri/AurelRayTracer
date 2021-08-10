@@ -52,7 +52,7 @@ void SamplerIntegrator::render(const Scene& sceneData)
                     CameraSample cameraSample = _sampler->generateCameraSample(pixel);
                     RayDifferential ray;
                     float rayWeight = _camera->generateRayDifferential(cameraSample, ray);
-                    ray.scaleDifferentials(1 / std::sqrt(tileSampler->getSamplesPerPixel()));
+                    ray.scaleDifferentials(1 / std::sqrtf(static_cast<float>(tileSampler->getSamplesPerPixel())));
                     glm::vec3 radiance(0);
                     if (rayWeight > 0) {
                         radiance = Li(ray, sceneData, *tileSampler);

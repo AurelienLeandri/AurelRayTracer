@@ -20,7 +20,7 @@ namespace {
 		int x_offset = nbSpheres >= 5 ? -20 : -(nbSpheres / 2) * 10;
 		for (int i = 0; i < nbSpheres; ++i) {
 			std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(x_offset + (i % 5) * 10, 0, 5 - (i / 5) * 10), 5);
-			unsigned int material_id = scene.addMaterial(materials[i]);
+			int material_id = scene.addMaterial(materials[i]);
 			sphere->materialId = material_id;
 			scene.addShape(sphere);
 		}

@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-class Vertex;
+struct Vertex;
 
 class Embree
 {

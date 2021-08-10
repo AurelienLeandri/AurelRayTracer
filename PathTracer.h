@@ -57,7 +57,7 @@ private:
 private:
     const Parameters _parameters;
 
-    unsigned int _currentSample = 1;
+    int _currentSample = 1;
     const size_t _portionSize;
 };
 

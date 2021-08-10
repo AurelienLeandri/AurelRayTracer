@@ -46,10 +46,11 @@ bool PathTracer::iterate() {
 
     float buffer_factor = ((_currentSample - 1.f) / _currentSample);
     float color_factor = (1.f / _currentSample);
+    int portionSize = static_cast<int>(_portionSize);
 
 #pragma omp parallel for num_threads(NB_THREADS)
-    for (unsigned int portion = 0; portion < _parameters.nbThreads; portion++) {
-        for (size_t i = portion * _portionSize; i < (portion + 1) * _portionSize; i++) {
+    for (int portion = 0; portion < _parameters.nbThreads; portion++) {
+        for (int i = portion * portionSize; i < (portion + 1) * portionSize; i++) {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
@@ -85,8 +86,8 @@ glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &path
     if (strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::LightsOnly)) {
         // Light sampling using light distribution
         const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
-        int nbLights = sceneLights.size();
-        std::shared_ptr<const Light> light = sceneLights[int(frand() * nbLights)];
+        int nbLights = static_cast<int>(sceneLights.size());
+        std::shared_ptr<const Light> light = sceneLights[static_cast<int>(static_cast<double>(frand()) * nbLights)];
         glm::vec3 light_sample_dl(0, 0, 1);
         glm::vec3 radiance = light->sampleLi(light_sample_dl, surfaceRecord, pdfDirectLighting);
         Ray direct_lighting_ray(surfaceRecord.position, light_sample_dl);

@@ -202,7 +202,7 @@ private:
 
     // TODO: refactor Vertex.h
     std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    std::vector<int> indices;
 
     struct UniformBufferObject {
         alignas(16) glm::mat4 model;

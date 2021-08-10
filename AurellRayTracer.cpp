@@ -27,7 +27,7 @@
 
 
 namespace {
-	unsigned int make_box(Scene& scene, unsigned int material_id, const Transform& t = {})
+	int make_box(Scene& scene, int material_id, const Transform& t = {})
 	{
 		std::shared_ptr<Mesh> box_mesh = std::make_shared<Mesh>();
 
@@ -90,16 +90,16 @@ namespace {
 		std::shared_ptr<PerfectDiffuseMaterial> material_green = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.12f, 0.45f, 0.15f)));
 		std::shared_ptr<EmissiveMaterial> material_light = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(30, 30, 30)), ConstantTexture::black);
 
-		unsigned int material_red_id = scene.addMaterial(material_red);
-		unsigned int material_green_id = scene.addMaterial(material_green);
-		unsigned int material_white_id = scene.addMaterial(material_white);
-		unsigned int material_light_id = scene.addMaterial(material_light);
+		int material_red_id = scene.addMaterial(material_red);
+		int material_green_id = scene.addMaterial(material_green);
+		int material_white_id = scene.addMaterial(material_white);
+		int material_light_id = scene.addMaterial(material_light);
 
 		std::shared_ptr<DielectricMaterial> fresnel_material = std::make_shared<DielectricMaterial>(1.05f);
-		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
+		int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<PerfectSpecularMaterial> mirror_material = std::make_shared<PerfectSpecularMaterial>();
-		unsigned int mirror_material_id = scene.addMaterial(mirror_material);
+		int mirror_material_id = scene.addMaterial(mirror_material);
 
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
@@ -197,7 +197,7 @@ namespace {
 		}
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(100, 100, 100)), ConstantTexture::black);
-		unsigned int light_material_id = scene.addMaterial(light_material);
+		int light_material_id = scene.addMaterial(light_material);
 
 		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 0, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 0) }),
@@ -238,7 +238,7 @@ namespace {
 		}
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(10, 10, 10)), ConstantTexture::black);
-		unsigned int light_material_id = scene.addMaterial(light_material);
+		int light_material_id = scene.addMaterial(light_material);
 
 		std::shared_ptr<Triangle> light_mesh0 = std::make_shared<Triangle>(
 			Vertex({ glm::vec3(-3, 0, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 0) }),
@@ -278,34 +278,34 @@ namespace {
 		}
 
 		std::shared_ptr<PerfectSpecularMaterial> mirror_material = std::make_shared<PerfectSpecularMaterial>();
-		unsigned int mirror_material_id = scene.addMaterial(mirror_material);
+		int mirror_material_id = scene.addMaterial(mirror_material);
 
 		std::shared_ptr<PerfectDiffuseMaterial> lambertian_debug_material = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.1f)));
-		unsigned int lambertian_debug_material_id = scene.addMaterial(lambertian_debug_material);
+		int lambertian_debug_material_id = scene.addMaterial(lambertian_debug_material);
 
 		std::shared_ptr<DielectricMaterial> fresnel_material = std::make_shared<DielectricMaterial>(2.56f);
-		unsigned int fresnel_material_id = scene.addMaterial(fresnel_material);
+		int fresnel_material_id = scene.addMaterial(fresnel_material);
 
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1)));
-		unsigned int matte_material_id = scene.addMaterial(matte_material);
+		int matte_material_id = scene.addMaterial(matte_material);
 
 		std::shared_ptr<GlossyMaterial> plastic_material = std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.9f, 0.4f, 0.8f)), 0.01f);
-		unsigned int plastic_material_id = scene.addMaterial(plastic_material);
+		int plastic_material_id = scene.addMaterial(plastic_material);
 
 		scene.getShapes()[0]->materialId = matte_material_id;
 
-		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10);
-		std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 100), 10);
+		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10.f);
+		std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 100), 10.f);
 		sphere->materialId = plastic_material_id;
 		scene.addShape(sphere);
 
-		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10);
-		std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3(0, 25, 100), 10);
+		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10.f);
+		std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3(0, 25, 100), 10.f);
 		sphere2->materialId = mirror_material_id;
 		scene.addShape(sphere2);
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1.5, 1.5, 1.5)), ConstantTexture::black);
-		unsigned int light_material_id = scene.addMaterial(light_material);
+		int light_material_id = scene.addMaterial(light_material);
 
 		TransformParameters light_transform;
 		light_transform.translation = glm::vec3(-30, 0, 100);
@@ -351,65 +351,6 @@ namespace {
 		float fov = (40.f * float(M_PI)) / 180.f;
 		return std::make_shared<Camera>(look_from, look_at, glm::vec3(0.f, 1.f, 0.f), fov, aspect_ratio, aperture, dist_to_focus, 0.f, 1.f);
 	}
-}
-
-float *test_2D_sampling(int nb_samples, int &width, int &height, int &nb_channels) {
-	if (!nb_samples) return nullptr;
-
-	std::shared_ptr<ImageTexture> environment_emission_texture = std::make_shared<ImageTexture>("lakeside_2k.hdr");
-	width = environment_emission_texture->getWidth();
-	height = environment_emission_texture->getHeight();
-	nb_channels = environment_emission_texture->getNbChannels();
-	const int LINE_SIZE = width * nb_channels;
-	float* buffer = new float[(size_t)width * height * nb_channels];
-	for (int i = 0; i < width * height * nb_channels; ++i)
-		buffer[i] = 0;
-	float* luminance_map = new float[(size_t)width * height];
-	const unsigned char* data = (const unsigned char*)environment_emission_texture->getData();
-	int k = 0;
-	glm::vec3 true_res(0);
-	for (int i = 0; i < width * height * nb_channels; i += nb_channels) {
-		float e = data[i] * 0.3f + data[i + 1] * 0.59f + data[i + 2] * 0.11f;
-		true_res.r += data[i] / 255;
-		true_res.g += data[i + 1] / 255;
-		true_res.b += data[i + 2] / 255;
-		static const float INV_255 = 1.f / 255;
-		luminance_map[i / 3] = e *= INV_255;
-	}
-	std::cout << true_res.r << " " << true_res.g << " " << true_res.b << std::endl;
-	Distribution2D distrib(luminance_map, height, width);
-	glm::vec3 res(0);
-	for (int k = 0; k < nb_samples; ++k) {
-		int i = -1, j = -1;
-		float inv_pdf = 1 / distrib.sample(frand(), frand(), i, j);
-		res.r += data[i * LINE_SIZE + j * 3] / 255 * inv_pdf;
-		res.g += data[i * LINE_SIZE + j * 3 + 1] / 255 * inv_pdf;
-		res.b += data[i * LINE_SIZE + j * 3 + 2] / 255 * inv_pdf;
-		buffer[i * LINE_SIZE + j * 3] = 255;
-		buffer[i * LINE_SIZE + j * 3 + 1] = 255;
-		buffer[i * LINE_SIZE + j * 3 + 2] = 255;
-	}
-	res /= nb_samples;
-	std::cout << res.r << " " << res.g << " " << res.b << std::endl << std::endl;
-	std::ofstream os;
-	os.open("test.ppm");
-	os << "P3" << std::endl;
-	os << width << " " << height << std::endl;
-	os << "255" << std::endl;
-	for (int i = 0; i < height; ++i) {
-		for (int j = 0; j < LINE_SIZE; j += 3) {
-			float r = buffer[i * LINE_SIZE + j];
-			float g = buffer[i * LINE_SIZE + j + 1];
-			float b = buffer[i * LINE_SIZE + j + 2];
-			os << int(r) << " ";
-			os << int(g) << " ";
-			os << int(b) << " ";
-		}
-		os << std::endl;
-	}
-	os.flush();
-	os.close();
-	return buffer;
 }
 
 int main()

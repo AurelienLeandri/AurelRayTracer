@@ -34,7 +34,7 @@ PerfectSpecularMaterial::PerfectSpecularMaterial(std::shared_ptr<Texture> albedo
 void PerfectSpecularMaterial::getBSDF(HitRecord& hitRecord) const
 {
     hitRecord.bsdf = BSDF();
-    hitRecord.bsdf.add(std::make_shared<TorranceSparrowReflection>(hitRecord.ray.eta, 0, _albedo->getColor(hitRecord), std::make_shared<TrowbridgeReitz>(0), 0));
+    hitRecord.bsdf.add(std::make_shared<TorranceSparrowReflection>(hitRecord.ray.eta, 0.f, _albedo->getColor(hitRecord), std::make_shared<TrowbridgeReitz>(0.f), 0.f));
 }
 
 PerfectTransparentMaterial::PerfectTransparentMaterial(std::shared_ptr<Texture> albedo)
