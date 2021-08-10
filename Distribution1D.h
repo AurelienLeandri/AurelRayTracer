@@ -6,7 +6,7 @@ class Distribution1D
 {
 public:
 	Distribution1D(const float* values, size_t n);
-	float sample(float e, int& index) const;
+	float sample(float e, size_t& index) const;
 
 public:
 	float integralValues= 0;

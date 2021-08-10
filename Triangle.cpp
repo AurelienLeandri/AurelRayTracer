@@ -78,7 +78,7 @@ void Triangle::commitGeometry(RTCDevice device, RTCScene rtcScene)
 	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &_vertices[0], sizeof(glm::vec3) * 2, sizeof(Vertex), _vertices.size());
 
 	// Indices
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(unsigned int), 1 /* <- only 1 triangle */);
+	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(int), 1 /* <- only 1 triangle */);
 
 	rtcCommitGeometry(geom);
 	rtcAttachGeometry(rtcScene, geom);

@@ -199,7 +199,6 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -218,7 +217,6 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -237,7 +235,6 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -256,7 +253,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -275,7 +271,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -294,7 +289,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -315,7 +309,6 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -338,7 +331,6 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -361,7 +353,6 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -384,7 +375,6 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Mlem\Documents\Libraries\boost_1_76_0;C:\Users\Mlem\Desktop\Docs\Projects\AurellRayTracer\AurellRayTracer\ThirdParty\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -493,7 +483,6 @@
     <ClInclude Include="MicrofacetDistribution.h" />
     <ClInclude Include="OrenNayarReflection.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="glad\glad.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="KHR\khrplatform.h" />
     <ClInclude Include="LambertianReflection.h" />
@@ -503,9 +492,10 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="ScatterRecord.h" />
     <ClInclude Include="Sphere.h" />
-    <ClInclude Include="stb_image.h" />
     <ClInclude Include="StratifiedSampler.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="ThirdParty\Headers\glad\glad.h" />
+    <ClInclude Include="ThirdParty\Headers\stb_image.h" />
     <ClInclude Include="TinyObjLoader.h" />
     <ClInclude Include="TorranceSparrowReflection.h" />
     <ClInclude Include="TorranceSparrowTransmission.h" />

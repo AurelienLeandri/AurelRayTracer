@@ -52,7 +52,7 @@ glm::vec3 BSDF::sample_f(glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord
     if (w_o.z == 0)
         return glm::vec3(0);
 
-    int random_index = frand() * nbComponents;
+    int random_index = static_cast<int>(frand() * nbComponents);
     int bxdf_index = -1;
     do {
         bxdf_index++;

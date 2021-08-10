@@ -44,7 +44,7 @@ bool SceneData::computeAccelerationStructures()
 
 	_rtcScene = rtcNewScene(_rtcDevice);
 
-	for (const std::pair<unsigned int, std::shared_ptr<Shape>>& pair : _geometries) {
+	for (const std::pair<int, std::shared_ptr<Shape>>& pair : _geometries) {
 		pair.second->commitGeometry(_rtcDevice, _rtcScene);
 	}
 
@@ -140,7 +140,7 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
 
         hit_record.ray = ray;
 
-        if (unsigned int material_id = shape->materialId) {
+        if (int material_id = shape->materialId) {
             hit_record.material = _materials.at(material_id).get();
             hit_record.material->getBSDF(hit_record);
             hit_record.material->emit(hit_record);
@@ -157,22 +157,22 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
     return false;
 }
 
-const std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes() const
+const std::unordered_map<int, std::shared_ptr<Shape>>& SceneData::getShapes() const
 {
 	return _geometries;
 }
 
-std::unordered_map<unsigned int, std::shared_ptr<Shape>>& SceneData::getShapes()
+std::unordered_map<int, std::shared_ptr<Shape>>& SceneData::getShapes()
 {
 	return _geometries;
 }
 
-const std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials() const
+const std::unordered_map<int, std::shared_ptr<Material>>& SceneData::getMaterials() const
 {
 	return _materials;
 }
 
-std::unordered_map<unsigned int, std::shared_ptr<Material>>& SceneData::getMaterials()
+std::unordered_map<int, std::shared_ptr<Material>>& SceneData::getMaterials()
 {
 	return _materials;
 }
@@ -192,31 +192,33 @@ const InfiniteAreaLight* SceneData::getEnvironmentLight() const
     return _environmentLight;
 }
 
-unsigned int SceneData::addShape(std::shared_ptr<Shape> shape)
+int SceneData::addShape(std::shared_ptr<Shape> shape)
 {
-	_geometries[_geometries.size()] = shape;
-	return _geometries.size() - 1;
+    int lastIndex = static_cast<int>(_geometries.size());
+	_geometries[lastIndex] = shape;
+	return lastIndex;
 }
 
-unsigned int SceneData::addLight(std::shared_ptr<Light> light, std::shared_ptr<Shape> lightShape)
+int SceneData::addLight(std::shared_ptr<Light> light, std::shared_ptr<Shape> lightShape)
 {
     if (light->getType() == LightType::INFINITE_AREA) {
         _environmentLight = static_cast<InfiniteAreaLight*>(light.get());
     }
 	_lights.push_back(light);
 	if (lightShape) {
-        int shapeId = _geometries.size();
+        int shapeId = static_cast<int>(_geometries.size());
         _geometries[shapeId] = lightShape;
         _areaLights[shapeId] = light;
-		return _geometries.size() - 1;
+		return shapeId;
 	}
 	return 0;
 }
 
-unsigned int SceneData::addMaterial(std::shared_ptr<Material> material)
+int SceneData::addMaterial(std::shared_ptr<Material> material)
 {
-	_materials[_materials.size() + 1] = material;
-	return _materials.size();
+    int lastIndex = static_cast<int>(_materials.size()) + 1;
+	_materials[lastIndex] = material;
+	return lastIndex;
 }
 
 SceneData *SceneFactory::createScene()

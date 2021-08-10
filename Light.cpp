@@ -69,7 +69,7 @@ glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record
     float u = 0, v = 0;
 
     pdf = 0;
-    int i, j;
+    size_t i = 0, j = 0;
     pdf = _distribution->sample(frand(), frand(), i, j);
 
     if (pdf == 0)

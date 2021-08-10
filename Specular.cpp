@@ -38,7 +38,7 @@ glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm
 	glm::vec3 eta_k = k / eta_i;
 
 	float cos_w_normal2 = cos_w_normal * cos_w_normal;
-	float sin2_w_normal = 1. - cos_w_normal2;
+	float sin2_w_normal = 1.f - cos_w_normal2;
 	glm::vec3 eta2 = eta * eta;
 	glm::vec3 eta_k2 = eta_k * eta_k;
 

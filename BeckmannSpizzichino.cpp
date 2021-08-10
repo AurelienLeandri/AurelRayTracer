@@ -16,7 +16,7 @@ BeckmannSpizzichino::BeckmannSpizzichino(float alpha_x, float alpha_y) : _alphaX
 float BeckmannSpizzichino::D(const glm::vec3& w_h) const
 {
 	if (_alphaX == 0 || _alphaY == 0) {
-		return (w_h.x == 0 && w_h.y == 0 ? 1 : 0);
+		return (w_h.x == 0 && w_h.y == 0 ? 1.f : 0.f);
 	}
 	float sin2_theta_h = glm::max(0.f, 1 - w_h.z * w_h.z);
 	float tan2_theta_h = sin2_theta_h / (w_h.z * w_h.z);

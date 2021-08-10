@@ -2,7 +2,7 @@
 
 #include "Utils.h"
 
-PixelSampler::PixelSampler(size_t samplesPerPixel, int nSampledDimensions)
+PixelSampler::PixelSampler(size_t samplesPerPixel, size_t nSampledDimensions)
     : Sampler(samplesPerPixel)
 {
     for (int i = 0; i < nSampledDimensions; ++i) {

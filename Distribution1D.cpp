@@ -23,7 +23,7 @@ Distribution1D::Distribution1D(const float* values, size_t n)
 	}
 }
 
-float Distribution1D::sample(float e, int& index) const
+float Distribution1D::sample(float e, size_t& index) const
 {
 	size_t i = _n / 2;
 	size_t left = 0;
@@ -40,11 +40,6 @@ float Distribution1D::sample(float e, int& index) const
 		}
 		i = (left + right) / 2;
 	}
-	/*
-	float du = glm::max(0.f, e - _cdf[i]);
-	if (_cdf[i + 1] - _cdf[i] > 0)
-		du /= _cdf[i + 1] - _cdf[i];
-	*/
 	index = i;
 	return _values[i] / (integralValues);
 }
