@@ -1,6 +1,6 @@
 #include "Integrator.h"
 
-Integrator::Integrator(unsigned int imageWidth, unsigned int imageHeight, unsigned int nbChannels) :
+Integrator::Integrator(size_t imageWidth, size_t imageHeight, size_t nbChannels) :
 	_imageWidth(imageWidth), _imageHeight(imageHeight), _nbChannels(nbChannels)
 {
 	_imageBuffer.resize(static_cast<size_t>(_imageWidth) * _imageHeight * _nbChannels, 255);
@@ -21,17 +21,17 @@ const std::vector<unsigned char>& Integrator::getImageBuffer() const
 	return _imageBuffer;
 }
 
-unsigned int Integrator::getImageWidth() const
+size_t Integrator::getImageWidth() const
 {
 	return _imageWidth;
 }
 
-unsigned int Integrator::getImageHeight() const
+size_t Integrator::getImageHeight() const
 {
 	return _imageHeight;
 }
 
-unsigned int Integrator::getNbChannels() const
+size_t Integrator::getNbChannels() const
 {
 	return _nbChannels;
 }

@@ -474,10 +474,10 @@ void RayTracerCPU::_createCommandBuffers() {
 
 void RayTracerCPU::_createTextureImage() {
     const std::vector<unsigned char>& image = _integrator->getImageBuffer();
-    unsigned int width = _integrator->getImageWidth();
-    unsigned int height = _integrator->getImageHeight();
-    unsigned int nbChannels = _integrator->getNbChannels();
-    size_t imageSize = static_cast<size_t>(width) * height * nbChannels;
+    uint32_t width = static_cast<uint32_t>(_integrator->getImageWidth());
+    uint32_t height = static_cast<uint32_t>(_integrator->getImageHeight());
+    uint32_t nbChannels = static_cast<uint32_t>(_integrator->getNbChannels());
+    uint32_t imageSize = width * height * nbChannels;
 
     _createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _stagingBuffer, _stagingBufferMemory);
 
@@ -836,13 +836,13 @@ void RayTracerCPU::_createIntegrator()
 void RayTracerCPU::_updateTextureImage()
 {
     const std::vector<unsigned char>& image = _integrator->getImageBuffer();
-    unsigned int width = _integrator->getImageWidth();
-    unsigned int height = _integrator->getImageHeight();
-    unsigned int nbChannels = _integrator->getNbChannels();
+    uint32_t width = static_cast<uint32_t>(_integrator->getImageWidth());
+    uint32_t height = static_cast<uint32_t>(_integrator->getImageHeight());
+    uint32_t nbChannels = static_cast<uint32_t>(_integrator->getNbChannels());
 
     VkDevice device = _vulkan.getLogicalDevice();
     void* data = nullptr;
-    size_t dataSize = static_cast<size_t>(width) * height * nbChannels;
+    uint32_t dataSize = width * height * nbChannels;
 
     vkMapMemory(device, _stagingBufferMemory, 0, dataSize, 0, &data);
     memcpy(data, image.data(), static_cast<size_t>(dataSize));

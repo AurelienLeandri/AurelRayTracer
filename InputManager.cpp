@@ -104,18 +104,20 @@ void InputManager::_mouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
     static bool firstTime = true;
     static float lastX = 0, lastY = 0;
+    float xposf = static_cast<float>(xpos);
+    float yposf = static_cast<float>(ypos);
     if (firstTime)
     {
-        lastX = xpos;
-        lastY = ypos;
+        lastX = xposf;
+        lastY = yposf;
         firstTime = false;
     }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float xoffset = xposf - lastX;
+    float yoffset = lastY - yposf; // reversed since y-coordinates go from bottom to top
 
-    lastX = xpos;
-    lastY = ypos;
+    lastX = xposf;
+    lastY = yposf;
 
     Application* app = (Application*)(glfwGetWindowUserPointer(window));
     app->_inputManager.processMouseMovement(xoffset, yoffset);

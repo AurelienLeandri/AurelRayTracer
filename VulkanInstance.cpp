@@ -137,7 +137,7 @@ void VulkanInstance::_createInstance()
     std::vector<const char*> requiredInstanceExtensions;
     getRequiredInstanceExtensions(requiredInstanceExtensions);
     checkInstanceRequiredExtensionsSupport(requiredInstanceExtensions);
-    createInfo.enabledExtensionCount = requiredInstanceExtensions.size();
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredInstanceExtensions.size());
     createInfo.ppEnabledExtensionNames = requiredInstanceExtensions.data();
 
     // Validation layers
@@ -269,7 +269,7 @@ VulkanInstance::QueueFamilyIndices VulkanInstance::_findRequiredQueueFamilies(Vk
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    for (int i = 0; i < queueFamilyCount; ++i) {
+    for (uint32_t i = 0; i < queueFamilyCount; ++i) {
         if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
         }
@@ -358,10 +358,10 @@ void VulkanInstance::_createLogicalDevice() {
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.queueCreateInfoCount = queueCreateInfos.size();
+    createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pEnabledFeatures = &deviceFeatures;
 
-    createInfo.enabledExtensionCount = deviceExtensions.size();
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
     // Device-specific validation layers are not used anymore. We set them regardless for backward compatibility

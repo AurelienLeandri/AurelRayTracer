@@ -49,17 +49,17 @@ bool PathTracer::iterate() {
     int portionSize = static_cast<int>(_portionSize);
 
 #pragma omp parallel for num_threads(NB_THREADS)
-    for (int portion = 0; portion < _parameters.nbThreads; portion++) {
-        for (int i = portion * portionSize; i < (portion + 1) * portionSize; i++) {
+    for (size_t portion = 0; portion < _parameters.nbThreads; portion++) {
+        for (size_t i = portion * portionSize; i < (portion + 1) * portionSize; i++) {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
             glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 10));
-            glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
+            glm::vec3 previous_color(static_cast<float>(_imageBuffer[(i * 3)]), static_cast<float>(_imageBuffer[(i * 3) + 1]), static_cast<float>(_imageBuffer[(i * 3) + 2]));
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
-            _imageBuffer[(i * 3)] = color.r;
-            _imageBuffer[(i * 3) + 1] = color.g;
-            _imageBuffer[(i * 3) + 2] = color.b;
+            _imageBuffer[(i * 3)] = static_cast<unsigned char>(color.r);
+            _imageBuffer[(i * 3) + 1] = static_cast<unsigned char>(color.g);
+            _imageBuffer[(i * 3) + 2] = static_cast<unsigned char>(color.b);
         }
     }
 

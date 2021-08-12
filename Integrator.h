@@ -8,7 +8,7 @@ class Scene;
 class Integrator
 {
 public:
-    Integrator(unsigned int imageWidth, unsigned int imageHeight, unsigned int nbChannels);
+    Integrator(size_t imageWidth, size_t imageHeight, size_t nbChannels);
 
 public:
     virtual int init() = 0;
@@ -19,16 +19,16 @@ public:
     void setScene(const Scene* scene);
 
     const std::vector<unsigned char>& getImageBuffer() const;
-    unsigned int getImageWidth() const;
-    unsigned int getImageHeight() const;
-    unsigned int getNbChannels() const;
+    size_t getImageWidth() const;
+    size_t getImageHeight() const;
+    size_t getNbChannels() const;
 
 protected:
     const Camera* _camera = nullptr;
     const Scene* _scene = nullptr;
     std::vector<unsigned char> _imageBuffer;
-    unsigned int _imageWidth = 0;
-    unsigned int _imageHeight = 0;
-    unsigned int _nbChannels = 0;
+    size_t _imageWidth = 0;
+    size_t _imageHeight = 0;
+    size_t _nbChannels = 0;
 };
 
