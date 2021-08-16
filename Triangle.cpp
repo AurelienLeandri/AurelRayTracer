@@ -67,19 +67,13 @@ const std::array<Vertex, 3>& Triangle::getVertices() const
 	return _vertices;
 }
 
-std::array<Vertex, 3>& Triangle::getVertices()
+void Triangle::setVertices(const std::array<Vertex, 3>& vertices)
 {
-	return _vertices;
+	_vertices = vertices;
 }
 
 const Vertex& Triangle::operator[](int index) const
 {
 	return _vertices[index];
 }
-
-Vertex& Triangle::operator[](int index)
-{
-	return _vertices[index];
-}
-
 

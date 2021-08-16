@@ -8,15 +8,28 @@
 
 class Transform;
 
+/**
+ * Representation of a triangle mesh. In the case you want a single-triangle mesh, consider using Triangle instead.
+ */
 class Mesh : public Shape
 {
 // Attributes
 private:
+    /**
+     * Vertices of the mesh.
+     */
     std::vector<Vertex> _vertices;
+
+    /**
+     * Indices referencing the vertices.
+     */
     std::vector<int> _indices;
 
 // Constructors/Destructors
 public:
+    /**
+     * Creates an empty mesh.
+     */
     Mesh();
 
 // Inherited via Shape
