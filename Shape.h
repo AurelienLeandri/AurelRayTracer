@@ -8,35 +8,44 @@
 struct HitRecord;
 class Transform;
 
-enum class ShapeType {
-	TRIANGLE,
-	MESH,
-	SPHERE
-};
-
+// Abstract
 class Shape
 {
+// Class-specific declarations
 public:
-	Shape(ShapeType type);
+	enum class Type {
+		TRIANGLE,
+		MESH,
+		SPHERE
+	};
 
+// Attributes
+protected:
+	int _materialId = 0;
 public:
-	// Gives area of the shape
+	const Type type;
+
+// Constructors/Destructors
+public:
+	Shape(Type type);
+
+// Interface
+public:
+	// Give the area of the shape
 	virtual float area() const = 0;
 
 	// Sample a point on the shape, gives the probability density of the sample created this way (by calling pdf(), see below)
 	virtual glm::vec3 sample(const HitRecord &record, float &pdf) const = 0;
 
-	// Gives the probability density of a given sample point (value) on the shape
+	// Give the probability density of a given sample point (value) on the shape
 	virtual float pdf(const glm::vec3& point, const HitRecord& record) const = 0;
 
-	// Transform the shape using the given transformation matrix. The matrix is assumed not to be ill-formed. This function doesnt check for errors
+	// Transform the shape using the given transformation matrix. The matrix is assumed to be well formed. This function doesn't check for errors
 	virtual void transform(const Transform &transform) = 0;
 
-	// Commit geometry to buffers for primitive intersection acceleration on the GPU
-	virtual void commitGeometry(RTCDevice device, RTCScene rtcScene) = 0;
-
+// Accessors
 public:
-	int materialId = 0;
-	ShapeType type;
+	int getMaterialId() const;
+	void setMaterialId(int materialId);
 };
 

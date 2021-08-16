@@ -5,18 +5,15 @@
 #include "Transform.h"
 #include "Embree.h"
 
+// Constructors/Destructors
+
 Triangle::Triangle(const Vertex& vertex0, const Vertex& vertex1, const Vertex& vertex2)
-	: Shape(ShapeType::TRIANGLE)
+	: Shape(Shape::Type::TRIANGLE)
 {
 	_vertices[0] = vertex0;
 	_vertices[1] = vertex1;
 	_vertices[2] = vertex2;
 	_computeTriangleNormalAndParallelogramArea();
-}
-
-const Vertex& Triangle::operator[](int index) const
-{
-	return _vertices[index];
 }
 
 void Triangle::_computeTriangleNormalAndParallelogramArea()
@@ -25,6 +22,8 @@ void Triangle::_computeTriangleNormalAndParallelogramArea()
 	_parallelogramArea = glm::length(_normal);
 	_normal = glm::normalize(_normal);
 }
+
+// Inherited from Shape
 
 glm::vec3 Triangle::sample(const HitRecord& record, float& pdf) const {
 	pdf = 0;
@@ -61,28 +60,26 @@ float Triangle::area() const
 	return _parallelogramArea * 0.5f;
 }
 
-void Triangle::commitGeometry(RTCDevice device, RTCScene rtcScene)
+// Accessors
+
+const std::array<Vertex, 3>& Triangle::getVertices() const
 {
-	static int indices[3] = { 0, 1, 2 };
-	RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+	return _vertices;
+}
 
-	// Vertices
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, &_vertices[0], 0, sizeof(Vertex), _vertices.size());
+std::array<Vertex, 3>& Triangle::getVertices()
+{
+	return _vertices;
+}
 
-	// Normals
-	rtcSetGeometryVertexAttributeCount(geom, 1);
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, RTC_FORMAT_FLOAT3, &_vertices[0], sizeof(glm::vec3), sizeof(Vertex), _vertices.size());
+const Vertex& Triangle::operator[](int index) const
+{
+	return _vertices[index];
+}
 
-	// UVs
-	rtcSetGeometryVertexAttributeCount(geom, 2);
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &_vertices[0], sizeof(glm::vec3) * 2, sizeof(Vertex), _vertices.size());
-
-	// Indices
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(int), 1 /* <- only 1 triangle */);
-
-	rtcCommitGeometry(geom);
-	rtcAttachGeometry(rtcScene, geom);
-	rtcReleaseGeometry(geom);
+Vertex& Triangle::operator[](int index)
+{
+	return _vertices[index];
 }
 
 

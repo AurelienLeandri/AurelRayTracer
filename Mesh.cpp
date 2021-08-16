@@ -3,14 +3,31 @@
 #include "Transform.h"
 #include "Embree.h"
 
+// Constructors/Destructors
+
 Mesh::Mesh()
-    : Shape(ShapeType::MESH)
+    : Shape(Shape::Type::MESH)
 {
+}
+
+// Inherited vie Shape
+
+glm::vec3 Mesh::sample(const HitRecord& record, float& pdf) const
+{
+	// TODO: Implement sampling
+	pdf = 0;
+	return glm::vec3(0, 0, 0);
+}
+
+float Mesh::pdf(const glm::vec3& point, const HitRecord& record) const
+{
+	// TODO: Implement sampling
+	return 0.0f;
 }
 
 void Mesh::transform(const Transform& t)
 {
-	for (Vertex& v : geometry) {
+	for (Vertex& v : _vertices) {
 		v.normal = glm::vec3(glm::transpose(t.getInvMatrix()) * glm::vec4(v.normal, 0));
 		v.position = glm::vec3(t.getMatrix() * glm::vec4(v.position, 1));
 	}
@@ -18,39 +35,29 @@ void Mesh::transform(const Transform& t)
 
 float Mesh::area() const
 {
+	// TODO: Implement computing the area
 	return 0.0f;
 }
 
-void Mesh::commitGeometry(RTCDevice device, RTCScene rtcScene)
+// Accessors
+
+const std::vector<Vertex>& Mesh::getVertices() const
 {
-    RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
-
-    // Vertices
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, &geometry[0], 0, sizeof(Vertex), geometry.size());
-
-    // Normals
-    rtcSetGeometryVertexAttributeCount(geom, 1);
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, RTC_FORMAT_FLOAT3, &geometry[0], sizeof(glm::vec3), sizeof(Vertex), geometry.size());
-
-    // UVs
-    rtcSetGeometryVertexAttributeCount(geom, 2);
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, RTC_FORMAT_FLOAT3, &geometry[0], sizeof(glm::vec3) * 2, sizeof(Vertex), geometry.size());
-
-    // Indices
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, &indices[0], 0, 3 * sizeof(int), indices.size() / 3);
-
-    rtcCommitGeometry(geom);
-    rtcAttachGeometry(rtcScene, geom);
-    rtcReleaseGeometry(geom);
+	return _vertices;
 }
 
-glm::vec3 Mesh::sample(const HitRecord& record, float& pdf) const
+std::vector<Vertex>& Mesh::getVertices()
 {
-	pdf = 0;
-	return glm::vec3(0, 0, 0);
+	return _vertices;
 }
 
-float Mesh::pdf(const glm::vec3& point, const HitRecord& record) const
+const std::vector<int>& Mesh::getIndices() const
 {
-	return 0.0f;
+	return _indices;
 }
+
+std::vector<int>& Mesh::getIndices()
+{
+	return _indices;
+}
+

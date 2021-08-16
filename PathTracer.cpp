@@ -75,7 +75,7 @@ int PathTracer::cleanup()
 }
 
 // NOTE: taken from pbr
-float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
+float power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
     float f = nf * fPdf, g = ng * gPdf;
     return (f * f) / (f * f + g * g);
 }
@@ -96,7 +96,7 @@ glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &path
         if (light->getType() == LightType::AREA) {
             // If the light can be sampled from our position, we check if we hit the light:
             // To verify this, "occlusion_hit_record.tRay" should be very close to one since "light_sample" stretches from the current position to the light.
-            if (pdfDirectLighting > 0 && _scene->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
+            if (pdfDirectLighting > 0 && Embree::getInstance()->castRay(direct_lighting_ray, occlusion_hit_record) && occlusion_hit_record.tRay >= 0.9999f) {
                 float cos_light_surface = glm::abs(glm::dot(light_sample_dl, surfaceRecord.normal));
                     glm::vec3 light_f = surfaceRecord.bsdf.f(light_sample_dl, wo, surfaceRecord);
                     glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
@@ -104,7 +104,7 @@ glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &path
             }
         }
         else if (light->getType() == LightType::INFINITE_AREA) {
-            if (pdfDirectLighting > 0 && !_scene->castRay(direct_lighting_ray, occlusion_hit_record)) {
+            if (pdfDirectLighting > 0 && !Embree::getInstance()->castRay(direct_lighting_ray, occlusion_hit_record)) {
                 float cos_light_surface = glm::abs(glm::dot(light_sample_dl, surfaceRecord.normal));
                     glm::vec3 light_f = surfaceRecord.bsdf.f(light_sample_dl, wo, surfaceRecord);
                     glm::vec3 light_scattering = light_f * cos_light_surface;  // The direct lighing is affected by the surface properties and by the cos factor
@@ -125,7 +125,7 @@ glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &path
         HitRecord bsdf_sample_hit_record;
         if (pdfBSDF > 0) {
             glm::vec3 radianceFromLight(0);
-            if (_scene->castRay(bsdf_light_sampling_ray, bsdf_sample_hit_record)) {
+            if (Embree::getInstance()->castRay(bsdf_light_sampling_ray, bsdf_sample_hit_record)) {
                 radianceFromLight = bsdf_sample_hit_record.emission;
             }
             else {
@@ -138,7 +138,7 @@ glm::vec3 PathTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &path
         }
     }
 
-    return Power2Heuristic(1, pdfDirectLighting, 1, pdfBSDF) * light_color + Power2Heuristic(1, pdfBSDF, 1, pdfDirectLighting) * bsdf_color;
+    return power2Heuristic(1, pdfDirectLighting, 1, pdfBSDF) * light_color + power2Heuristic(1, pdfBSDF, 1, pdfDirectLighting) * bsdf_color;
 }
 
 glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
@@ -149,7 +149,7 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
     while (!max_depth || depth++ < max_depth) {
         HitRecord hit_record;
-        if (_scene->castRay(w_o, hit_record)) {
+        if (Embree::getInstance()->castRay(w_o, hit_record)) {
 
             // We add the emission at intersection in two exceptional cases:
             // 1 - Rays starting from the camera that hit a light source immediately

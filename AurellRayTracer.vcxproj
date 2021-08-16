@@ -464,7 +464,6 @@
     <ClCompile Include="TrowbridgeReitz.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="VulkanInstance.cpp" />
-    <ClCompile Include="WhittedIntegrator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -519,7 +518,6 @@
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VulkanInstance.h" />
-    <ClInclude Include="WhittedIntegrator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag" />

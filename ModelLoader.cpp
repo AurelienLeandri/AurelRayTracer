@@ -96,25 +96,27 @@ void ModelLoader::_processMesh(
         model_materials[assimp_material] = scene.addMaterial(material);
     }
 
-    mesh->materialId = model_materials[assimp_material];
+    mesh->setMaterialId(model_materials[assimp_material]);
 
     // Process triangles
     bool has_uv = assimp_mesh->mTextureCoords[0];
     bool has_normals = assimp_mesh->HasNormals();
 
+    std::vector<int>& indices = mesh->getIndices();
     for (unsigned int i = 0; i < assimp_mesh->mNumFaces; i++)
     {
         const aiFace& face = assimp_mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            mesh->indices.push_back(face.mIndices[j]);
+            indices.push_back(face.mIndices[j]);
         }
 
     }
 
+    std::vector<Vertex>& vertices = mesh->getVertices();
     for (unsigned int i = 0; i < assimp_mesh->mNumVertices; i++) {
         auto a = assimp_mesh->mVertices[i];
         auto c = assimp_mesh->mNormals[i];
-        mesh->geometry.push_back({
+        vertices.push_back({
                 glm::vec3(assimp_mesh->mVertices[i].x, assimp_mesh->mVertices[i].y, assimp_mesh->mVertices[i].z),
                 has_normals ? glm::vec3(assimp_mesh->mNormals[i].x, assimp_mesh->mNormals[i].y, assimp_mesh->mNormals[i].z) : glm::vec3(1, 0, 0),
                 has_uv ? glm::vec2(assimp_mesh->mTextureCoords[0][i].x, assimp_mesh->mTextureCoords[0][i].y) : glm::vec2(0, 0)

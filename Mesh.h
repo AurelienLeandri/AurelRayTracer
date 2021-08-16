@@ -10,20 +10,26 @@ class Transform;
 
 class Mesh : public Shape
 {
+// Attributes
+private:
+    std::vector<Vertex> _vertices;
+    std::vector<int> _indices;
+
+// Constructors/Destructors
 public:
     Mesh();
 
+// Inherited via Shape
 public:
-    // Inherited via Shape
     virtual glm::vec3 sample(const HitRecord& record, float& pdf) const override;
     virtual float pdf(const glm::vec3& point, const HitRecord& record) const override;
     virtual void transform(const Transform& t) override;
     virtual float area() const override;
-    virtual void commitGeometry(RTCDevice device, RTCScene rtcScene) override;
 
+// Accessors
 public:
-    std::vector<Vertex> geometry;
-    std::vector<int> indices;
-    int materialId = 0;
-
+    const std::vector<Vertex>& getVertices() const;
+    std::vector<Vertex>& getVertices();
+    const std::vector<int>& getIndices() const;
+    std::vector<int>& getIndices();
 };

@@ -31,7 +31,7 @@ private:
 	void _createGraphicsPipeline();
 	VkShaderModule _createShaderModule(const std::vector<char>& code);
 	void _createFramebuffers();
-	void _createVertexBuffer();
+	void _createVertexBuffers();
 	void _createIndexBuffer();
 	void _createCommandBuffers();
 	void _createSyncObjects();

@@ -30,56 +30,58 @@ namespace {
 	int make_box(Scene& scene, int material_id, const Transform& t = {})
 	{
 		std::shared_ptr<Mesh> box_mesh = std::make_shared<Mesh>();
+		std::vector<Vertex>& vertices = box_mesh->getVertices();
 
-		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(0, 0, -1), glm::vec2(0, 0) });  // 0
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 0, -1), glm::vec2(1, 1) });  // 3
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(0), glm::vec3(0, 0, -1), glm::vec2(0, 0) });  // 0
+		vertices.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1) });  // 1
+		vertices.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 0, -1), glm::vec2(1, 1) });  // 3
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0) });  // 2
 
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec2(0, 0) });  // 4
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(0, 0, 1), glm::vec2(1, 1) });  // 7
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
+		vertices.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec2(0, 0) });  // 4
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 0, 1), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(1), glm::vec3(0, 0, 1), glm::vec2(1, 1) });  // 7
+		vertices.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0) });  // 6
 
-		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 1
-		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 4
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 1
+		vertices.push_back({ glm::vec3(0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 0
+		vertices.push_back({ glm::vec3(0, 0, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });  // 4
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });  // 5
 
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 6
-		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 3
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(1, 0, 1), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 6
+		vertices.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(1, 0, 0), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(1), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 7
+		vertices.push_back({ glm::vec3(1, 1, 0), glm::vec3(1, 0, 0), glm::vec2(1, 1) });  // 3
 
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 1
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
-		box_mesh->geometry.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
-		box_mesh->geometry.push_back({ glm::vec3(1), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 7
+		vertices.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
+		vertices.push_back({ glm::vec3(0, 1, 0), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 1
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(1, 1, 0), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 3
+		vertices.push_back({ glm::vec3(0, 1, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1) });  // 5
+		vertices.push_back({ glm::vec3(1), glm::vec3(0, 1, 0), glm::vec2(1, 1) });  // 7
 
-		box_mesh->geometry.push_back({ glm::vec3(0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 0
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 4
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
-		box_mesh->geometry.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 4
-		box_mesh->geometry.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 6
+		vertices.push_back({ glm::vec3(0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 0
+		vertices.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 4
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(1, 0, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 2
+		vertices.push_back({ glm::vec3(0, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0) });  // 4
+		vertices.push_back({ glm::vec3(1, 0, 1), glm::vec3(0, -1, 0), glm::vec2(1, 0) });  // 6
 
+		std::vector<int>& indices = box_mesh->getIndices();
 		for (int i = 0; i < 36; ++i) {
-			box_mesh->indices.push_back(i);
+			indices.push_back(i);
 		}
 
 		box_mesh->transform(t);
 
-		box_mesh->materialId = material_id;
+		box_mesh->setMaterialId(material_id);
 
 		return scene.addShape(box_mesh);
 	}
@@ -103,53 +105,52 @@ namespace {
 
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
-		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
-		green_plane->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(1, 0, 0), glm::vec2(0, 1) });
-		green_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
-		green_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
-		green_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		green_plane->materialId = fresnel_material_id;
+		green_plane->getVertices().push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
+		green_plane->getVertices().push_back({ glm::vec3(0, 555, 0), glm::vec3(1, 0, 0), glm::vec2(0, 1) });
+		green_plane->getVertices().push_back({ glm::vec3(0, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
+		green_plane->getVertices().push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
+		green_plane->getIndices() = { 0, 1, 2, 3, 2, 1 };
+		green_plane->setMaterialId(fresnel_material_id);
 		scene.addShape(green_plane);
 
 		// Red plane
 		std::shared_ptr<Mesh> red_plane = std::make_shared<Mesh>();
-		red_plane->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });
-		red_plane->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 0) });
-		red_plane->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });
-		red_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
-		red_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		red_plane->materialId = fresnel_material_id;
+		red_plane->getVertices().push_back({ glm::vec3(555, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });
+		red_plane->getVertices().push_back({ glm::vec3(555, 0, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 0) });
+		red_plane->getVertices().push_back({ glm::vec3(555, 555, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });
+		red_plane->getVertices().push_back({ glm::vec3(555, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
+		red_plane->getIndices() = { 0, 1, 2, 3, 2, 1 };
+		red_plane->setMaterialId(fresnel_material_id);
 		scene.addShape(red_plane);
 
 		// White ceiling
 		std::shared_ptr<Mesh> white_ceiling = std::make_shared<Mesh>();
-		white_ceiling->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
-		white_ceiling->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });
-		white_ceiling->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(0, -1, 0), glm::vec2(0, 1) });
-		white_ceiling->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
-		white_ceiling->indices = { 0, 1, 2, 3, 2, 1 };
-		white_ceiling->materialId = fresnel_material_id;
+		white_ceiling->getVertices().push_back({ glm::vec3(0, 555, 0), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
+		white_ceiling->getVertices().push_back({ glm::vec3(555, 555, 0), glm::vec3(0, -1, 0), glm::vec2(1, 0) });
+		white_ceiling->getVertices().push_back({ glm::vec3(0, 555, 555), glm::vec3(0, -1, 0), glm::vec2(0, 1) });
+		white_ceiling->getVertices().push_back({ glm::vec3(555, 555, 555), glm::vec3(0, -1, 0), glm::vec2(0, 0) });
+		white_ceiling->getIndices() = { 0, 1, 2, 3, 2, 1 };
+		white_ceiling->setMaterialId(fresnel_material_id);
 		scene.addShape(white_ceiling);
-
 
 		// White plane in the back
 		std::shared_ptr<Mesh> white_plane = std::make_shared<Mesh>();
-		white_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
-		white_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(0, 0, -1), glm::vec2(1, 0) });
-		white_plane->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 1) });
-		white_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
-		white_plane->indices = { 0, 1, 2, 3, 2, 1 };
-		white_plane->materialId = fresnel_material_id;
+		white_plane->getVertices().push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
+		white_plane->getVertices().push_back({ glm::vec3(0, 555, 555), glm::vec3(0, 0, -1), glm::vec2(1, 0) });
+		white_plane->getVertices().push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 0, -1), glm::vec2(0, 1) });
+		white_plane->getVertices().push_back({ glm::vec3(555, 555, 555), glm::vec3(0, 0, -1), glm::vec2(0, 0) });
+		white_plane->getIndices() = { 0, 1, 2, 3, 2, 1 };
+		white_plane->setMaterialId(fresnel_material_id);
 		scene.addShape(white_plane);
 
 		// White floor
 		std::shared_ptr<Mesh> white_floor = std::make_shared<Mesh>();
-		white_floor->geometry.push_back({ glm::vec3(0), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
-		white_floor->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 1) });
-		white_floor->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(0, 1, 0), glm::vec2(1, 0) });
-		white_floor->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
-		white_floor->indices = { 0, 1, 2, 3, 2, 1 };
-		white_floor->materialId = material_white_id;
+		white_floor->getVertices().push_back({ glm::vec3(0), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
+		white_floor->getVertices().push_back({ glm::vec3(0, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 1) });
+		white_floor->getVertices().push_back({ glm::vec3(555, 0, 0), glm::vec3(0, 1, 0), glm::vec2(1, 0) });
+		white_floor->getVertices().push_back({ glm::vec3(555, 0, 555), glm::vec3(0, 1, 0), glm::vec2(0, 0) });
+		white_floor->getIndices() = { 0, 1, 2, 3, 2, 1 };
+		white_floor->setMaterialId(material_white_id);
 		scene.addShape(white_floor);
 
 		// Light plane
@@ -163,8 +164,8 @@ namespace {
 			Vertex({ glm::vec3(213, 554, 332), glm::vec3(0, -1, 0), glm::vec2(0, 1) }),
 			Vertex({ glm::vec3(343, 554, 227), glm::vec3(0, -1, 0), glm::vec2(1, 0) })
 		);
-		triangle_light_0->materialId = material_light_id;
-		triangle_light_1->materialId = material_light_id;
+		triangle_light_0->setMaterialId(material_light_id);
+		triangle_light_1->setMaterialId(material_light_id);
 		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_0);
 		scene.addLight(light0, triangle_light_0);
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_1);
@@ -204,7 +205,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) }),
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
-		light_mesh0->materialId = light_material_id;
+		light_mesh0->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(100, 100, 100), light_mesh0);
 		scene.addLight(light0, light_mesh0);
 
@@ -213,7 +214,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) }),
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 		);
-		light_mesh1->materialId = light_material_id;
+		light_mesh1->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(100, 100, 100), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
@@ -245,7 +246,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) }),
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
-		light_mesh0->materialId = light_material_id;
+		light_mesh0->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10, 10, 10), light_mesh0);
 		scene.addLight(light0, light_mesh0);
 
@@ -254,7 +255,7 @@ namespace {
 			Vertex({ glm::vec3(-3, 0, 3.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) }),
 			Vertex({ glm::vec3(-3, 1, 2.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 			);
-		light_mesh1->materialId = light_material_id;
+		light_mesh1->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10, 10, 10), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
@@ -292,16 +293,16 @@ namespace {
 		std::shared_ptr<GlossyMaterial> plastic_material = std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.9f, 0.4f, 0.8f)), 0.01f);
 		int plastic_material_id = scene.addMaterial(plastic_material);
 
-		scene.getShapes()[0]->materialId = matte_material_id;
+		scene.getShapes()[0]->setMaterialId(matte_material_id);
 
 		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10.f);
 		std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 100), 10.f);
-		sphere->materialId = plastic_material_id;
+		sphere->setMaterialId(plastic_material_id);
 		scene.addShape(sphere);
 
 		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10.f);
 		std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3(0, 25, 100), 10.f);
-		sphere2->materialId = mirror_material_id;
+		sphere2->setMaterialId(mirror_material_id);
 		scene.addShape(sphere2);
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1.5, 1.5, 1.5)), ConstantTexture::black);
@@ -316,7 +317,7 @@ namespace {
 			Vertex({ glm::vec3(0, -0.5f, 0.5f), glm::vec3(1, 0, 0), glm::vec2(1, 0) })
 			);
 		light_mesh0->transform(Transform(light_transform));
-		light_mesh0->materialId = light_material_id;
+		light_mesh0->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh0);
 		scene.addLight(light0, light_mesh0);
 
@@ -326,7 +327,7 @@ namespace {
 			Vertex({ glm::vec3(0, 0.5f, -0.5f), glm::vec3(1, 0, 0), glm::vec2(0, 1) })
 			);
 		light_mesh1->transform(Transform(light_transform));
-		light_mesh1->materialId = light_material_id;
+		light_mesh1->setMaterialId(light_material_id);
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 

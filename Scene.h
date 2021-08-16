@@ -12,7 +12,7 @@ struct HitRecord;
 class InfiniteAreaLight;
 
 /*
-* Holds the data of every mesh throughout ApplicationOld lifetime
+* Holds the data of every mesh throughout Application lifetime
 */
 class Scene
 {
@@ -29,6 +29,7 @@ public:
 	const std::unordered_map<int, std::shared_ptr<Material>>& getMaterials() const;
 	std::unordered_map<int, std::shared_ptr<Material>>& getMaterials();
 	const std::vector<std::shared_ptr<const Light>>& getLights() const;
+	const std::unordered_map<int, std::shared_ptr<const Light>>& getAreaLights() const;
 	std::vector<std::shared_ptr<const Light>>& getLights();
 	const InfiniteAreaLight* getEnvironmentLight() const;
 
@@ -44,7 +45,7 @@ private:
 	std::unordered_map<int, std::shared_ptr<Material>> _materials;  // Keys are material ids
 	std::unordered_map<int, std::shared_ptr<const Light>> _areaLights;  // Keys are associated shapes
 	std::vector<std::shared_ptr<const Light>> _lights;
-	InfiniteAreaLight *_environmentLight = nullptr;
+	const InfiniteAreaLight* _environmentLight = nullptr;
 
 	// Handlers for Embree
 	RTCScene _rtcScene = 0;

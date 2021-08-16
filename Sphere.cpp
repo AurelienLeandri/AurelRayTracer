@@ -5,22 +5,21 @@
 
 #include "Transform.h"
 
+// Constructors/Destructors
+
 Sphere::Sphere()
-	: Shape(ShapeType::SPHERE)
+	: Shape(Shape::Type::SPHERE)
 {
 }
 
 Sphere::Sphere(const glm::vec3& center, float radius)
-    : Shape(ShapeType::SPHERE)
+    : Shape(Shape::Type::SPHERE)
 {
-	data.center = center;
-	data.radius = radius;
+	_data.center = center;
+	_data.radius = radius;
 }
 
-float Sphere::area() const
-{
-    return 4 * (float)M_PI * radius * radius;
-}
+// Inherited via Shape
 
 glm::vec3 Sphere::sample(const HitRecord& record, float& pdf) const
 {
@@ -34,17 +33,18 @@ float Sphere::pdf(const glm::vec3& point, const HitRecord& record) const
 
 void Sphere::transform(const Transform& transform)
 {
-    center = glm::vec3(transform.getMatrix() * glm::vec4(center, 1));
+    _data.center = glm::vec3(transform.getMatrix() * glm::vec4(center, 1));
 }
 
-void Sphere::commitGeometry(RTCDevice device, RTCScene rtcScene)
+float Sphere::area() const
 {
-	RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_SPHERE_POINT);
-	SphereData *bufferData = (SphereData *)rtcSetNewGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT4, sizeof(SphereData), 1);
-	bufferData->center = data.center;
-	bufferData->radius = data.radius;
-
-	rtcCommitGeometry(geom);
-	rtcAttachGeometry(rtcScene, geom);
-	rtcReleaseGeometry(geom);
+    return 4 * (float)M_PI * radius * radius;
 }
+
+// Getters/Setters
+
+const Sphere::Data& Sphere::getData() const
+{
+    return _data;
+}
+

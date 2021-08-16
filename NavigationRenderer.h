@@ -29,7 +29,7 @@ private:
 	void _createColorResources();
 	void _createDepthResources();
 	void _createFramebuffers();
-	void _createVertexBuffer();
+	void _createVertexBuffers();
 	void _createIndexBuffer();
 	void _createUniformBuffers();
 	void _createCommandBuffers();

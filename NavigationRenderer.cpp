@@ -46,7 +46,7 @@ int NavigationRenderer::init()
             // TODO
             // Create descriptor sets without knowing about the scene beforehand, because we always expect the same set of textures and data?
 
-            _createVertexBuffer();
+            _createVertexBuffers();
             _createIndexBuffer();
 
             _createTextureImage();
@@ -523,7 +523,7 @@ void NavigationRenderer::_createCommandBuffers() {
         vkCmdBindDescriptorSets(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
             _pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
 
-        vkCmdDrawIndexed(_commandBuffers[i], static_cast<uint32_t>(dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->indices.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(_commandBuffers[i], static_cast<uint32_t>(dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->getIndices().size()), 1, 0, 0, 0);
 
         vkCmdEndRenderPass(_commandBuffers[i]);
 
@@ -779,9 +779,9 @@ void NavigationRenderer::_createTextureSampler() {
     }
 }
 
-void NavigationRenderer::_createVertexBuffer()
+void NavigationRenderer::_createVertexBuffers()
 {
-    const std::vector<Vertex>& vertices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->geometry;
+    const std::vector<Vertex>& vertices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->getVertices();
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
     VkBuffer stagingBuffer;
@@ -806,7 +806,7 @@ void NavigationRenderer::_createVertexBuffer()
 
 void NavigationRenderer::_createIndexBuffer()
 {
-    const std::vector<int>& indices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->indices;
+    const std::vector<int>& indices = dynamic_cast<Mesh*>(_scene->getShapes().at(0).get())->getIndices();
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;

@@ -40,7 +40,7 @@ public:
 		VkImageTiling tiling, VkFormatFeatureFlags features) const;
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
-	// Accessors
+	// Accessorss
 	const Properties& getProperties() const;
 	VkDevice& getLogicalDevice();
 	const QueueFamilyIndices& getQueueFamilyIndices() const;

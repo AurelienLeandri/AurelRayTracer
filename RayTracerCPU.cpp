@@ -43,7 +43,7 @@ int RayTracerCPU::init()
             // TODO
             // Create descriptor sets without knowing about the scene beforehand, because we always expect the same set of textures and data?
 
-            _createVertexBuffer();
+            _createVertexBuffers();
             _createIndexBuffer();
 
             _createIntegrator();
@@ -613,7 +613,7 @@ void RayTracerCPU::_createTextureSampler() {
     }
 }
 
-void RayTracerCPU::_createVertexBuffer()
+void RayTracerCPU::_createVertexBuffers()
 {
     static const std::vector<Vertex> vertices = {
     {{-1.0f, -1.0f, 0.f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},

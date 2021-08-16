@@ -1997,8 +1997,8 @@ void ApplicationOld::loadModel()
     if (!ModelLoader::loadModel(model_path, *scene, Transform(t))) {
         std::cerr << "Could not load model " << model_path << std::endl;
     }
-    vertices = dynamic_cast<Mesh*>(scene->getShapes()[0].get())->geometry;
-    indices = dynamic_cast<Mesh*>(scene->getShapes()[0].get())->indices;
+    vertices = dynamic_cast<Mesh*>(scene->getShapes()[0].get())->getVertices();
+    indices = dynamic_cast<Mesh*>(scene->getShapes()[0].get())->getIndices();
 }
 
 VkFormat ApplicationOld::findSupportedFormat(const std::vector<VkFormat>& candidates,
