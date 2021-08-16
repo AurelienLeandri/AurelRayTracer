@@ -12,6 +12,7 @@
 #include "ModelLoader.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Vertex.h"
 
 // TODO: remove and use texture class
 #include <stb_image.h>

@@ -76,7 +76,7 @@ int Application::_initRenderers(std::string& failed)
     _renderers["RayTracerCPU"] = std::make_unique<RayTracerCPU>(*_window, _vulkan);
     _rendererNames.push_back("NavigationRenderer");
     _rendererNames.push_back("RayTracerCPU");
-    _activeRenderer = 1;
+    _activeRenderer = 0;
 
     for (std::pair<const std::string, std::unique_ptr<Renderer>>& pair : _renderers) {
         std::unique_ptr<Renderer>& renderer = pair.second;

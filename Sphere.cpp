@@ -23,11 +23,13 @@ Sphere::Sphere(const glm::vec3& center, float radius)
 
 glm::vec3 Sphere::sample(const HitRecord& record, float& pdf) const
 {
+    // TODO: implement shape sampling for Sphere
     return glm::vec3();
 }
 
 float Sphere::pdf(const glm::vec3& point, const HitRecord& record) const
 {
+    // TODO: implement shape sampling for Sphere
     return 0.0f;
 }
 

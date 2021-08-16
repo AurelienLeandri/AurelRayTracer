@@ -1,7 +1,6 @@
 #include "Mesh.h"
 
 #include "Transform.h"
-#include "Embree.h"
 
 // Constructors/Destructors
 

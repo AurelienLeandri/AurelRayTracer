@@ -1,9 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <memory>
-
-#include "Embree.h"
 
 struct HitRecord;
 class Transform;

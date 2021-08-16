@@ -6,8 +6,6 @@
 
 #include "Vertex.h"
 
-class Transform;
-
 /**
  * Representation of a triangle mesh. In the case you want a single-triangle mesh, consider using Triangle instead.
  */

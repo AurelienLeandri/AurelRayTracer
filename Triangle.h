@@ -2,9 +2,9 @@
 
 #include "Shape.h"
 
-#include "Vertex.h"
-
 #include <array>
+
+#include "Vertex.h"
 
 /**
  * Representation of a triangle.
@@ -36,7 +36,7 @@ public:
 	Triangle(const Vertex& vertex0, const Vertex& vertex1, const Vertex& vertex2);
 private:
 	/**
-	 * Computes the value of the attribute _parallelogramArea. To be called whenever the vertices are changed.
+	 * Computes the value of the attribute _parallelogramArea as well as the _normal. To be called whenever the vertices are changed.
 	 */
 	void _computeTriangleNormalAndParallelogramArea();
 

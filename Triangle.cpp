@@ -3,7 +3,6 @@
 #include "Utils.h"
 #include "HitRecord.h"
 #include "Transform.h"
-#include "Embree.h"
 
 // Constructors/Destructors
 

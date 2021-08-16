@@ -1,12 +1,8 @@
 #include "Scene.h"
 
-#include "Embree.h"
 #include "Shape.h"
-#include "Ray.h"
-#include "HitRecord.h"
 #include "Material.h"
 #include "Light.h"
-#include "Distribution2D.h"
 
 std::vector<std::unique_ptr<Scene>> SceneFactory::_scenes;
 

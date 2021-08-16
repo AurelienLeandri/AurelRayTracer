@@ -2,13 +2,10 @@
 
 #include <unordered_map>
 #include <memory>
-#include <embree3/rtcore.h>
 
 class Material;
 class Shape;
 class Light;
-class Ray;
-struct HitRecord;
 class InfiniteAreaLight;
 
 /**
@@ -57,6 +54,7 @@ public:
 	/**
 	 * Adds a light of arbitrary type to the scene. If lightShape is provided, adds an associated shape for the light
 	 * (for example in the case of an AreaLight). Returns the lightShape's id if lightShape was provided, 0 else.
+	 * If light is of type InfiniteAreaLight, it will replace the environment light currently attached to the scene, if any.
 	 * 
 	 * \param light The light to add.
 	 * \param lightShape The shape associated to the light, if any (for example in the case of an AreaLight).
