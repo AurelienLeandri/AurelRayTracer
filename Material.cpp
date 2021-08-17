@@ -16,29 +16,29 @@ void Material::emit(HitRecord& hitRecord) const
 }
 
 PerfectDiffuseMaterial::PerfectDiffuseMaterial(std::shared_ptr<Texture> albedo)
-    : _albedo(albedo)
+    : albedo(albedo)
 {
 }
 
 void PerfectDiffuseMaterial::getBSDF(HitRecord& hitRecord) const
 {
     hitRecord.bsdf = BSDF();
-    hitRecord.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hitRecord)));
+    hitRecord.bsdf.add(std::make_shared<LambertianReflection>(albedo->getColor(hitRecord)));
 }
 
 PerfectSpecularMaterial::PerfectSpecularMaterial(std::shared_ptr<Texture> albedo)
-    : _albedo(albedo)
+    : albedo(albedo)
 {
 }
 
 void PerfectSpecularMaterial::getBSDF(HitRecord& hitRecord) const
 {
     hitRecord.bsdf = BSDF();
-    hitRecord.bsdf.add(std::make_shared<TorranceSparrowReflection>(hitRecord.ray.eta, 0.f, _albedo->getColor(hitRecord), std::make_shared<TrowbridgeReitz>(0.f), 0.f));
+    hitRecord.bsdf.add(std::make_shared<TorranceSparrowReflection>(hitRecord.ray.eta, 0.f, albedo->getColor(hitRecord), std::make_shared<TrowbridgeReitz>(0.f), 0.f));
 }
 
 PerfectTransparentMaterial::PerfectTransparentMaterial(std::shared_ptr<Texture> albedo)
-    : _albedo(albedo)
+    : albedo(albedo)
 {
 }
 
@@ -50,52 +50,52 @@ void PerfectTransparentMaterial::getBSDF(HitRecord& hitRecord) const
 }
 
 MatteMaterial::MatteMaterial(std::shared_ptr<Texture> albedo, float sigma)
-    : _albedo(albedo), _sigma(sigma)
+    : albedo(albedo), _sigma(sigma)
 {
 }
 
 void MatteMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<OrenNayarReflection>(_albedo->getColor(hit_record), _sigma));
+    hit_record.bsdf.add(std::make_shared<OrenNayarReflection>(albedo->getColor(hit_record), _sigma));
 }
 
-EmissiveMaterial::EmissiveMaterial(std::shared_ptr<Texture> emission, std::shared_ptr<Texture> albedo) : _emission(emission), _albedo(albedo) {
+EmissiveMaterial::EmissiveMaterial(std::shared_ptr<Texture> emission, std::shared_ptr<Texture> albedo) : emission(emission), albedo(albedo) {
 }
 
 void EmissiveMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hit_record)));
+    hit_record.bsdf.add(std::make_shared<LambertianReflection>(albedo->getColor(hit_record)));
 }
 
 void EmissiveMaterial::emit(HitRecord& hit_record) const
 {
-    hit_record.emission = _emission->getColor(hit_record);
+    hit_record.emission = emission->getColor(hit_record);
 }
 
 DielectricMaterial::DielectricMaterial(float eta, std::shared_ptr<Texture> albedo, float roughness, float k)
-    : _eta(eta), _roughness(roughness), _k(k), _albedo(albedo), _alpha(MicrofacetDistribution::roughnessToAlpha(_roughness))
+    : eta(eta), roughness(roughness), k(k), albedo(albedo), alpha(MicrofacetDistribution::roughnessToAlpha(roughness))
 {
 }
 
 void DielectricMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha), _k));
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, _eta, _albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(_alpha)));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, eta, albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(alpha), k));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowTransmission>(hit_record.ray.eta, eta, albedo->getColor(hit_record), std::make_shared<TrowbridgeReitz>(alpha)));
 }
 
 GlossyMaterial::GlossyMaterial(float eta, std::shared_ptr<Texture> albedo, float roughness)
-    : _eta(eta), _roughness(roughness), _albedo(albedo), _alpha(MicrofacetDistribution::roughnessToAlpha(_roughness))
+    : eta(eta), roughness(roughness), albedo(albedo), alpha(MicrofacetDistribution::roughnessToAlpha(roughness))
 {
 }
 
 void GlossyMaterial::getBSDF(HitRecord& hit_record) const
 {
     hit_record.bsdf = BSDF();
-    hit_record.bsdf.add(std::make_shared<LambertianReflection>(_albedo->getColor(hit_record)));
-    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, _eta, glm::vec3(1.f), std::make_shared<TrowbridgeReitz>(_alpha)));
+    hit_record.bsdf.add(std::make_shared<LambertianReflection>(albedo->getColor(hit_record)));
+    hit_record.bsdf.add(std::make_shared<TorranceSparrowReflection>(hit_record.ray.eta, eta, glm::vec3(1.f), std::make_shared<TrowbridgeReitz>(alpha)));
 }
 
 /*

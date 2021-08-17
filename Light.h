@@ -58,7 +58,7 @@ public:
     virtual glm::vec3 radianceFromPoint(const HitRecord& pointOnLight, const glm::vec3& w) const;
 
 private:
-    const glm::vec3 _emission = glm::vec3(1);
+    const glm::vec3 emission = glm::vec3(1);
     std::shared_ptr<Shape> _shape;
     const float _area = 0;
 };

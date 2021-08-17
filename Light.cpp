@@ -10,7 +10,7 @@
 #include "Distribution2D.h"
 
 AreaLight::AreaLight(const glm::vec3& emission, std::shared_ptr<Shape> shape)
-    : Light(LightType::AREA), _emission(emission), _shape(shape), _area(shape->area())
+    : Light(LightType::AREA), emission(emission), _shape(shape), _area(shape->area())
 {
 }
 
@@ -21,19 +21,19 @@ void AreaLight::transform(const Transform& transform)
 glm::vec3 AreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const
 {
     wi = _shape->sample(hit_record, pdf);
-    return _emission;
+    return emission;
 }
 
 glm::vec3 AreaLight::power() const
 {
-    return _emission * _area * (float)M_PI;
+    return emission * _area * (float)M_PI;
 }
 
 glm::vec3 AreaLight::radianceFromPoint(const HitRecord& pointOnLight, const glm::vec3& w) const
 {
     if (glm::dot(w, pointOnLight.normal) < 0)
         return glm::vec3(0);
-    return _emission;
+    return emission;
 }
 
 InfiniteAreaLight::InfiniteAreaLight(const std::string& texturePath)

@@ -1,6 +1,9 @@
 #define BOOST_TEST_MODULE mytests
 #include <boost/test/included/unit_test.hpp>
 
+#include <iostream>
+#include <fstream>
+
 #include "Texture.h"
 #include "Utils.h"
 #include "StratifiedSampler.h"
@@ -48,7 +51,6 @@ namespace {
 
 BOOST_AUTO_TEST_CASE(TextureLoadingTest)
 {
-	/*
 	ImageTexture imageTextureHdrRgb("lakeside_2k.hdr", ImageTextureDataType::FLOAT, ImageTextureLayoutType::RGB);
 	printImagePPM(imageTextureHdrRgb.getData(), imageTextureHdrRgb.getWidth(), imageTextureHdrRgb.getHeight(), imageTextureHdrRgb.getNbChannels(),
 		ImageTextureDataType::FLOAT, ImageTextureLayoutType::RGB, "imageTextureHdrRgb.ppm");
@@ -64,7 +66,6 @@ BOOST_AUTO_TEST_CASE(TextureLoadingTest)
 	ImageTexture imageTextureLdrLuminance("lakeside_2k.hdr", ImageTextureDataType::UNSIGNED_CHAR, ImageTextureLayoutType::LUMINANCE);
 	printImagePPM(imageTextureLdrLuminance.getData(), imageTextureLdrLuminance.getWidth(), imageTextureLdrLuminance.getHeight(), imageTextureLdrLuminance.getNbChannels(),
 		ImageTextureDataType::FLOAT, ImageTextureLayoutType::RGB, "imageTextureHdrRgb.ppm");
-		*/
 }
 
 template<class S>

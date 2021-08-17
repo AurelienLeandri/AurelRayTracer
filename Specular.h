@@ -19,7 +19,7 @@ public:
 private:
     float _etaRay = 0;
     float _etaInterface = 0;
-    glm::vec3 _albedo = glm::vec3(1);
+    glm::vec3 albedo = glm::vec3(1);
     bool _fromLight = false;
 };
 
@@ -37,7 +37,7 @@ public:
 private:
     float _etaRay = 0;
     float _etaInterface = 0;
-    glm::vec3 _albedo = glm::vec3(1);
+    glm::vec3 albedo = glm::vec3(1);
     bool _fromLight = false;
 };
 
@@ -56,8 +56,8 @@ public:
 private:
     glm::vec3 _etaRay = glm::vec3(0);
     glm::vec3 _etaInterface = glm::vec3(0);
-    glm::vec3 _albedo = glm::vec3(1);
-    glm::vec3 _k = glm::vec3(0);
+    glm::vec3 albedo = glm::vec3(1);
+    glm::vec3 k = glm::vec3(0);
     bool _fromLight = false;
 };
 

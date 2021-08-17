@@ -14,12 +14,12 @@
 
 
 TorranceSparrowReflection::TorranceSparrowReflection(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, float k)
-	: BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_GLOSSY), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _reflectionModel(reflection_model), _k(glm::vec3(k))
+	: BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_GLOSSY), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), albedo(albedo), _reflectionModel(reflection_model), k(glm::vec3(k))
 {
 }
 
 TorranceSparrowReflection::TorranceSparrowReflection(const glm::vec3& etaRay, const glm::vec3& etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model, const glm::vec3& k)
-	: BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model), _k(k)
+	: BxDF(BxDF::Type::BXDF_REFLECTION | BxDF::Type::BXDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), albedo(albedo), _reflectionModel(reflection_model), k(k)
 {
 }
 
@@ -40,12 +40,12 @@ glm::vec3 TorranceSparrowReflection::f(const glm::vec3& w_i, const glm::vec3& w_
 	float cos_w_i_w_h = glm::dot(w_i, w_h_fwd);
 
 	glm::vec3 fresnel_w_o;
-	if (_k != glm::vec3(0))
-		fresnel_w_o = fresnelConductor(cos_w_i_w_h, _etaRay, _etaInterface, _k);
+	if (k != glm::vec3(0))
+		fresnel_w_o = fresnelConductor(cos_w_i_w_h, _etaRay, _etaInterface, k);
 	else
 		fresnel_w_o = glm::vec3(fresnelDielectric(cos_w_i_w_h, _etaRay.x, _etaInterface.x));
 
-	glm::vec3 f = _albedo * D_w_h * G_w_o_w_i * fresnel_w_o / (4 * cos_w_i * cos_w_o);
+	glm::vec3 f = albedo * D_w_h * G_w_o_w_i * fresnel_w_o / (4 * cos_w_i * cos_w_o);
 	return f;
 }
 

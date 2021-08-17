@@ -17,6 +17,6 @@ public:
     virtual glm::vec3 f(const glm::vec3 & w_i, const glm::vec3 & w_o, const HitRecord &hit_record) const;
 
 private:
-    glm::vec3 _albedo = glm::vec3(1);
+    glm::vec3 albedo = glm::vec3(1);
 };
 

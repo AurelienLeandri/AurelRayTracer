@@ -57,7 +57,7 @@ glm::vec3 fresnelConductor(float cos_w_normal, const glm::vec3& eta_i, const glm
 }
 
 SpecularTransmission::SpecularTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION), _etaRay(etaRay), _etaInterface(etaInterface), albedo(albedo), _fromLight(fromLight)
 {
 }
 
@@ -83,7 +83,7 @@ glm::vec3 SpecularTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, c
 	if (!refract(w_o, glm::vec3(0, 0, 1), eta_i_over_eta_t, w_i))
 		return glm::vec3(0);
 
-	glm::vec3 f = _albedo * (glm::vec3(1) - fresnel_reflectance) / glm::abs(w_i.z);
+	glm::vec3 f = albedo * (glm::vec3(1) - fresnel_reflectance) / glm::abs(w_i.z);
 	if (_fromLight == true) {
 		f *= eta_i_over_eta_t * eta_i_over_eta_t;
 	}
@@ -93,11 +93,11 @@ glm::vec3 SpecularTransmission::sample_f(glm::vec3& w_i, const glm::vec3& w_o, c
 }
 
 SpecularReflection::SpecularReflection(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), _albedo(albedo), _fromLight(fromLight), _k(glm::vec3(k))
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(glm::vec3(etaRay)), _etaInterface(glm::vec3(etaInterface)), albedo(albedo), _fromLight(fromLight), k(glm::vec3(k))
 {
 }
 SpecularReflection::SpecularReflection(const glm::vec3& etaRay, const glm::vec3& etaInterface, const glm::vec3& albedo, const glm::vec3& k, bool fromLight)
-	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight), _k(k)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), albedo(albedo), _fromLight(fromLight), k(k)
 {
 }
 
@@ -112,19 +112,19 @@ float SpecularReflection::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const 
 
 glm::vec3 SpecularReflection::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const {
 	glm::vec3 fresnel_reflectance(0);
-	if (_k == glm::vec3(0)) {
+	if (k == glm::vec3(0)) {
 		fresnel_reflectance = glm::vec3(fresnelDielectric(w_o.z, _etaRay.x, _etaInterface.x));
 	}
 	else {
-		fresnel_reflectance = fresnelConductor(w_o.z, _etaRay, _etaInterface, _k);
+		fresnel_reflectance = fresnelConductor(w_o.z, _etaRay, _etaInterface, k);
 	}
 	w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);  // Reflect when the normal is (0, 0, 1)
 	pdf = 1;
-	return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
+	return albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
 }
 
 Specular::Specular(float etaRay, float etaInterface, const glm::vec3& albedo, float k, bool fromLight)
-	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _fromLight(fromLight)
+	: BxDF(BxDF::Type::BXDF_SPECULAR | BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_REFLECTION), _etaRay(etaRay), _etaInterface(etaInterface), albedo(albedo), _fromLight(fromLight)
 {
 }
 
@@ -144,7 +144,7 @@ glm::vec3 Specular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitReco
 	if (frand() <= fresnel_reflectance) {  // Reflection
 		w_i = glm::vec3(-w_o.x, -w_o.y, w_o.z);  // Reflect when the normal is (0, 0, 1)
 		pdf = fresnel_reflectance;
-		return _albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
+		return albedo * glm::vec3(fresnel_reflectance) / glm::abs(w_i.z);
 	}
 	else {  // Transmission
 		float eta_i_over_eta_t = 0;
@@ -156,7 +156,7 @@ glm::vec3 Specular::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitReco
 		if (!refract(w_o, glm::vec3(0, 0, 1), eta_i_over_eta_t, w_i))
 			return glm::vec3(0);
 
-		glm::vec3 f = _albedo * (glm::vec3(1) - fresnel_reflectance) / glm::abs(w_i.z);
+		glm::vec3 f = albedo * (glm::vec3(1) - fresnel_reflectance) / glm::abs(w_i.z);
 		if (_fromLight == true) {
 			f *= eta_i_over_eta_t * eta_i_over_eta_t;
 		}

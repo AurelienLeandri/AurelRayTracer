@@ -23,8 +23,8 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-protected:
-    std::shared_ptr<Texture> _albedo;
+public:
+    std::shared_ptr<Texture> albedo;
 };
 
 class PerfectSpecularMaterial : public Material {
@@ -34,8 +34,8 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-protected:
-    std::shared_ptr<Texture> _albedo;
+public:
+    std::shared_ptr<Texture> albedo;
 };
 
 class PerfectTransparentMaterial : public Material {
@@ -45,8 +45,8 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-protected:
-    std::shared_ptr<Texture> _albedo;
+public:
+    std::shared_ptr<Texture> albedo;
 };
 
 class MatteMaterial : public Material
@@ -57,8 +57,8 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-protected:
-    std::shared_ptr<Texture> _albedo;
+public:
+    std::shared_ptr<Texture> albedo;
     float _sigma;
 };
 
@@ -71,9 +71,9 @@ public:
     virtual void getBSDF(HitRecord& hitRecord) const;
     virtual void emit(HitRecord& hitRecord) const override;
 
-protected:
-    std::shared_ptr<Texture> _emission;
-    std::shared_ptr<Texture> _albedo;
+public:
+    std::shared_ptr<Texture> emission;
+    std::shared_ptr<Texture> albedo;
 };
 
 class DielectricMaterial : public Material {
@@ -83,12 +83,12 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-private:
-    float _eta;
-    float _roughness;
-    float _alpha;
-    float _k;
-    std::shared_ptr<Texture> _albedo;
+public:
+    float eta;
+    float roughness;
+    float alpha;
+    float k;
+    std::shared_ptr<Texture> albedo;
 };
 
 class GlossyMaterial : public Material {
@@ -98,9 +98,9 @@ public:
 public:
     virtual void getBSDF(HitRecord& hitRecord) const;
 
-private:
-    float _eta;
-    float _roughness;
-    float _alpha;
-    std::shared_ptr<Texture> _albedo;
+public:
+    float eta;
+    float roughness;
+    float alpha;
+    std::shared_ptr<Texture> albedo;
 };

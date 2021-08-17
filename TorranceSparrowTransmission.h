@@ -12,7 +12,7 @@ public:
     TorranceSparrowTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model);
 
 private:
-    glm::vec3 _albedo;
+    glm::vec3 albedo;
     std::shared_ptr<MicrofacetDistribution> _reflectionModel;
     float _etaRay = 0;
     float _etaInterface = 0;

@@ -9,7 +9,7 @@
 #include <iostream>
 
 TorranceSparrowTransmission::TorranceSparrowTransmission(float etaRay, float etaInterface, const glm::vec3& albedo, std::shared_ptr<MicrofacetDistribution> reflection_model)
-	: BxDF(BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), _albedo(albedo), _reflectionModel(reflection_model)
+	: BxDF(BxDF::Type::BXDF_TRANSMISSION | BxDF::Type::BXDF_GLOSSY), _etaRay(etaRay), _etaInterface(etaInterface), albedo(albedo), _reflectionModel(reflection_model)
 {
 }
 
@@ -20,7 +20,7 @@ glm::vec3 TorranceSparrowTransmission::f(const glm::vec3& w_i, const glm::vec3& 
 
 	float eta = w_o.z > 0 ? _etaInterface / _etaRay : _etaRay / _etaInterface;
 	if (glm::abs(eta - 1.f) < 1e-4f)  // Case both etas are ~=, to avoid division by zero for the f value
-		return _albedo;
+		return albedo;
 
 	float cos_w_o = w_o.z;
 	float cos_w_i = w_i.z;
@@ -46,7 +46,7 @@ glm::vec3 TorranceSparrowTransmission::f(const glm::vec3& w_i, const glm::vec3& 
 	float fresnel_w_o = fresnelDielectric(dot_w_o_w_h, _etaRay, _etaInterface);
 	// TODO: test "if (from_light)". (for sampling; there is an additional factor here, see pbrt)
 	float denom = ((float)glm::pow(dot_w_o_w_h + eta * dot_w_i_w_h, 2) * cos_w_o * cos_w_i);
-	glm::vec3 f = glm::abs(_albedo * D_w_h * G_w_o_w_i * (1 - fresnel_w_o) * eta * eta * glm::abs(dot_w_i_w_h) * glm::abs(dot_w_o_w_h) / denom);
+	glm::vec3 f = glm::abs(albedo * D_w_h * G_w_o_w_i * (1 - fresnel_w_o) * eta * eta * glm::abs(dot_w_i_w_h) * glm::abs(dot_w_o_w_h) / denom);
 
 	return f;
 }
