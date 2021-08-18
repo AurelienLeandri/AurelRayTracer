@@ -89,6 +89,6 @@ private:
     /**
      * Stores all the textures loaded so far to make sure textures aren't loaded more than once.
      */
-    static std::unordered_map<std::string, std::shared_ptr<ImageTexture>> _texturesCache;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    static std::unordered_map<std::string, std::shared_ptr<ImageTexture>> _texturesCache;
 };
 
