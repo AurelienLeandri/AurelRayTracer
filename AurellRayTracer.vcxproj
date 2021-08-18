@@ -427,6 +427,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RenderTests|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="SamplerIntegrator.cpp" />
     <ClCompile Include="Shape.cpp" />
@@ -487,6 +488,7 @@
     <ClInclude Include="PixelSampler.h" />
     <ClInclude Include="RayTracerCPU.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="SamplerIntegrator.h" />
     <ClInclude Include="Shape.h" />

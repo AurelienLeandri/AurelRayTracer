@@ -37,6 +37,11 @@ public:
 	static int loadFromFile(std::string fileName, std::vector<Mesh*>& meshes, std::string* id = nullptr);
 	static int loadFromFile(std::string id, std::string fileName, std::vector<Mesh*>& meshes);
 
+	static int add(std::string id, const std::vector<Mesh*>& meshes);
+	static int add(const std::vector<Mesh*>& meshes, std::string* id = nullptr);
+
+	static int addOrReplace(std::string id, const std::vector<Mesh*>& meshes);
+
 	static int create(std::string id, size_t nbMeshes, std::vector<Mesh*>& meshes);
 	static int create(size_t nbMeshes, std::vector<Mesh*>& meshes, std::string* id = nullptr);
 

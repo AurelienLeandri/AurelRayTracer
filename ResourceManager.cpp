@@ -51,6 +51,51 @@ int ImageTextureManager::loadFromFile(std::string id, std::string fileName, Imag
 
 int ImageTextureManager::add(std::string id, ImageTexture* texture)
 {
+    if (!texture || !isIdValid(id)) {
+        return -1;
+    }
+
+    ImageTexture* alreadyThere = nullptr;
+    if (!get(id, alreadyThere)) {
+        if (alreadyThere != texture) {
+            return -2;
+        }
+        return 1;
+    }
+
+    _texturesMap[id] = std::unique_ptr<ImageTexture>(texture);
+
+    return 0;
+}
+
+int ImageTextureManager::add(ImageTexture* texture, std::string* id)
+{
+    if (!texture) {
+        return -1;
+    }
+
+    std::stringstream stream;
+    stream << "_" << static_cast<void*>(texture);
+    std::string textureId = stream.str();
+
+    _texturesMap[textureId] = std::unique_ptr<ImageTexture>(texture);
+    if (id) {
+        *id = textureId;
+    }
+
+    return 0;
+}
+
+int ImageTextureManager::addOrReplace(std::string id, ImageTexture* texture)
+{
+    if (!texture || !isIdValid(id)) {
+        return -1;
+    }
+
+    _texturesMap.erase(id);
+
+    _texturesMap[id] = std::unique_ptr<ImageTexture>(texture);
+
     return 0;
 }
 
@@ -173,6 +218,65 @@ int MeshManager::loadFromFile(std::string id, std::string fileName, std::vector<
     return 0;
 }
 
+int MeshManager::add(std::string id, const std::vector<Mesh*>& meshes)
+{
+    if (meshes.size() == 0 || !isIdValid(id)) {
+        return -1;
+    }
+
+    std::vector<Mesh*> alreadyThere;
+    if (!get(id, alreadyThere)) {
+        if (meshes.size() != alreadyThere.size() || meshes != alreadyThere) {
+            return -2;
+        }
+        return 1;
+    }
+
+    _meshesMap[id] = std::vector<std::unique_ptr<Mesh>>();
+    for (Mesh* mesh : meshes) {
+        _meshesMap[id].push_back(std::unique_ptr<Mesh>(mesh));
+    }
+
+    return 0;
+}
+
+int MeshManager::add(const std::vector<Mesh*>& meshes, std::string* id)
+{
+    if (meshes.size() == 0) {
+        return -1;
+    }
+
+    std::stringstream stream;
+    stream << "_" << static_cast<void*>(meshes[0]);
+    std::string meshId = stream.str();
+
+    _meshesMap[meshId] = std::vector<std::unique_ptr<Mesh>>();
+    for (Mesh* mesh : meshes) {
+        _meshesMap[meshId].push_back(std::unique_ptr<Mesh>(mesh));
+    }
+    if (id) {
+        *id = meshId;
+    }
+
+    return 0;
+}
+
+int MeshManager::addOrReplace(std::string id, const std::vector<Mesh*>& meshes)
+{
+    if (meshes.size() == 0 || !isIdValid(id)) {
+        return -1;
+    }
+
+    _meshesMap.erase(id);
+
+    _meshesMap[id] = std::vector<std::unique_ptr<Mesh>>();
+    for (Mesh* mesh : meshes) {
+        _meshesMap[id].push_back(std::unique_ptr<Mesh>(mesh));
+    }
+
+    return 0;
+}
+
 int MeshManager::create(std::string id, size_t nbMeshes, std::vector<Mesh*>& meshes)
 {
     if (!isIdValid(id) || nbMeshes == 0) {
@@ -188,10 +292,9 @@ int MeshManager::create(std::string id, size_t nbMeshes, std::vector<Mesh*>& mes
 
     meshes = std::vector<Mesh*>(nbMeshes, new Mesh());
 
-    _meshesMap[id] = std::vector<std::unique_ptr<Mesh>>(nbMeshes, std::make_unique<Mesh>());
-    std::vector<Mesh*> meshes = std::vector<Mesh*>();
-    for (const std::unique_ptr<Mesh>& mesh : _meshesMap[id]) {
-        meshes.push_back(mesh.get());
+    _meshesMap[id] = std::vector<std::unique_ptr<Mesh>>();
+    for (Mesh* mesh : meshes) {
+        _meshesMap[id].push_back(std::unique_ptr<Mesh>(mesh));
     }
 
     return 0;
