@@ -9,10 +9,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Transform.h"
+
 class Material;
 class Scene;
 class ImageTexture;
-class Transform;
 
 /**
  * Provides functions to load models from a file into a scene. This class uses the assimp library for model loading.

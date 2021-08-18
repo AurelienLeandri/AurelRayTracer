@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "Triangle.h"
-#include "ImageTexture.h"
+#include "Texture.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Scene.h"
@@ -116,16 +116,18 @@ std::shared_ptr<Material> ModelLoader::_loadMaterial(aiMaterial* assimpMaterial,
     aiTextureType textureTypes[] = {
         aiTextureType_DIFFUSE
     };
-    std::unordered_map<aiTextureType, std::shared_ptr<Texture>&> materialTextureSlots = {
-        { aiTextureType_DIFFUSE, material->albedo }
+    std::unordered_map<aiTextureType, std::shared_ptr<Texture>*> materialTextureSlots = {
+        { aiTextureType_DIFFUSE, &material->albedo }
     };
     for (const aiTextureType& textureType : textureTypes) {
         std::shared_ptr<ImageTexture> texture = _loadMaterialTexture(assimpMaterial, textureType, directory);
         if (texture) {
-            materialTextureSlots[textureType] = texture;
+            *materialTextureSlots[textureType] = texture;
         }
         // TODO: else case, for example adding a constant texture from another parameter of the material
     }
+
+    return material;
 }
 
 std::shared_ptr<ImageTexture> ModelLoader::_loadMaterialTexture(

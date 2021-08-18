@@ -9,11 +9,6 @@ Mesh::Mesh()
 {
 }
 
-Mesh* Mesh::create()
-{
-	;
-}
-
 // Inherited vie Shape
 
 glm::vec3 Mesh::sample(const HitRecord& record, float& pdf) const

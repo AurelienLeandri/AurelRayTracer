@@ -10,6 +10,9 @@ namespace {
 * ImageTextureManager
 */
 
+std::unordered_map<std::string, std::unique_ptr<ImageTexture>> ImageTextureManager::_texturesMap;
+std::unordered_map<std::string, std::string> ImageTextureManager::_fileNameToId;
+
 int ImageTextureManager::loadFromFile(std::string fileName, ImageTexture*& texture, std::string* id)
 {
     if (!getFromFileName(fileName, texture)) {
@@ -172,6 +175,9 @@ int ImageTextureManager::getFromFileName(std::string fileName, ImageTexture*& te
 /*
 * MeshManager
 */
+
+std::unordered_map<std::string, std::vector<std::unique_ptr<Mesh>>> MeshManager::_meshesMap;
+std::unordered_map<std::string, std::string> MeshManager::_fileNameToId;
 
 int MeshManager::loadFromFile(std::string fileName, std::vector<Mesh*>& meshes, std::string* id)
 {
