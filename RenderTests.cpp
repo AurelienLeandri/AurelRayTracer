@@ -98,10 +98,10 @@ int main() {
 	};
 
 	std::vector<std::shared_ptr<InfiniteAreaLight>> environmentLights = {
-		std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr"),
-		std::make_shared<InfiniteAreaLight>("test_sun.hdr"),
-		std::make_shared<InfiniteAreaLight>("test_white.hdr"),
-		std::make_shared<InfiniteAreaLight>("test_directions.hdr"),
+		std::make_shared<InfiniteAreaLight>("resources/hdr/lakeside_2k.hdr"),
+		std::make_shared<InfiniteAreaLight>("resources/hdr/test_sun.hdr"),
+		std::make_shared<InfiniteAreaLight>("resources/hdr/test_white.hdr"),
+		std::make_shared<InfiniteAreaLight>("resources/hdr/test_directions.hdr"),
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
