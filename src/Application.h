@@ -1,7 +1,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
-#include <glfw3.h>
+#include <glfw/glfw3.h>
 
 class Application
 {

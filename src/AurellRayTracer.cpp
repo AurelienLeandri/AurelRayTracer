@@ -190,7 +190,7 @@ namespace {
 		t.translation = glm::vec3(0.5f, 0, 3);
 		t.scaling = glm::vec3(1);
 		t.rotation_rads = glm::vec3(0, -(3 * M_PI) / 4, 0);
-		std::string model_path = "Survival_BackPack_2/backpack.obj";
+		std::string model_path = "resources/models/Survival_BackPack_2/backpack.obj";
 		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
@@ -231,7 +231,7 @@ namespace {
 		t.translation = glm::vec3(0, 0, 3);
 		t.scaling = glm::vec3(0.08f, 0.08f, 0.08f);
 		t.rotation_rads = glm::vec3(0, M_PI / 4, 0);
-		std::string model_path = "utah-teapot.obj";
+		std::string model_path = "resources/models/utah-teapot.obj";
 		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
@@ -271,7 +271,7 @@ namespace {
 		TransformParameters t;
 		t.translation = glm::vec3(0, 0, 200);
 		t.rotation_rads = glm::vec3(0, -M_PI / 12, 0);
-		std::string model_path = "Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
+		std::string model_path = "resources/models/Cerberus_by_Andrew_Maximov/Cerberus_LP.fbx";
 		if (!ModelLoader::loadModel(model_path, scene, Transform(t))) {
 			std::cerr << "Could not load model " << model_path << std::endl;
 		}
@@ -388,9 +388,9 @@ int main()
 
 	std::shared_ptr<Camera> camera =  cerberus_scene(*scene);
 
-	std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("lakeside_2k.hdr");
-	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_sun.hdr");
-	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("test_white.hdr");
+	std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("resources/hdr/lakeside_2k.hdr");
+	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("resources/hdr/test_sun.hdr");
+	//std::shared_ptr<InfiniteAreaLight> environmentLight = std::make_shared<InfiniteAreaLight>("resources/hdr/test_white.hdr");
 	scene->addLight(environmentLight);
 
 	ray_tracer.setCamera(camera);
