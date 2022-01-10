@@ -24,6 +24,5 @@ public:
 public:
     std::vector<Vertex> geometry;
     std::vector<int> indices;
-    int materialId = 0;
 
 };
