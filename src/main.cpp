@@ -27,6 +27,8 @@ namespace {
 }
 
 int main() {
+	std::cout << "Loading test scenes. This can take a few seconds." << std::endl;
+
 	std::vector<int> scenes = {
 		0,
 		1,
