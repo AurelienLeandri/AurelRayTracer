@@ -1,4 +1,4 @@
-#include "RayTracer.h"
+#include "PathTracer.h"
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -23,12 +23,12 @@
 
 static float max_green = 0;
 
-RayTracer::RayTracer(const Parameters& parameters)
+PathTracer::PathTracer(const Parameters& parameters)
     : _parameters(parameters), _portionSize((_parameters.width * _parameters.height) / _parameters.nbThreads)
 {
 }
 
-RayTracer::~RayTracer()
+PathTracer::~PathTracer()
 {
     if (_imageBuffer) {
         delete[] _imageBuffer;
@@ -36,7 +36,7 @@ RayTracer::~RayTracer()
     }
 }
 
-int RayTracer::init()
+int PathTracer::init()
 {
     if (_imageBuffer) {
         delete[] _imageBuffer;
@@ -50,7 +50,7 @@ int RayTracer::init()
     return 0;
 }
 
-bool RayTracer::iterate() {
+bool PathTracer::iterate() {
     std::cout << "\tSample " << _currentSample;
 
     std::clock_t start(std::clock());
@@ -59,13 +59,15 @@ bool RayTracer::iterate() {
     float color_factor = (1.f / _currentSample);
     int portionSize = static_cast<int>(_portionSize);
 
+    srand(time(NULL));
+
 #pragma omp parallel for num_threads(NB_THREADS)
     for (int portion = 0; portion < _parameters.nbThreads; portion++) {
         for (int i = portion * portionSize; i < (portion + 1) * portionSize; i++) {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 10));
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, 4));
             glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
             glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
             _imageBuffer[(i * 3)] = color.r;
@@ -86,10 +88,10 @@ float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
     return (f * f) / (f * f + g * g);
 }
 
-glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const DirectLightingSamplingStrategy& strategy) const {
+glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const SamplingStrategy& strategy) const {
     float pdfDirectLighting = 0;
     glm::vec3 light_color(0);
-    if ((strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::LightsOnly)) && _scene->getLights().size()) {
+    if ((strategy & (SamplingStrategy::LightsAndBSDF | SamplingStrategy::LightsOnly)) && _scene->getLights().size()) {
         // Light sampling using light distribution
         const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
         int nbLights = static_cast<int>(sceneLights.size());
@@ -121,7 +123,7 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
 
     float pdfBSDF = 0;
     glm::vec3 bsdf_color(0);
-    if (strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::BSDFOnly)) {
+    if (strategy & (SamplingStrategy::LightsAndBSDF | SamplingStrategy::BSDFOnly)) {
         // Light sampling using BSDF
         glm::vec3 light_sample_bsdf(0, 0, 1);
         BxDF::Type bxdfType = BxDF::Type::BXDF_NONE;
@@ -148,7 +150,7 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
     return Power2Heuristic(1, pdfDirectLighting, 1, pdfBSDF) * light_color + Power2Heuristic(1, pdfBSDF, 1, pdfDirectLighting) * bsdf_color;
 }
 
-glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
+glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     size_t depth = 0;
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
@@ -167,7 +169,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
 
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
-            color += _directLighting(w_o_calculations, path_accumulated_weight, hit_record, DirectLightingSamplingStrategy::LightsAndBSDF);
+            color += _importanceSamplingRadiance(w_o_calculations, path_accumulated_weight, hit_record, _parameters.strategy);
 
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
@@ -180,15 +182,6 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             w_o = Ray(hit_record.position, w_i);
             float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
             path_accumulated_weight *= (light_attenuation_wrt_angle * f) / sample_proba;
-
-            // Russian roulette
-            if (depth >= 27) {  // 4
-                float russian_roulette_weight = glm::max(0.05f, 1 - (0.3f * path_accumulated_weight.r + 0.59f * path_accumulated_weight.g + 0.11f * path_accumulated_weight.b));
-                if (frand() < russian_roulette_weight) {
-                    break;
-                }
-                path_accumulated_weight /= 1 - russian_roulette_weight;
-            }
         }
         else {
             // Same conditions as earlier to add the environment light contribution.
@@ -205,16 +198,16 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     return color;
 }
 
-const float* RayTracer::getImageBuffer() const
+const float* PathTracer::getImageBuffer() const
 {
     return _imageBuffer;
 }
 
-void RayTracer::setCamera(std::shared_ptr<Camera> camera) {
+void PathTracer::setCamera(std::shared_ptr<Camera> camera) {
     _camera = camera;
 }
 
-void RayTracer::setScene(const SceneData& scene) {
+void PathTracer::setScene(const SceneData& scene) {
     _scene = &scene;
 }
 
@@ -227,7 +220,7 @@ namespace { // embree
 
 }
 
-bool RayTracer::start() {
+bool PathTracer::start() {
     if (!_scene || !_camera) {
         return false;
     }

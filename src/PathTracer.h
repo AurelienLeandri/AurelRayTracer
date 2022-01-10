@@ -18,9 +18,9 @@ class Material;
 class SceneData;
 class Light;
 
-class RayTracer {
-private:
-    enum DirectLightingSamplingStrategy {
+class PathTracer {
+public:
+    enum SamplingStrategy {
         LightsOnly = 1 << 0,
         BSDFOnly = 1 << 1,
         LightsAndBSDF = 1 << 2
@@ -33,11 +33,12 @@ public:
         size_t nbChannels = Application::NB_CHANNELS;
         size_t nbSamples = 128;
         int nbThreads = 32;
+        SamplingStrategy strategy = SamplingStrategy::LightsAndBSDF;
     };
 
 public:
-    RayTracer(const Parameters& parameters = {});
-    ~RayTracer();
+    PathTracer(const Parameters& parameters = {});
+    ~PathTracer();
 
 public:
     int init();
@@ -46,11 +47,11 @@ public:
     void setCamera(std::shared_ptr<Camera> camera);
     void setScene(const SceneData& scene);
     bool start();
-    glm::vec3 _directLighting(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const DirectLightingSamplingStrategy& strategy = DirectLightingSamplingStrategy::LightsAndBSDF) const;
 
 
 private:
     glm::vec3 _getColor(const Ray& r, size_t max_depth = 0) const;
+    glm::vec3 _importanceSamplingRadiance(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const SamplingStrategy& strategy) const;
 
 private:
     float* _imageBuffer = nullptr;
