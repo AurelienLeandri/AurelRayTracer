@@ -89,7 +89,7 @@ float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
 glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const DirectLightingSamplingStrategy& strategy) const {
     float pdfDirectLighting = 0;
     glm::vec3 light_color(0);
-    if (strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::LightsOnly)) {
+    if ((strategy & (DirectLightingSamplingStrategy::LightsAndBSDF | DirectLightingSamplingStrategy::LightsOnly)) && _scene->getLights().size()) {
         // Light sampling using light distribution
         const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
         int nbLights = static_cast<int>(sceneLights.size());
@@ -135,12 +135,13 @@ glm::vec3 RayTracer::_directLighting(const glm::vec3 &wo, const glm::vec3 &pathW
                 radianceFromLight = bsdf_sample_hit_record.emission;
             }
             else {
-                radianceFromLight = _scene->getEnvironmentLight()->radianceInDirection(light_sample_bsdf);
+                const InfiniteAreaLight* areaLight = _scene->getEnvironmentLight();
+                if (areaLight) {
+                    radianceFromLight = _scene->getEnvironmentLight()->radianceInDirection(light_sample_bsdf);
+                }
             }
             float lightAttenuationWrtAngle = glm::abs(glm::dot(surfaceRecord.normal, light_sample_bsdf));
             bsdf_color = radianceFromLight * ((pathWeight * lightAttenuationWrtAngle * bsdf_scattering) / pdfBSDF);
-            if (bsdf_color.r > 1 || bsdf_color.g > 1 || bsdf_color.b > 1)
-                int a = 0;
         }
     }
 
@@ -181,7 +182,7 @@ glm::vec3 RayTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             path_accumulated_weight *= (light_attenuation_wrt_angle * f) / sample_proba;
 
             // Russian roulette
-            if (depth >= 21) {  // 4
+            if (depth >= 27) {  // 4
                 float russian_roulette_weight = glm::max(0.05f, 1 - (0.3f * path_accumulated_weight.r + 0.59f * path_accumulated_weight.g + 0.11f * path_accumulated_weight.b));
                 if (frand() < russian_roulette_weight) {
                     break;

@@ -140,7 +140,8 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
 
         hit_record.ray = ray;
 
-        if (int material_id = shape->materialId) {
+        int material_id = shape->materialId;
+        if (material_id) {
             hit_record.material = _materials.at(material_id).get();
             hit_record.material->getBSDF(hit_record);
             hit_record.material->emit(hit_record);

@@ -83,7 +83,9 @@ void ModelLoader::_processMesh(
         loadMaterialTextures(assimp_material, aiTextureType_SPECULAR, "texture_specular", specularMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_HEIGHT, "texture_normal", normalMaps, directory);
         loadMaterialTextures(assimp_material, aiTextureType_AMBIENT, "texture_height", heightMaps, directory);
-        if (diffuseMaps.size()) material = std::make_shared<MatteMaterial>(diffuseMaps[0]);
+        if (diffuseMaps.size()) {
+            material = std::make_shared<MatteMaterial>(diffuseMaps[0]);
+        }
         else {
             material = std::make_shared<MatteMaterial>(ConstantTexture::white);
         }

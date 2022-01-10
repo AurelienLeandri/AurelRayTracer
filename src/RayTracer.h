@@ -31,7 +31,7 @@ public:
         size_t width = Application::WIDTH;
         size_t height = Application::HEIGHT;
         size_t nbChannels = Application::NB_CHANNELS;
-        size_t nbSamples = 2048;
+        size_t nbSamples = 128;
         int nbThreads = 32;
     };
 
