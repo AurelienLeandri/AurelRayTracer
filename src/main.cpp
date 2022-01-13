@@ -29,6 +29,7 @@ namespace {
 int main() {
 	std::cout << "Loading test scenes. This can take a few seconds." << std::endl;
 
+	/*
 	std::vector<int> scenes = {
 		0,
 		1,
@@ -39,17 +40,44 @@ int main() {
 		6,
 		7
 	};
+	*/
+
+	std::vector<int> scenes = {
+		6,
+	};
+
+	/*std::vector<int> nbSamples = {
+		256,
+		256,
+		256,
+		256,
+		256,
+		256,
+		256,
+		256
+	};*/
 
 	std::vector<int> nbSamples = {
-		64,
-		64,
-		64,
-		64,
-		64,
-		64,
-		64,
-		64
+		256,
+		256,
+		256,
+		256,
+		256,
+		256,
+		256,
+		256
 	};
+
+	//std::vector<int> nbSamples = {
+	//	2048,
+	//	2048,
+	//	2048,
+	//	2048,
+	//	2048,
+	//	2048,
+	//	2048,
+	//	2048
+	//};
 
 	std::vector<std::string> sceneNames = {
 		"MatteMaterialSigmaStep10deg",
@@ -83,7 +111,7 @@ int main() {
 	// Perfect materials
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
-	sceneMaterials.back().push_back(std::make_shared<PerfectSpecularMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.3f, 0.8f, 0.4f))));
+	//sceneMaterials.back().push_back(std::make_shared<PerfectSpecularMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.3f, 0.8f, 0.4f))));
 	sceneMaterials.back().push_back(std::make_shared<PerfectTransparentMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.6f, 0.5f, 0.8f))));
 	// Plastic materials roughness
 	sceneMaterials.push_back({});
@@ -140,8 +168,9 @@ int main() {
 		application.init();
 
 		PathTracer::Parameters params;
-		params.strategy = PathTracer::SamplingStrategy::LightsAndBSDF;
+		params.strategy = PathTracer::SamplingStrategy::LightsOnly;
 		params.nbSamples = nbSamples[i];
+		params.maxDepth = 1;
 		PathTracer ray_tracer(params);
 
 		ray_tracer.init();
@@ -279,7 +308,7 @@ namespace {
 		std::shared_ptr<PerfectDiffuseMaterial> material_red = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.65f, 0.05f, 0.05f)));
 		std::shared_ptr<PerfectDiffuseMaterial> material_white = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.73f, 0.73f, 0.73f)));
 		std::shared_ptr<PerfectDiffuseMaterial> material_green = std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.12f, 0.45f, 0.15f)));
-		std::shared_ptr<EmissiveMaterial> material_light = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(30, 30, 30)), ConstantTexture::black);
+		std::shared_ptr<EmissiveMaterial> material_light = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(15, 15, 15)), ConstantTexture::black);
 
 		int material_red_id = scene.addMaterial(material_red);
 		int material_green_id = scene.addMaterial(material_green);
@@ -350,9 +379,9 @@ namespace {
 			);
 		triangle_light_0->materialId = material_light_id;
 		triangle_light_1->materialId = material_light_id;
-		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_0);
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(15, 15, 15), triangle_light_0);
 		scene.addLight(light0, triangle_light_0);
-		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(30, 30, 30), triangle_light_1);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(15, 15, 15), triangle_light_1);
 		scene.addLight(light1, triangle_light_1);
 
 		// Small box
@@ -446,9 +475,11 @@ namespace {
 		scene.addShape(sphere);
 
 		//std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 10.f);
+		/*
 		std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3(0, 25, 100), 10.f);
 		sphere2->materialId = mirror_material_id;
 		scene.addShape(sphere2);
+		*/
 
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1.5, 1.5, 1.5)), ConstantTexture::black);
 		int light_material_id = scene.addMaterial(light_material);

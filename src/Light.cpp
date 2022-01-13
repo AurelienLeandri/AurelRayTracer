@@ -24,6 +24,12 @@ glm::vec3 AreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record, float&
     return _emission;
 }
 
+float AreaLight::pdf(const glm::vec3& point, const HitRecord& hit_record) const
+{
+    return _shape->pdf(point, hit_record);
+}
+
+
 glm::vec3 AreaLight::power() const
 {
     return _emission * _area * (float)M_PI;
@@ -117,6 +123,11 @@ glm::vec3 InfiniteAreaLight::radianceInDirection(const glm::vec3& w) const
 Light::Light(LightType type)
     : _type(type)
 {
+}
+
+float Light::pdf(const glm::vec3& point, const HitRecord& hit_record) const
+{
+    return 0.0f;
 }
 
 glm::vec3 Light::radianceInDirection(const glm::vec3& w) const

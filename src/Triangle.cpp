@@ -45,7 +45,7 @@ glm::vec3 Triangle::sample(const HitRecord& record, float& pdf) const {
 
 float Triangle::pdf(const glm::vec3& point, const HitRecord& record) const
 {
-	return std::fabs(glm::dot(point, point)) / (std::fabs(glm::dot(glm::normalize(point), record.normal)) * (area() * 0.5f));
+	return std::fabs(glm::dot(point, point)) / (std::fabs(glm::dot(glm::normalize(point), record.normal)) * area());
 }
 
 void Triangle::transform(const Transform& t)
