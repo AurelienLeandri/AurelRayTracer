@@ -32,6 +32,7 @@ public:
         size_t height = Application::HEIGHT;
         size_t nbChannels = Application::NB_CHANNELS;
         size_t nbSamples = 128;
+        size_t maxDepth = 4;
         int nbThreads = 32;
         SamplingStrategy strategy = SamplingStrategy::LightsAndBSDF;
     };
