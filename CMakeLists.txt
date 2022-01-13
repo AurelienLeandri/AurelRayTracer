@@ -35,6 +35,12 @@ endif()
 
 message("Using Embree lib found in ${EMBREE_LIB_PATH}")
 
+if (NOT DEFINED GLAD_INCLUDE_PATH OR NOT DEFINED GLAD_LIB_PATH)
+  message(FATAL_ERROR "GLAD_LIB_PATH and EMBREE_INCLUDE_PATH is not set in .env.cmake!")
+endif()
+
+message("Using GLAD lib found in ${EMBREE_LIB_PATH}")
+
 include_directories(${INCLUDE_PATH})
 message("Additional include directory: ${INCLUDE_PATH}")
 
@@ -64,12 +70,17 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${PROJECT_SOURCE_DIR}/src
   ${GLFW_INCLUDE_PATH}
   ${ASSIMP_INCLUDE_PATH}
+  ${EMBREE_INCLUDE_PATH}
+  ${GLAD_INCLUDE_PATH}
   ${INCLUDE_PATH}
   )
 
 target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLFW_LIB_PATH}
   ${ASSIMP_LIB_PATH}
+  ${EMBREE_LIB_PATH}
+  ${GLAD_LIB_PATH}
+  ${LIB_PATH}
 )
 
 target_link_libraries(${PROJECT_NAME} glfw3 embree3 assimp-vc140-mt)
