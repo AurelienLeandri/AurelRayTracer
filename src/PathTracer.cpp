@@ -125,7 +125,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                             && !_scene->castRay(direct_lighting_ray, occlusion_hit_record);
 
                         if (isLightReachable) {
-                            float power2HeuristicWeight = Power2Heuristic(1, pdfLight, 1, pdfBSDF);
+                            float power2HeuristicWeight = strategy & SamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
                             light_color += f * radiance * power2HeuristicWeight / pdfLight;
                         }
                     }
@@ -139,25 +139,29 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
         glm::vec3 bsdfSample(0, 0, 1);
         BxDF::Type bxdfType = BxDF::Type::BXDF_NONE;
         float pdfBSDF = 0;
-        glm::vec3 f = surfaceRecord.bsdf.sample_f(bsdfSample, wo, surfaceRecord, pdfBSDF, bxdfType);  // Get a sample vector, gets the proba to pick it
+        glm::vec3 f = surfaceRecord.bsdf.sample_f(bsdfSample, wo, surfaceRecord, pdfBSDF, bxdfType);
         bsdfSample = glm::normalize(bsdfSample);
-        Ray bsdfRaySample(surfaceRecord.position, bsdfSample);
-        HitRecord bsdf_sample_hit_record;
-        if (pdfBSDF > 0) {
+        float lightAttenuationWrtAngle = glm::dot(surfaceRecord.normal, bsdfSample);
+        if (lightAttenuationWrtAngle > 0 && f != glm::vec3(0) && pdfBSDF > 0) {
+            Ray bsdfRaySample(surfaceRecord.position, bsdfSample);
+            HitRecord bsdf_sample_hit_record;
             glm::vec3 radianceFromLight(0);
+            float lightPdf = 0;
             if (_scene->castRay(bsdfRaySample, bsdf_sample_hit_record) && bsdf_sample_hit_record.areaLight.get() == light.get()) {
                 radianceFromLight = bsdf_sample_hit_record.emission;
+                lightPdf = light->pdf(bsdf_sample_hit_record.position - surfaceRecord.position, surfaceRecord);
             }
             else {
-                const InfiniteAreaLight* areaLight = _scene->getEnvironmentLight();
-                if (areaLight) {
+                const InfiniteAreaLight* environmentLight = _scene->getEnvironmentLight();
+                if (environmentLight && environmentLight == light.get()) {
                     radianceFromLight = _scene->getEnvironmentLight()->radianceInDirection(bsdfSample);
+                    lightPdf = environmentLight->pdf(bsdfSample, surfaceRecord);
                 }
             }
-            float lightPdf = light->pdf(bsdf_sample_hit_record.position, surfaceRecord);
-            float lightAttenuationWrtAngle = glm::abs(glm::dot(surfaceRecord.normal, bsdfSample));
-            float mixtureDensityWeight = Power2Heuristic(1, pdfBSDF, 1, lightPdf);
-            light_color += radianceFromLight * mixtureDensityWeight * lightAttenuationWrtAngle * f / pdfBSDF;
+            if (lightPdf > 0) {
+                float power2HeuristicWeight = strategy & SamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfBSDF, 1, lightPdf) : 1;
+                light_color += radianceFromLight * power2HeuristicWeight * lightAttenuationWrtAngle * f / pdfBSDF;
+            }
         }
     }
 

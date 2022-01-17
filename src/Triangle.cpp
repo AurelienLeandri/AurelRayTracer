@@ -36,16 +36,18 @@ glm::vec3 Triangle::sample(const HitRecord& record, float& pdf) const {
 	}
 	glm::vec3 point_on_triangle = (u * (_vertices[1].position - _vertices[0].position) + v * (_vertices[2].position - _vertices[0].position)) + _vertices[0].position;
 	glm::vec3 value = point_on_triangle - record.position;
-	float light_cosine = glm::dot(glm::normalize(value), record.normal);
-	if (light_cosine < 0.1 || glm::dot(_normal, value) >= 0)
-		return value;
 	pdf = this->pdf(value, record);
 	return value;
 }
 
-float Triangle::pdf(const glm::vec3& point, const HitRecord& record) const
+float Triangle::pdf(const glm::vec3& surfaceToLight, const HitRecord& record) const
 {
-	return std::fabs(glm::dot(point, point)) / (std::fabs(glm::dot(glm::normalize(point), record.normal)) * area());
+	glm::vec3 surfaceToLightDirection = glm::normalize(surfaceToLight);
+	float cosTheta = glm::dot(-glm::normalize(surfaceToLight), _normal);
+	if (cosTheta <= 0) {  // Sampling the light from the wrong side
+		return 0;
+	}
+	return std::fabs(glm::dot(surfaceToLight, surfaceToLight)) / (cosTheta * area());
 }
 
 void Triangle::transform(const Transform& t)

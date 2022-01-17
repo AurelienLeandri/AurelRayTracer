@@ -29,7 +29,6 @@ namespace {
 int main() {
 	std::cout << "Loading test scenes. This can take a few seconds." << std::endl;
 
-	/*
 	std::vector<int> scenes = {
 		0,
 		1,
@@ -40,22 +39,10 @@ int main() {
 		6,
 		7
 	};
-	*/
 
-	std::vector<int> scenes = {
-		6,
+	scenes = {
+		5,
 	};
-
-	/*std::vector<int> nbSamples = {
-		256,
-		256,
-		256,
-		256,
-		256,
-		256,
-		256,
-		256
-	};*/
 
 	std::vector<int> nbSamples = {
 		256,
@@ -66,6 +53,17 @@ int main() {
 		256,
 		256,
 		256
+	};
+
+	nbSamples = {
+		1024,
+		1024,
+		1024,
+		1024,
+		1024,
+		1024,
+		1024,
+		1024
 	};
 
 	//std::vector<int> nbSamples = {
@@ -168,7 +166,7 @@ int main() {
 		application.init();
 
 		PathTracer::Parameters params;
-		params.strategy = PathTracer::SamplingStrategy::LightsOnly;
+		params.strategy = PathTracer::SamplingStrategy::BSDFOnly;
 		params.nbSamples = nbSamples[i];
 		params.maxDepth = 1;
 		PathTracer ray_tracer(params);
