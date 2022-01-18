@@ -59,7 +59,7 @@ bool PathTracer::iterate() {
     float color_factor = (1.f / _currentSample);
     int portionSize = static_cast<int>(_portionSize);
 
-    srand(time(NULL));
+    //srand(time(NULL));
 
 #pragma omp parallel for num_threads(NB_THREADS)
     for (int portion = 0; portion < _parameters.nbThreads; portion++) {

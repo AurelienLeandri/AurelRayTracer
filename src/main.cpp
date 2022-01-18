@@ -149,7 +149,7 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 1, 1, -1, 0, 0  // -1 is black
+		0, 0, 0, -1, 1, -1, 0, 0  // -1 is black
 	};
 
 	for (int i : scenes) {
@@ -229,11 +229,32 @@ namespace {
 		int nbSpheres = materials.size();
 		int x_offset = nbSpheres >= 5 ? -20 : -(nbSpheres / 2) * 10;
 		for (int i = 0; i < nbSpheres; ++i) {
-			std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(x_offset + (i % 5) * 10, 0, 5 - (i / 5) * 10), 5);
+			std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(glm::vec3(x_offset + (i % 5) * 10, 0, 5 - (i / 5) * 10), 5.f);
 			int material_id = scene.addMaterial(materials[i]);
 			sphere->materialId = material_id;
 			scene.addShape(sphere);
 		}
+
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1000, 1000, 1000)), ConstantTexture::black);
+		int material_light_id = scene.addMaterial(light_material);
+
+		// Light plane
+		std::shared_ptr<Triangle> triangle_light_0 = std::make_shared<Triangle>(
+			Vertex({ glm::vec3(-10, 100, -10), glm::vec3(0, -1, 0), glm::vec2(0, 0) }),
+			Vertex({ glm::vec3(10, 100, -10), glm::vec3(0, -1, 0), glm::vec2(1, 0) }),
+			Vertex({ glm::vec3(-10, 100, 10), glm::vec3(0, -1, 0), glm::vec2(0, 1) })
+			);
+		std::shared_ptr<Triangle> triangle_light_1 = std::make_shared<Triangle>(
+			Vertex({ glm::vec3(10, 100, 10), glm::vec3(0, -1, 0), glm::vec2(0, 0) }),
+			Vertex({ glm::vec3(-10, 100, 10), glm::vec3(0, -1, 0), glm::vec2(0, 1) }),
+			Vertex({ glm::vec3(10, 100, -10), glm::vec3(0, -1, 0), glm::vec2(1, 0) })
+			);
+		triangle_light_0->materialId = material_light_id;
+		triangle_light_1->materialId = material_light_id;
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(1000, 1000, 1000), triangle_light_0);
+		scene.addLight(light0, triangle_light_0);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(1000, 1000, 1000), triangle_light_1);
+		scene.addLight(light1, triangle_light_1);
 	}
 
 	int make_box(SceneData& scene, int material_id, const Transform& t = {})
