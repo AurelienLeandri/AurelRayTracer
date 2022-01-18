@@ -41,7 +41,7 @@ int main() {
 	};
 
 	scenes = {
-		5,
+		3,
 	};
 
 	std::vector<int> nbSamples = {
@@ -56,26 +56,15 @@ int main() {
 	};
 
 	nbSamples = {
-		1024,
-		1024,
-		1024,
-		1024,
-		1024,
-		1024,
-		1024,
-		1024
+		64,
+		64,
+		64,
+		64,
+		64,
+		64,
+		64,
+		64
 	};
-
-	//std::vector<int> nbSamples = {
-	//	2048,
-	//	2048,
-	//	2048,
-	//	2048,
-	//	2048,
-	//	2048,
-	//	2048,
-	//	2048
-	//};
 
 	std::vector<std::string> sceneNames = {
 		"MatteMaterialSigmaStep10deg",
@@ -109,8 +98,10 @@ int main() {
 	// Perfect materials
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
+	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
+	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
 	//sceneMaterials.back().push_back(std::make_shared<PerfectSpecularMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.3f, 0.8f, 0.4f))));
-	sceneMaterials.back().push_back(std::make_shared<PerfectTransparentMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.6f, 0.5f, 0.8f))));
+	//sceneMaterials.back().push_back(std::make_shared<PerfectTransparentMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.6f, 0.5f, 0.8f))));
 	// Plastic materials roughness
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f)), 0.f));
@@ -158,7 +149,7 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 0, 1, -1, 0, 0  // -1 is black
+		0, 0, 0, 1, 1, -1, 0, 0  // -1 is black
 	};
 
 	for (int i : scenes) {
@@ -166,9 +157,9 @@ int main() {
 		application.init();
 
 		PathTracer::Parameters params;
-		params.strategy = PathTracer::SamplingStrategy::BSDFOnly;
+		params.strategy = PathTracer::SamplingStrategy::LightsOnly;
 		params.nbSamples = nbSamples[i];
-		params.maxDepth = 1;
+		params.maxDepth = 10;
 		PathTracer ray_tracer(params);
 
 		ray_tracer.init();
@@ -479,7 +470,7 @@ namespace {
 		scene.addShape(sphere2);
 		*/
 
-		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1.5, 1.5, 1.5)), ConstantTexture::black);
+		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1000, 1000, 1000)), ConstantTexture::black);
 		int light_material_id = scene.addMaterial(light_material);
 
 		TransformParameters light_transform;
@@ -492,7 +483,7 @@ namespace {
 			);
 		light_mesh0->transform(Transform(light_transform));
 		light_mesh0->materialId = light_material_id;
-		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh0);
+		std::shared_ptr<AreaLight> light0 = std::make_shared<AreaLight>(glm::vec3(1000, 1000, 1000), light_mesh0);
 		scene.addLight(light0, light_mesh0);
 
 		std::shared_ptr<Triangle> light_mesh1 = std::make_shared<Triangle>(
@@ -502,7 +493,7 @@ namespace {
 			);
 		light_mesh1->transform(Transform(light_transform));
 		light_mesh1->materialId = light_material_id;
-		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(10000, 10000, 10000), light_mesh1);
+		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(1000, 1000, 1000), light_mesh1);
 		scene.addLight(light1, light_mesh1);
 
 		float aspect_ratio = static_cast<float>(Application::WIDTH) / Application::HEIGHT;

@@ -100,6 +100,20 @@ glm::vec3 InfiniteAreaLight::sampleLi(glm::vec3& wi, const HitRecord& hit_record
     return radianceInDirection(wi);
 }
 
+float InfiniteAreaLight::pdf(const glm::vec3& point, const HitRecord& hit_record) const
+{
+    glm::vec3 w2 = glm::normalize(point);
+    glm::vec3 local_w = glm::normalize(_worldTransform.getMatrix() * glm::vec4(w2.x, w2.y, w2.z, 0));
+    local_w = point;
+    static const float pi = float(M_PI);
+    float phi = glm::atan(local_w.z, local_w.x);
+    if (phi < 0) phi = phi + 2 * pi;
+    float theta = glm::acos(glm::clamp(local_w.y, -1.f, 1.f));
+    float sinTheta = glm::sin(theta);
+    if (sinTheta == 0) return 0;
+    return _distribution->pdf(_radianceMap->getHeight() * theta / pi, _radianceMap->getWidth() * phi / (2 * pi)) / (2 * pi * pi * sinTheta);
+}
+
 glm::vec3 InfiniteAreaLight::power() const
 {
     return glm::vec3();

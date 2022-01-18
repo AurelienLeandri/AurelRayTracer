@@ -43,3 +43,8 @@ float Distribution1D::sample(float e, size_t& index) const
 	index = i;
 	return _values[i] / (integralValues);
 }
+
+float Distribution1D::pdf(size_t index)
+{
+	return _values[index] / (integralValues);
+}

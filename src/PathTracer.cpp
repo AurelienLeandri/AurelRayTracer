@@ -178,17 +178,15 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
         depth++;
         HitRecord hit_record;
         if (_scene->castRay(w_o, hit_record)) {
+            if (depth == 3) {
+                int a = 0;
+            }
 
             // We add the emission at intersection in two exceptional cases:
             // 1 - Rays starting from the camera that hit a light source immediately
             // 2 - If the BxDF at the last surface intersection was specular, direct lighting contribution was not taken into account (f is always 0)
             if (depth == 1 || (last_bxdf_used.flags & BxDF::Type::BXDF_SPECULAR)) {
-                if (hit_record.emission.r > 0) {
-                    color += hit_record.emission;
-                }
-                else {
-                    int a = 0;  // DEBUG
-                }
+                color += path_accumulated_weight * hit_record.emission;
             }
 
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
@@ -199,13 +197,14 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             glm::vec3 w_i(0, 0, 0);
             float sample_proba = 0;
             glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba, last_bxdf_used);  // Get a sample vector, gets the proba to pick it
+            w_i = glm::normalize(w_i);
+            float light_attenuation_wrt_angle = glm::abs(glm::dot(w_i, hit_record.normal));
 
             if (sample_proba == 0 || f == glm::vec3(0))
                 break;
 
             w_o = Ray(hit_record.position, w_i);
-            float light_attenuation_wrt_angle = std::fabs(glm::dot(glm::normalize(w_i), hit_record.normal));
-            path_accumulated_weight *= (light_attenuation_wrt_angle * f) / sample_proba;
+            path_accumulated_weight = path_accumulated_weight * (light_attenuation_wrt_angle * f) / sample_proba;
         }
         else {
             // Same conditions as earlier to add the environment light contribution.
