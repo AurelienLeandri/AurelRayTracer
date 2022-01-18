@@ -57,8 +57,10 @@ bool SceneData::computeAccelerationStructures()
 * Cast a single ray with origin (ox, oy, oz) and direction
 * (dx, dy, dz).
 */
-bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
+bool SceneData::castRay(const Ray& ray, HitRecord& hit_record, const HitRecord* previous_hit_record) const
 {
+    Ray rayIn(ray.origin, glm::normalize(ray.direction));  // We need to make sure the ray has a normalized direction
+
     /*
      * The intersect context can be used to set intersection
      * filters or flags, and it also contains the instance ID stack
@@ -73,17 +75,18 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
      * for rtcIntersect1() for details.
      */
     struct RTCRayHit rayhit;
-    rayhit.ray.org_x = ray.origin.x;
-    rayhit.ray.org_y = ray.origin.y;
-    rayhit.ray.org_z = ray.origin.z;
-    rayhit.ray.dir_x = ray.direction.x;
-    rayhit.ray.dir_y = ray.direction.y;
-    rayhit.ray.dir_z = ray.direction.z;
-    rayhit.ray.tnear = 0.01f;
-    rayhit.ray.tfar = std::numeric_limits<float>::infinity();
+    rayhit.ray.org_x = rayIn.origin.x;
+    rayhit.ray.org_y = rayIn.origin.y;
+    rayhit.ray.org_z = rayIn.origin.z;
+    rayhit.ray.dir_x = rayIn.direction.x;
+    rayhit.ray.dir_y = rayIn.direction.y;
+    rayhit.ray.dir_z = rayIn.direction.z;
+    rayhit.ray.tnear = 0.001f;
+    rayhit.ray.tfar = std::numeric_limits<float>::max();
     rayhit.ray.mask = -1;
     rayhit.ray.flags = 0;
     rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+    rayhit.hit.primID = RTC_INVALID_GEOMETRY_ID;
     rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
 
     /*
@@ -94,9 +97,11 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
 
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID)
     {
-        hit_record.position = ray.pointAtParameter(rayhit.ray.tfar);
+        hit_record.position = rayIn.pointAtParameter(rayhit.ray.tfar);
         hit_record.normal = glm::normalize(glm::vec3(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z));;
         hit_record.tRay = rayhit.ray.tfar;
+        hit_record.primId = rayhit.hit.primID;
+        hit_record.geomId = rayhit.hit.geomID;
 
         std::shared_ptr<Shape> shape = _geometries.at(rayhit.hit.geomID);
 
@@ -128,7 +133,7 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
         }
 
         // Compute shading coordinate system
-        if (glm::dot(hit_record.normal, ray.direction) > 0)
+        if (glm::dot(hit_record.normal, rayIn.direction) > 0)
             hit_record.normal = -hit_record.normal;
         glm::vec3 a = glm::abs(hit_record.normal.x) > 0.9f ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
         hit_record.bitangent = glm::normalize(glm::cross(a, hit_record.normal));
@@ -138,7 +143,7 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record) const
         hit_record.shadingCoordinateSystem[1] = glm::vec3(hit_record.tangent.y, hit_record.bitangent.y, hit_record.normal.y);
         hit_record.shadingCoordinateSystem[2] = glm::vec3(hit_record.tangent.z, hit_record.bitangent.z, hit_record.normal.z);
 
-        hit_record.ray = ray;
+        hit_record.ray = rayIn;
 
         int material_id = shape->materialId;
         if (material_id) {

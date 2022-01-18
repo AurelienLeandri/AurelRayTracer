@@ -20,3 +20,11 @@ float Distribution2D::sample(float e1, float e2, size_t& u, size_t& v) const
     float conditional_density_u = _conditionalDistributionU[u]->sample(e2, v);
     return conditional_density_u * marginal_density_v;
 }
+
+float Distribution2D::pdf(size_t u, size_t v) const
+{
+    float marginal_density_v = _marginalDistributionV->pdf(u);
+    float conditional_density_u = _conditionalDistributionU[u]->pdf(v);
+    return conditional_density_u * marginal_density_v;
+}
+

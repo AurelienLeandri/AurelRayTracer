@@ -25,11 +25,18 @@ float BxDF::pdf(const glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit
 
 glm::vec3 BxDF::sample_f(glm::vec3& w_i, const glm::vec3& w_o, const HitRecord& hit_record, float& pdf) const
 {
+    /*
     do {
         w_i = glm::normalize(glm::vec3(0, 0, 1) + glm::normalize(random_in_unit_sphere()));
-    } while (glm::abs(w_i.z) < 0.001f);
-    if (w_o.z <= 0.f)  // Surface is backfacing so the directions have a negative z
+    } while (glm::abs(w_i.z) <= 0.f);
+    if (w_o.z <= 0.f)
         w_i.z *= -1;
+    pdf = this->pdf(w_i, w_o, hit_record);
+    return f(w_i, w_o, hit_record);
+    */
+    // Cosine-sample the hemisphere, flipping the direction if necessary
+    w_i = glm::normalize(PBRTCosineSampleHemisphere(frand(), frand()));
+    if (w_o.z < 0.) w_i.z *= -1.f;
     pdf = this->pdf(w_i, w_o, hit_record);
     return f(w_i, w_o, hit_record);
 }

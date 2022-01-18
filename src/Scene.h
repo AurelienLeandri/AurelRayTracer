@@ -21,7 +21,7 @@ public:
 
 public:
 	bool computeAccelerationStructures();
-	bool castRay(const Ray& ray, HitRecord& hit_record) const;
+	bool castRay(const Ray& ray, HitRecord& hit_record, const HitRecord* previous_hit_record = nullptr) const;
 
 public:
 	const std::unordered_map<int, std::shared_ptr<Shape>>& getShapes() const;

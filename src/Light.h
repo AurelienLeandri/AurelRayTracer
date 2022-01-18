@@ -76,6 +76,7 @@ public:
     // Inherited via Light
     virtual void transform(const Transform& transform) override;
     virtual glm::vec3 sampleLi(glm::vec3& wi, const HitRecord& hit_record, float& pdf) const override;
+    virtual float pdf(const glm::vec3& point, const HitRecord& hit_record) const override;
     virtual glm::vec3 power() const override;
     virtual glm::vec3 radianceInDirection(const glm::vec3& w) const override;
 
