@@ -40,9 +40,11 @@ int main() {
 		7
 	};
 
+	/*
 	scenes = {
 		3,
 	};
+	*/
 
 	std::vector<int> nbSamples = {
 		256,
@@ -56,14 +58,14 @@ int main() {
 	};
 
 	nbSamples = {
-		64,
-		64,
-		64,
-		64,
-		64,
-		64,
-		64,
-		64
+		32,
+		32,
+		32,
+		32,
+		32,
+		32,
+		32,
+		32
 	};
 
 	std::vector<std::string> sceneNames = {
@@ -149,7 +151,7 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, -1, 1, -1, 0, 0  // -1 is black
+		0, 0, 0, 1, 1, -1, 0, 0  // -1 is black
 	};
 
 	for (int i : scenes) {
@@ -157,9 +159,9 @@ int main() {
 		application.init();
 
 		PathTracer::Parameters params;
-		params.strategy = PathTracer::SamplingStrategy::LightsOnly;
+		params.strategy = PathTracer::SamplingStrategy::LightsAndBSDF;
 		params.nbSamples = nbSamples[i];
-		params.maxDepth = 10;
+		params.maxDepth = 4;
 		PathTracer ray_tracer(params);
 
 		ray_tracer.init();
@@ -235,6 +237,7 @@ namespace {
 			scene.addShape(sphere);
 		}
 
+		/*
 		std::shared_ptr<EmissiveMaterial> light_material = std::make_shared<EmissiveMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1000, 1000, 1000)), ConstantTexture::black);
 		int material_light_id = scene.addMaterial(light_material);
 
@@ -255,6 +258,7 @@ namespace {
 		scene.addLight(light0, triangle_light_0);
 		std::shared_ptr<AreaLight> light1 = std::make_shared<AreaLight>(glm::vec3(1000, 1000, 1000), triangle_light_1);
 		scene.addLight(light1, triangle_light_1);
+		*/
 	}
 
 	int make_box(SceneData& scene, int material_id, const Transform& t = {})

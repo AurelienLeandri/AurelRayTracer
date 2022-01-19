@@ -111,12 +111,14 @@ float InfiniteAreaLight::pdf(const glm::vec3& point, const HitRecord& hit_record
     float theta = glm::acos(glm::clamp(local_w.y, -1.f, 1.f));
     float sinTheta = glm::sin(theta);
     if (sinTheta == 0) return 0;
-    return _distribution->pdf(_radianceMap->getHeight() * theta / pi, _radianceMap->getWidth() * phi / (2 * pi)) / (2 * pi * pi * sinTheta);
+    size_t height = size_t(_radianceMap->getHeight());
+    size_t width = size_t(_radianceMap->getWidth());
+    return _distribution->pdf(glm::min(size_t(height * theta / pi), height - 1), glm::min(size_t(width * phi / (2 * pi)), width - 1)) / (2 * pi * pi * sinTheta);
 }
 
 glm::vec3 InfiniteAreaLight::power() const
 {
-    return glm::vec3();
+    return glm::vec3(0);
 }
 
 glm::vec3 InfiniteAreaLight::radianceInDirection(const glm::vec3& w) const

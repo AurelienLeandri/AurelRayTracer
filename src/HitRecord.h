@@ -24,5 +24,7 @@ typedef struct HitRecord
     Ray ray;
     int shapeId = 0;
     std::shared_ptr<const Light> areaLight = nullptr;
+    unsigned int geomId = 0;
+    unsigned int primId = 0;
 } HitRecord;
 

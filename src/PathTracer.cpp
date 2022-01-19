@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ctime>
 #include <unordered_map>
+#include <sstream>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -59,7 +60,7 @@ bool PathTracer::iterate() {
     float color_factor = (1.f / _currentSample);
     int portionSize = static_cast<int>(_portionSize);
 
-    //srand(time(NULL));
+    srand(time(NULL));
 
 #pragma omp parallel for num_threads(NB_THREADS)
     for (int portion = 0; portion < _parameters.nbThreads; portion++) {
@@ -90,7 +91,6 @@ float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
 
 glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const SamplingStrategy& strategy) const {
     glm::vec3 light_color(0);
-
     const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
     int nbLights = static_cast<int>(sceneLights.size());
     std::shared_ptr<const Light> light = sceneLights[static_cast<int>(static_cast<double>(frand()) * nbLights)];
@@ -117,12 +117,12 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                         bool isLightReachable =
                             // Area light that can be hit from our position
                             light->getType() == LightType::AREA
-                            && _scene->castRay(direct_lighting_ray, occlusion_hit_record)
-                            && occlusion_hit_record.tRay >= 0.9999f
+                            && _scene->castRay(direct_lighting_ray, occlusion_hit_record, &surfaceRecord)
+                            && occlusion_hit_record.areaLight.get() == light.get()
                             ||
                             // Infinite area light and nothing is hit along the sampled ray
                             light->getType() == LightType::INFINITE_AREA
-                            && !_scene->castRay(direct_lighting_ray, occlusion_hit_record);
+                            && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
 
                         if (isLightReachable) {
                             float power2HeuristicWeight = strategy & SamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
@@ -147,7 +147,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
             HitRecord bsdf_sample_hit_record;
             glm::vec3 radianceFromLight(0);
             float lightPdf = 0;
-            if (_scene->castRay(bsdfRaySample, bsdf_sample_hit_record) && bsdf_sample_hit_record.areaLight.get() == light.get()) {
+            if (_scene->castRay(bsdfRaySample, bsdf_sample_hit_record, &surfaceRecord) && bsdf_sample_hit_record.areaLight.get() == light.get()) {
                 radianceFromLight = bsdf_sample_hit_record.emission;
                 lightPdf = light->pdf(bsdf_sample_hit_record.position - surfaceRecord.position, surfaceRecord);
             }
@@ -169,17 +169,23 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
 }
 
 glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
+    glm::vec3 firstHit(0);
+    std::stringstream ss;
     size_t depth = 0;
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);
     Ray w_o = camera_ray;
     BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
+    HitRecord hit_record;
     while (!max_depth || depth < max_depth) {
         depth++;
-        HitRecord hit_record;
-        if (_scene->castRay(w_o, hit_record)) {
-            if (depth == 3) {
-                int a = 0;
+        if (_scene->castRay(w_o, hit_record, &hit_record)) {
+            if (depth == 1) {
+                firstHit = hit_record.position;
+            }
+
+            if (firstHit.x == -7.85838461f && firstHit.y == -3.10595489f && firstHit.z == 1.71875954f) {
+                int b = 0;
             }
 
             // We add the emission at intersection in two exceptional cases:
@@ -192,6 +198,8 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
 
             color += path_accumulated_weight * _importanceSamplingRadiance(w_o_calculations, path_accumulated_weight, hit_record, _parameters.strategy);
+
+            if (depth == max_depth) break;
 
             // Computing the next step of the path and updating the accumulated weight
             glm::vec3 w_i(0, 0, 0);
@@ -217,6 +225,9 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
             break;
         }
 
+    }
+    if (depth == 2 && firstHit.y < -3.0f && color.x > 1.0f) {
+        int a = 0;
     }
     return color;
 }
