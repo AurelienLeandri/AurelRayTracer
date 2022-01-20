@@ -24,6 +24,14 @@
 
 static float max_green = 0;
 
+namespace {
+    // NOTE: taken from pbr
+    float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
+        float f = nf * fPdf, g = ng * gPdf;
+        return (f * f) / (f * f + g * g);
+    }
+}
+
 PathTracer::PathTracer(const Parameters& parameters)
     : _parameters(parameters), _portionSize((_parameters.width * _parameters.height) / _parameters.nbThreads)
 {
@@ -31,22 +39,36 @@ PathTracer::PathTracer(const Parameters& parameters)
 
 PathTracer::~PathTracer()
 {
-    if (_imageBuffer) {
-        delete[] _imageBuffer;
-        _imageBuffer = nullptr;
+    if (_accumulationBuffer) {
+        delete[] _accumulationBuffer;
+        _accumulationBuffer = nullptr;
+    }
+
+    if (_finalBuffer) {
+        delete[] _finalBuffer;
+        _finalBuffer = nullptr;
     }
 }
 
 int PathTracer::init()
 {
-    if (_imageBuffer) {
-        delete[] _imageBuffer;
-        _imageBuffer = nullptr;
+    if (_accumulationBuffer) {
+        delete[] _accumulationBuffer;
+        _accumulationBuffer = nullptr;
     }
 
-    _imageBuffer = new float[_parameters.width * _parameters.height * _parameters.nbChannels];
+    _accumulationBuffer = new float[_parameters.width * _parameters.height * _parameters.nbChannels];
     for (int i = 0; i < _parameters.width * _parameters.height * _parameters.nbChannels; ++i)
-        _imageBuffer[i] = 1.f;
+        _accumulationBuffer[i] = 0.f;
+
+    if (_finalBuffer) {
+        delete[] _finalBuffer;
+        _finalBuffer = nullptr;
+    }
+
+    _finalBuffer = new float[_parameters.width * _parameters.height * _parameters.nbChannels];
+    for (int i = 0; i < _parameters.width * _parameters.height * _parameters.nbChannels; ++i)
+        _finalBuffer[i] = 0.f;
 
     return 0;
 }
@@ -60,7 +82,7 @@ bool PathTracer::iterate() {
     float color_factor = (1.f / _currentSample);
     int portionSize = static_cast<int>(_portionSize);
 
-    srand(time(NULL));
+    if (_parameters.shuffleRandom) srand(time(NULL));
 
 #pragma omp parallel for num_threads(NB_THREADS)
     for (int portion = 0; portion < _parameters.nbThreads; portion++) {
@@ -68,12 +90,13 @@ bool PathTracer::iterate() {
             glm::vec3 pixel_screen_position = glm::vec3((static_cast<float>(i % _parameters.width) / _parameters.width), (1.f - (static_cast<float>(i / _parameters.width) / _parameters.height)), 0.f);  // y pointing upward
             glm::vec3 sample_screen_position = pixel_screen_position + glm::vec3(frand() / _parameters.width, frand() / _parameters.height, 0.f);
             Ray r = _camera->getRay(sample_screen_position.x, sample_screen_position.y);
-            glm::vec3 sample_color = glm::max(glm::vec3(0), _getColor(r, _parameters.maxDepth));
-            glm::vec3 previous_color(_imageBuffer[(i * 3)], _imageBuffer[(i * 3) + 1], _imageBuffer[(i * 3) + 2]);
-            glm::vec3 color = buffer_factor * previous_color + color_factor * sample_color;
-            _imageBuffer[(i * 3)] = color.r;
-            _imageBuffer[(i * 3) + 1] = color.g;
-            _imageBuffer[(i * 3) + 2] = color.b;
+            glm::vec3 sample_color = glm::max(glm::vec3(0), _getRadianceFromCameraRay(r, _parameters.maxDepth));
+            _accumulationBuffer[(i * 3)] += sample_color.r;
+            _accumulationBuffer[(i * 3) + 1] += sample_color.g;
+            _accumulationBuffer[(i * 3) + 2] += sample_color.b;
+            _finalBuffer[(i * 3)] = glm::sqrt(_accumulationBuffer[(i * 3)] / (_currentSample + 1));
+            _finalBuffer[(i * 3) + 1] = glm::sqrt(_accumulationBuffer[(i * 3) + 1] / (_currentSample + 1));
+            _finalBuffer[(i * 3) + 2] = glm::sqrt(_accumulationBuffer[(i * 3) + 2] / (_currentSample + 1));
         }
     }
 
@@ -83,19 +106,23 @@ bool PathTracer::iterate() {
     return _currentSample > _parameters.nbSamples;
 }
 
-// NOTE: taken from pbr
-float Power2Heuristic(int nf, float fPdf, int ng, float gPdf) {
-    float f = nf * fPdf, g = ng * gPdf;
-    return (f * f) / (f * f + g * g);
+glm::vec3 PathTracer::_getRadianceFromCameraRay(const Ray& camera_ray, size_t max_depth) const
+{
+    switch (_parameters.integratorStrategy) {
+    case IntegratorStrategy::PathTracerDirectLighting:
+        return _pathTracingDirectLighting(camera_ray, max_depth);
+    case IntegratorStrategy::SimplePathTracer:
+        return _simplePathTracing(camera_ray, max_depth);
+    }
 }
 
-glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const SamplingStrategy& strategy) const {
+glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm::vec3 &pathWeight, const HitRecord &surfaceRecord, const ImportanceSamplingStrategy& strategy) const {
     glm::vec3 light_color(0);
     const std::vector<std::shared_ptr<const Light>>& sceneLights = _scene->getLights();
     int nbLights = static_cast<int>(sceneLights.size());
     std::shared_ptr<const Light> light = sceneLights[static_cast<int>(static_cast<double>(frand()) * nbLights)];
 
-    if ((strategy & (SamplingStrategy::LightsAndBSDF | SamplingStrategy::LightsOnly)) && _scene->getLights().size()) {
+    if ((strategy & (ImportanceSamplingStrategy::LightsAndBSDF | ImportanceSamplingStrategy::LightsOnly)) && _scene->getLights().size()) {
         // Light sampling using light distribution
         if (!(surfaceRecord.areaLight.get() == light.get())) {  // Exclude the case where we're sampling a light we are curently on.
             glm::vec3 lightSample(0, 0, 1);
@@ -125,7 +152,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                             && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
 
                         if (isLightReachable) {
-                            float power2HeuristicWeight = strategy & SamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
+                            float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
                             light_color += f * radiance * power2HeuristicWeight / pdfLight;
                         }
                     }
@@ -134,7 +161,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
         }
     }
 
-    if (strategy & (SamplingStrategy::LightsAndBSDF | SamplingStrategy::BSDFOnly)) {
+    if (strategy & (ImportanceSamplingStrategy::LightsAndBSDF | ImportanceSamplingStrategy::BSDFOnly)) {
         // Light sampling using BSDF
         glm::vec3 bsdfSample(0, 0, 1);
         BxDF::Type bxdfType = BxDF::Type::BXDF_NONE;
@@ -159,7 +186,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                 }
             }
             if (lightPdf > 0) {
-                float power2HeuristicWeight = strategy & SamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfBSDF, 1, lightPdf) : 1;
+                float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfBSDF, 1, lightPdf) : 1;
                 light_color += radianceFromLight * power2HeuristicWeight * lightAttenuationWrtAngle * f / pdfBSDF;
             }
         }
@@ -168,7 +195,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
     return static_cast<float>(nbLights) * light_color;
 }
 
-glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
+glm::vec3 PathTracer::_pathTracingDirectLighting(const Ray& camera_ray, size_t max_depth) const {
     glm::vec3 firstHit(0);
     std::stringstream ss;
     size_t depth = 0;
@@ -232,9 +259,50 @@ glm::vec3 PathTracer::_getColor(const Ray& camera_ray, size_t max_depth) const {
     return color;
 }
 
+glm::vec3 PathTracer::_simplePathTracing(const Ray& camera_ray, size_t max_depth) const {
+    size_t depth = 0;
+    glm::vec3 color(0, 0, 0);
+    glm::vec3 path_accumulated_weight(1, 1, 1);
+    Ray w_o = camera_ray;
+    BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
+    HitRecord hit_record;
+    while (!max_depth || depth < max_depth) {
+        depth++;
+        if (_scene->castRay(w_o, hit_record, &hit_record)) {
+            color += path_accumulated_weight * hit_record.emission;
+
+            if (depth == max_depth) break;
+
+            glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
+
+            // Computing the next step of the path and updating the accumulated weight
+            glm::vec3 w_i(0, 0, 0);
+            float sample_proba = 0;
+            glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba, last_bxdf_used);  // Get a sample vector, gets the proba to pick it
+            w_i = glm::normalize(w_i);
+            float light_attenuation_wrt_angle = glm::abs(glm::dot(w_i, hit_record.normal));
+
+            if (sample_proba == 0 || f == glm::vec3(0))
+                break;
+
+            w_o = Ray(hit_record.position, w_i);
+            path_accumulated_weight = path_accumulated_weight * (light_attenuation_wrt_angle * f) / sample_proba;
+        }
+        else {
+            const InfiniteAreaLight* environmentLight = _scene->getEnvironmentLight();
+            if (environmentLight) {
+                color += path_accumulated_weight * environmentLight->radianceInDirection(w_o.direction);
+            }
+            break;
+        }
+
+    }
+    return color;
+}
+
 const float* PathTracer::getImageBuffer() const
 {
-    return _imageBuffer;
+    return _finalBuffer;
 }
 
 void PathTracer::setCamera(std::shared_ptr<Camera> camera) {

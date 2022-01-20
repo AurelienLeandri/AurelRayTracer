@@ -20,10 +20,15 @@ class Light;
 
 class PathTracer {
 public:
-    enum SamplingStrategy {
+    enum ImportanceSamplingStrategy {
         LightsOnly = 1 << 0,
         BSDFOnly = 1 << 1,
         LightsAndBSDF = 1 << 2
+    };
+
+    enum class IntegratorStrategy {
+        SimplePathTracer,
+        PathTracerDirectLighting
     };
 
 public:
@@ -34,7 +39,9 @@ public:
         size_t nbSamples = 128;
         size_t maxDepth = 4;
         int nbThreads = 32;
-        SamplingStrategy strategy = SamplingStrategy::LightsAndBSDF;
+        ImportanceSamplingStrategy strategy = ImportanceSamplingStrategy::LightsAndBSDF;
+        IntegratorStrategy integratorStrategy = IntegratorStrategy::PathTracerDirectLighting;
+        bool shuffleRandom = true;
     };
 
 public:
@@ -51,11 +58,14 @@ public:
 
 
 private:
-    glm::vec3 _getColor(const Ray& r, size_t max_depth = 0) const;
-    glm::vec3 _importanceSamplingRadiance(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const SamplingStrategy& strategy) const;
+    glm::vec3 _getRadianceFromCameraRay(const Ray& camera_ray, size_t max_depth) const;
+    glm::vec3 _pathTracingDirectLighting(const Ray& r, size_t max_depth = 0) const;
+    glm::vec3 _importanceSamplingRadiance(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const ImportanceSamplingStrategy& strategy) const;
+    glm::vec3 _simplePathTracing(const Ray& camera_ray, size_t max_depth) const;
 
 private:
-    float* _imageBuffer = nullptr;
+    float* _accumulationBuffer = nullptr;
+    float* _finalBuffer = nullptr;
 
     std::shared_ptr<Camera> _camera;
 
