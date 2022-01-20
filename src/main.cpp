@@ -29,6 +29,13 @@ namespace {
 int main() {
 	std::cout << "Loading test scenes. This can take a few seconds." << std::endl;
 
+	PathTracer::Parameters params;
+	params.strategy = PathTracer::ImportanceSamplingStrategy::LightsAndBSDF;
+	params.integratorStrategy = PathTracer::IntegratorStrategy::SimplePathTracer;
+	params.nbSamples = 200;
+	params.maxDepth = 50;
+	params.shuffleRandom = true;
+
 	std::vector<int> scenes = {
 		0,
 		1,
@@ -40,32 +47,8 @@ int main() {
 		7
 	};
 
-	/*
 	scenes = {
-		3,
-	};
-	*/
-
-	std::vector<int> nbSamples = {
-		256,
-		256,
-		256,
-		256,
-		256,
-		256,
-		256,
-		256
-	};
-
-	nbSamples = {
-		32,
-		32,
-		32,
-		32,
-		32,
-		32,
-		32,
-		32
+		5,
 	};
 
 	std::vector<std::string> sceneNames = {
@@ -158,10 +141,6 @@ int main() {
 		Application application;
 		application.init();
 
-		PathTracer::Parameters params;
-		params.strategy = PathTracer::SamplingStrategy::LightsAndBSDF;
-		params.nbSamples = nbSamples[i];
-		params.maxDepth = 4;
 		PathTracer ray_tracer(params);
 
 		ray_tracer.init();
@@ -331,20 +310,20 @@ namespace {
 
 		// Green plane
 		std::shared_ptr<Mesh> green_plane = std::make_shared<Mesh>();
-		green_plane->geometry.push_back({ glm::vec3(0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
-		green_plane->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(1, 0, 0), glm::vec2(0, 1) });
-		green_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
-		green_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
+		green_plane->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(1, 0, 0), glm::vec2(0, 0) });
+		green_plane->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(1, 0, 0), glm::vec2(0, 1) });
+		green_plane->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(1, 0, 0), glm::vec2(1, 0) });
+		green_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(1, 0, 0), glm::vec2(1, 1) });
 		green_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		green_plane->materialId = material_green_id;
 		scene.addShape(green_plane);
 
 		// Red plane
 		std::shared_ptr<Mesh> red_plane = std::make_shared<Mesh>();
-		red_plane->geometry.push_back({ glm::vec3(555, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });
-		red_plane->geometry.push_back({ glm::vec3(555, 0, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 0) });
-		red_plane->geometry.push_back({ glm::vec3(555, 555, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });
-		red_plane->geometry.push_back({ glm::vec3(555, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
+		red_plane->geometry.push_back({ glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 0) });
+		red_plane->geometry.push_back({ glm::vec3(0, 0, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 0) });
+		red_plane->geometry.push_back({ glm::vec3(0, 555, 0), glm::vec3(-1, 0, 0), glm::vec2(0, 1) });
+		red_plane->geometry.push_back({ glm::vec3(0, 555, 555), glm::vec3(-1, 0, 0), glm::vec2(1, 1) });
 		red_plane->indices = { 0, 1, 2, 3, 2, 1 };
 		red_plane->materialId = material_red_id;
 		scene.addShape(red_plane);
@@ -401,15 +380,15 @@ namespace {
 		// Small box
 		TransformParameters cubic_box_transform;
 		cubic_box_transform.scaling = glm::vec3(165);
-		cubic_box_transform.translation = glm::vec3(265, 0, 65);
-		cubic_box_transform.rotation_rads = glm::vec3(0, 18 * (float(M_PI) / 180.f), 0);
+		cubic_box_transform.translation = glm::vec3(130, 0, 65);
+		cubic_box_transform.rotation_rads = glm::vec3(0, -18 * (float(M_PI) / 180.f), 0);
 		make_box(scene, material_white_id, Transform(cubic_box_transform));
 
 		// Big box
 		TransformParameters tall_box_transform;
 		tall_box_transform.scaling = glm::vec3(165, 330, 165);
-		tall_box_transform.translation = glm::vec3(130, 0, 295);
-		tall_box_transform.rotation_rads = glm::vec3(0, -15 * (float(M_PI) / 180.f), 0);
+		tall_box_transform.translation = glm::vec3(265, 0, 295);
+		tall_box_transform.rotation_rads = glm::vec3(0, 15 * (float(M_PI) / 180.f), 0);
 		make_box(scene, material_white_id, Transform(tall_box_transform));
 	}
 
