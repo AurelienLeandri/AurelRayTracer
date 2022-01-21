@@ -48,7 +48,7 @@ int main() {
 	};
 
 	scenes = {
-		5,
+		0,
 	};
 
 	std::vector<std::string> sceneNames = {

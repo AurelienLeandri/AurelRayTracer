@@ -20,7 +20,7 @@ namespace {
         "uniform sampler2D ourTexture;\n"
         "void main()\n"
         "{\n"
-        "   FragColor = texture(ourTexture, vec2(1.0 - TexCoord.x, 1.0 - TexCoord.y));\n"  // Sensor rotation
+        "   FragColor = texture(ourTexture, vec2(TexCoord.x, 1.0 - TexCoord.y));\n"  // Sensor rotation
         "}\n\0";
 
     void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
