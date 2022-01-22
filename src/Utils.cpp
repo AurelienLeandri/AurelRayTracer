@@ -31,6 +31,18 @@ glm::vec3 random_on_unit_sphere()
     return glm::normalize(result);
 }
 
+glm::vec3 random_cosine_direction() {
+	float r1 = frand();
+	float r2 = frand();
+	float z = glm::sqrt(1 - r2);
+
+	float phi = 2 * float(M_PI) * r1;
+	float x = glm::cos(phi) * glm::sqrt(r2);
+	float y = glm::sin(phi) * glm::sqrt(r2);
+
+	return glm::vec3(x, y, z);
+}
+
 /*
 * Taken from PBRT-V1 for testing
 */
@@ -147,42 +159,4 @@ glm::vec3 spherical_to_cartesian(float theta, float phi)
 	float sin_theta = sinf(theta);
 	return glm::vec3(
 		cos_phi * sin_theta, sin_phi * sin_theta, cos_theta);
-}
-
-// Generates a random point with uniform probability distribution
-//glm::vec3 random_on_unit_sphere(float (*f)(float) = [](float) -> float { return 1 / (4 * M_PI); })  // default for theta is uniform distribution
-//{
-//	/*
-//	--- a and b are PDFs of theta and phi
-//	a(theta) = 2 * PI * sin(theta) * f(theta)  // Depends on f, default is uniform
-//	b(phi) = 1 / (2 * PI)  // Uniform
-//
-//	--- r1 and r2 two random numbers in [0, 1]
-//	-- r1
-//	r1 = INTEGRAL[0, theta](2 * PI * sin(t) f(t) * d(t))
-//	if f(t) = 1 / 4PI (area of the sphere)
-//	r1 = (1/2) * INTEGRAL[0, theta](sin(t) * d(t))
-//	r1 = [cos(t)] = cos(theta)
-//	r1 = cos(theta)
-//	theta = arcos(r1) but we will actually just be using cos(theta)
-//
-//	-- r2
-//	r2 = INTEGRAL[0, phi]((1 / (2 * PI)) d(p)) = phi / 2PI
-//	phi = 2PI * r2
-//	*/
-//
-//	// FIXME implement
-//
-//	return glm::vec3();
-//}
-
-glm::vec3 random_cosine_direction() {
-	float r1 = frand();
-	float r2 = frand();
-	float phi = 2 * float(M_PI)* r1;
-	float x = cos(phi) * 2 * sqrt(r2);
-	float y = sin(phi) * 2 * sqrt(r2);
-	float z = sqrtf(1 - r2);
-
-	return glm::vec3(x, y, z);
 }

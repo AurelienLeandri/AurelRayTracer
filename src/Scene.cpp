@@ -133,8 +133,10 @@ bool SceneData::castRay(const Ray& ray, HitRecord& hit_record, const HitRecord* 
         }
 
         // Compute shading coordinate system
+        /*
         if (glm::dot(hit_record.normal, rayIn.direction) > 0)
             hit_record.normal = -hit_record.normal;
+        */
         glm::vec3 a = glm::abs(hit_record.normal.x) > 0.9f ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
         hit_record.bitangent = glm::normalize(glm::cross(a, hit_record.normal));
         hit_record.tangent = glm::cross(hit_record.normal, hit_record.bitangent);

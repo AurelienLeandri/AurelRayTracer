@@ -8,6 +8,8 @@ glm::vec3 random_in_unit_sphere();
 
 glm::vec3 random_in_unit_disc();
 
+glm::vec3 random_cosine_direction();
+
 glm::vec3 reflect(const glm::vec3& v, const glm::vec3& normal);
 
 bool refract(const glm::vec3& v, const glm::vec3 &normal, float ni_over_nt, glm::vec3 &refracted);
@@ -19,8 +21,6 @@ float linear_interpolation(float a, float b, float ratio);
 void get_sphere_uv(const glm::vec3& n, float& u, float& v);
 
 glm::vec3 spherical_to_cartesian(float theta, float phi);
-
-glm::vec3 random_cosine_direction();
 
 void PBRTConcentricSampleDisk(float u1, float u2, float* dx, float* dy);
 glm::vec3 PBRTCosineSampleHemisphere(float u1, float u2);
