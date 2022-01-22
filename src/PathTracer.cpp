@@ -113,6 +113,8 @@ glm::vec3 PathTracer::_getRadianceFromCameraRay(const Ray& camera_ray, size_t ma
         return _pathTracingDirectLighting(camera_ray, max_depth);
     case IntegratorStrategy::SimplePathTracer:
         return _simplePathTracing(camera_ray, max_depth);
+    case IntegratorStrategy::SimplePathTracerDirectLighting:
+        return _simplePathTracingDirectLighting(camera_ray, max_depth);
     }
 }
 
@@ -134,27 +136,25 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                 HitRecord occlusion_hit_record;
                 glm::vec3 f(0);
                 float pdfBSDF = 0;
-                float lightAttenuationWrtAngle = glm::dot(lightSample, surfaceRecord.normal);
-                if (lightAttenuationWrtAngle > 0) {
-                    f = surfaceRecord.bsdf.f(lightSample, wo, surfaceRecord);
-                    pdfBSDF = surfaceRecord.bsdf.pdf(lightSample, wo, surfaceRecord);
+                f = surfaceRecord.bsdf.f(lightSample, wo, surfaceRecord);
+                pdfBSDF = surfaceRecord.bsdf.pdf(lightSample, wo, surfaceRecord);
 
-                    if (f != glm::vec3(0) && pdfBSDF > 0) {
-                        // Occlusion test
-                        bool isLightReachable =
-                            // Area light that can be hit from our position
-                            light->getType() == LightType::AREA
-                            && _scene->castRay(direct_lighting_ray, occlusion_hit_record, &surfaceRecord)
-                            && occlusion_hit_record.areaLight.get() == light.get()
-                            ||
-                            // Infinite area light and nothing is hit along the sampled ray
-                            light->getType() == LightType::INFINITE_AREA
-                            && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
+                if (f != glm::vec3(0) && pdfBSDF > 0) {
+                    // Occlusion test
+                    bool isLightReachable =
+                        // Area light that can be hit from our position
+                        light->getType() == LightType::AREA
+                        && _scene->castRay(direct_lighting_ray, occlusion_hit_record, &surfaceRecord)
+                        && occlusion_hit_record.areaLight.get() == light.get()
+                        ||
+                        // Infinite area light and nothing is hit along the sampled ray
+                        light->getType() == LightType::INFINITE_AREA
+                        && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
 
-                        if (isLightReachable) {
-                            float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
-                            light_color += f * radiance * power2HeuristicWeight / pdfLight;
-                        }
+                    if (isLightReachable) {
+                        float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
+                        float lightAttenuationWrtAngle = glm::abs(glm::dot(lightSample, surfaceRecord.normal));
+                        light_color += f * lightAttenuationWrtAngle * radiance * power2HeuristicWeight / pdfLight;
                     }
                 }
             }
@@ -260,6 +260,49 @@ glm::vec3 PathTracer::_pathTracingDirectLighting(const Ray& camera_ray, size_t m
 }
 
 glm::vec3 PathTracer::_simplePathTracing(const Ray& camera_ray, size_t max_depth) const {
+    size_t depth = 0;
+    glm::vec3 color(0, 0, 0);
+    glm::vec3 path_accumulated_weight(1, 1, 1);
+    Ray w_o = camera_ray;
+    BxDF::Type last_bxdf_used = BxDF::Type::BXDF_NONE;
+    HitRecord hit_record;
+    while (!max_depth || depth < max_depth) {
+        depth++;
+        if (_scene->castRay(w_o, hit_record, &hit_record)) {
+            glm::vec3 w_o_calculations = glm::normalize(-w_o.direction);
+
+            if (glm::dot(w_o_calculations, hit_record.normal) > 0) {
+                color += path_accumulated_weight * hit_record.emission;
+            }
+
+            if (depth == max_depth) break;
+
+            // Computing the next step of the path and updating the accumulated weight
+            glm::vec3 w_i(0, 0, 0);
+            float sample_proba = 0;
+            glm::vec3 f = hit_record.bsdf.sample_f(w_i, w_o_calculations, hit_record, sample_proba, last_bxdf_used);  // Get a sample vector, gets the proba to pick it
+            w_i = glm::normalize(w_i);
+            float light_attenuation_wrt_angle = glm::abs(glm::dot(w_i, hit_record.normal));
+
+            if (sample_proba == 0 || f == glm::vec3(0))
+                break;
+
+            w_o = Ray(hit_record.position, w_i);
+            path_accumulated_weight = path_accumulated_weight * (light_attenuation_wrt_angle * f) / sample_proba;
+        }
+        else {
+            const InfiniteAreaLight* environmentLight = _scene->getEnvironmentLight();
+            if (environmentLight) {
+                color += path_accumulated_weight * environmentLight->radianceInDirection(w_o.direction);
+            }
+            break;
+        }
+
+    }
+    return color;
+}
+
+glm::vec3 PathTracer::_simplePathTracingDirectLighting(const Ray& camera_ray, size_t max_depth) const {
     size_t depth = 0;
     glm::vec3 color(0, 0, 0);
     glm::vec3 path_accumulated_weight(1, 1, 1);

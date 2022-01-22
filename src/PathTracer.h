@@ -28,6 +28,7 @@ public:
 
     enum class IntegratorStrategy {
         SimplePathTracer,
+        SimplePathTracerDirectLighting,
         PathTracerDirectLighting
     };
 
@@ -62,6 +63,7 @@ private:
     glm::vec3 _pathTracingDirectLighting(const Ray& r, size_t max_depth = 0) const;
     glm::vec3 _importanceSamplingRadiance(const glm::vec3& wo, const glm::vec3& pathWeight, const HitRecord& surfaceRecord, const ImportanceSamplingStrategy& strategy) const;
     glm::vec3 _simplePathTracing(const Ray& camera_ray, size_t max_depth) const;
+    glm::vec3 _simplePathTracingDirectLighting(const Ray& camera_ray, size_t max_depth) const;
 
 private:
     float* _accumulationBuffer = nullptr;

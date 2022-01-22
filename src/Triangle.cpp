@@ -43,11 +43,12 @@ glm::vec3 Triangle::sample(const HitRecord& record, float& pdf) const {
 float Triangle::pdf(const glm::vec3& surfaceToLight, const HitRecord& record) const
 {
 	glm::vec3 surfaceToLightDirection = glm::normalize(surfaceToLight);
-	float cosTheta = glm::dot(-glm::normalize(surfaceToLight), _normal);
+	float cosTheta = glm::dot(-surfaceToLightDirection, _normal);
 	if (cosTheta <= 0) {  // Sampling the light from the wrong side
 		return 0;
 	}
-	return std::fabs(glm::dot(surfaceToLight, surfaceToLight)) / (cosTheta * area());
+	float lengthSquared = glm::dot(surfaceToLight, surfaceToLight);
+	return std::fabs(lengthSquared) / (cosTheta * area());
 }
 
 void Triangle::transform(const Transform& t)
