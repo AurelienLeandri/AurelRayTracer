@@ -62,4 +62,5 @@ void BeckmannSpizzichino::sample_wh(glm::vec3& w_h) const
 	w_h = glm::vec3(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta);
 	if (w_h.z < 0)
 		w_h = -w_h;
+	w_h = glm::normalize(w_h);
 }

@@ -33,8 +33,8 @@ int main() {
 	params.strategy = PathTracer::ImportanceSamplingStrategy::LightsOnly;
 	params.integratorStrategy = PathTracer::IntegratorStrategy::SimplePathTracer;
 	params.integratorStrategy = PathTracer::IntegratorStrategy::PathTracerDirectLighting;
-	params.nbSamples = 10;
-	params.maxDepth = 1;
+	params.nbSamples = 215;
+	params.maxDepth = 50;
 	params.shuffleRandom = true;
 
 	std::vector<int> scenes = {
@@ -48,11 +48,9 @@ int main() {
 		7
 	};
 
-	/*
 	scenes = {
-		5,
+		4,
 	};
-	*/
 
 	std::vector<std::string> sceneNames = {
 		"MatteMaterialSigmaStep10deg",
