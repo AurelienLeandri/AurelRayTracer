@@ -79,9 +79,23 @@ Note that the path tracer produces the same results as the path tracer from the 
 | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 |                                                                                    Plastic spheres with the main integrator                                                                                    |
 
-### Important notice ###
+Important notice (the current status)
+-------------------------------------
 
-This is an evergoing work in progress, as it is mostly used for self-teaching. I did not take the time to clean it up and I am in the middle of bugfixes. However it shoud be buildable and runable if you want to take a look!
+**This project is an evergoing work in progress**, as it was mostly used for self-teaching. I did not take the time to clean it up yet and I am in the middle of bugfixes. However it is buildable and runable if you want to take a look! See the *Building and Running* section :)
+
+**Elements that were implemented, worked at some point, but don't work anymore (or were removed) include:**
+* Dielectrics with torrance sparrow reflection and transmission ("rough" dielectrics)
+* Mirror and lambertian transmission material models (the latter has been removed from the code base).
+* Russian roulette path termination from *PBR-book* was implemented but was removed, because it generates some variance and I first needed to get rid of the variance induced by everything else. I use a max bounces limit instead (set at 10 in the main, but changeable).
+
+**Elements that would need a nice refactoring include (but are certainly not limited to)**
+* Embree integration. I integrated Embree mostly to gain time with rendering (which it does for me), but I am sure I don't use it the optimal way. It is still slow especially with the Cornell Box, if one sets the max bounces number to a high value.
+* Memory management. I still do some wild dynamic allocations in the integrator like both books I followed do. I think about recoupling materials and BSDFs, for example.
+
+I will either clean them up, or just **start over** with all the knowledge I accumulated doing this, and make a better, clean ray tracer. This, after all, is a 6 months project.
+
+I still believe it is a fun project with some interesting things, and I hope you like it!
 
 Building and running
 --------------------
@@ -120,6 +134,8 @@ How to use
 ----------
 
 **Launch *AurelRayTracer.exe* from the project root**. This will render the many test scenes I use and produce ppm images in the root folder.
+
+The *main* function in *RenderTests.cpp* sets up the path tracer. You can change the parameters of the integrator, located at the top of the function, if you want to play around :)
 
 **If you can't launch the project for any reason**, you can find all the images as they would be rendered with the current project in the "*media/renderTestsStatus*" folder.
 
