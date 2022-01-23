@@ -82,10 +82,8 @@ glm::vec3 TorranceSparrowTransmission::sample_f(glm::vec3& w_i, const glm::vec3&
 
 	glm::vec3 w_h(0, 0, 0);
 	_reflectionModel->sample_wh(w_h);
-	float dot_w_o_w_h = glm::dot(w_o, w_h);
-	while (dot_w_o_w_h < 0) {
-		_reflectionModel->sample_wh(w_h);
-		dot_w_o_w_h = glm::dot(w_o, w_h);
+	if (glm::dot(w_o, w_h) < 0) {
+		w_h = -w_h;
 	}
 
 	float eta_i_over_eta_t = w_o.z > 0 ? _etaRay / _etaInterface : _etaInterface / _etaRay;

@@ -33,63 +33,64 @@ int main() {
 	params.strategy = PathTracer::ImportanceSamplingStrategy::LightsAndBSDF;
 	//params.integratorStrategy = PathTracer::IntegratorStrategy::SimplePathTracer;
 	params.integratorStrategy = PathTracer::IntegratorStrategy::PathTracerDirectLighting;
-	params.nbSamples = 256;
-	params.maxDepth = 50;
+	params.nbSamples = 128;
+	params.maxDepth = 10;
 	params.shuffleRandom = true;
 
 	std::vector<int> scenes = {
 		0,
-		1,
-		2,
-		3,
+		4,
+		5,
+		6,
+		7,
+		0,
 		4,
 		5,
 		6,
 		7
 	};
 
-	scenes = {
-		1,
-		2,
-	};
-
 	std::vector<std::string> sceneNames = {
-		"MatteMaterialSigmaStep10deg",
-		"DielectricMaterialEta256RoughnessStep01",
-		"DielectricMaterialEta1To2Step01Roughness02",
-		"PerfectMaterials",
-		"PlasticRoughnessStep01",
-		"CornellBox",
-		"Backpack",
-		"Cerberus"
+		"MatteMaterialSigmaStep10deg_AreaLight_and_LakeSideEnvironment",
+		"PlasticRoughnessStep01_AreaLight_and_LakeSideEnvironment",
+		"CornellBox_NoLight",
+		"Backpack_AreaLight_and_LakeSideEnvironment",
+		"Cerberus_AreaLight_and_LakeSideEnvironment",
+		"MatteMaterialSigmaStep10deg_TopSunEnvironment_and_AreaLight",
+		"PlasticRoughnessStep01_TopSunEnvironment_and_AreaLight",
+		"CornellBox_LakeSideEnvironment",
+		"Backpack_TopSunEnvironment_and_AreaLight",
+		"Cerberus_TopSunEnvironment_and_AreaLight",
 	};
 
 	std::vector<std::vector<std::shared_ptr<Material>>> sceneMaterials;
+
 	// Matte materials sigma
 	sceneMaterials.push_back({});
 	for (int i = 0; i < 10; ++i) {
 		sceneMaterials.back().push_back(std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.4f, 0.2f, 0.5f)), (i * 10.f / 180) * M_PI));
 	}
+
 	// Dielectric materials roughness
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<DielectricMaterial>(2.56f, ConstantTexture::white, 0));
 	for (int i = 0; i < 9; ++i) {
 		sceneMaterials.back().push_back(std::make_shared<DielectricMaterial>(2.56f, ConstantTexture::white, (i + 1) * (1.f / 9)));
 	}
+
 	// Dielectric materials eta
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<DielectricMaterial>(1.f, ConstantTexture::white, 0.f));
 	for (int i = 0; i < 9; ++i) {
 		sceneMaterials.back().push_back(std::make_shared<DielectricMaterial>(1.f + (i + 1) * (1.f / 9), ConstantTexture::white, 0.f));
 	}
+
 	// Perfect materials
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
-	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
-	sceneMaterials.back().push_back(std::make_shared<PerfectDiffuseMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.5f, 0.4f))));
-	//sceneMaterials.back().push_back(std::make_shared<PerfectSpecularMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.3f, 0.8f, 0.4f))));
-	//sceneMaterials.back().push_back(std::make_shared<PerfectTransparentMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.6f, 0.5f, 0.8f))));
-	// 
+	sceneMaterials.back().push_back(std::make_shared<PerfectSpecularMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.3f, 0.8f, 0.4f))));
+	sceneMaterials.back().push_back(std::make_shared<PerfectTransparentMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.6f, 0.5f, 0.8f))));
+
 	// Plastic materials roughness
 	sceneMaterials.push_back({});
 	sceneMaterials.back().push_back(std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.8f, 0.2f, 0.1f)), 0.f));
@@ -137,11 +138,11 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 0, 0, -1, 0, 0  // -1 is black
-		// -1, -1, -1, -1, -1, -1, -1, -1  // -1 is black
+		0, 0, -1, 0, 0, 1, 1, 0, 1, 1  // -1 is black
 	};
 
-	for (int i : scenes) {
+	for (int i = 0; i < scenes.size(); ++i) {
+		int sceneIdx = scenes[i];
 		Application application;
 		application.init();
 
@@ -150,15 +151,15 @@ int main() {
 		ray_tracer.init();
 		SceneData* scene = nullptr;
 
-		if (sceneMaterials[i].size()) {  // Material test scene
+		if (sceneMaterials[sceneIdx].size()) {  // Material test scene
 			scene = SceneFactory::createScene();
-			material_test_scene(*scene, sceneMaterials[i]);
+			material_test_scene(*scene, sceneMaterials[sceneIdx]);
 		}
 		else {  // Model
-			scene = modelScenes[i];
+			scene = modelScenes[sceneIdx];
 		}
 
-		std::shared_ptr<Camera> camera = cameras[sceneCameras[i]];
+		std::shared_ptr<Camera> camera = cameras[sceneCameras[sceneIdx]];
 
 		if (sceneEnvironments[i] >= 0) {
 			scene->addLight(environmentLights[sceneEnvironments[i]]);
@@ -185,11 +186,11 @@ int main() {
 		os << "P3" << std::endl;
 		os << Application::WIDTH << " " << Application::HEIGHT << std::endl;
 		os << "255" << std::endl;
-		for (int i = 0; i < Application::HEIGHT; ++i) {
+		for (int sceneIdx = 0; sceneIdx < Application::HEIGHT; ++sceneIdx) {
 			for (int j = 0; j < Application::WIDTH * 3; j += 3) {
-				float r = image_buffer[i * Application::WIDTH * 3 + j] * 255;
-				float g = image_buffer[i * Application::WIDTH * 3 + j + 1] * 255;
-				float b = image_buffer[i * Application::WIDTH * 3 + j + 2] * 255;
+				float r = image_buffer[sceneIdx * Application::WIDTH * 3 + j] * 255;
+				float g = image_buffer[sceneIdx * Application::WIDTH * 3 + j + 1] * 255;
+				float b = image_buffer[sceneIdx * Application::WIDTH * 3 + j + 2] * 255;
 				if (clampColors) {
 					os << int(glm::min(255.f, r)) << " ";
 					os << int(glm::min(255.f, g)) << " ";
@@ -458,7 +459,7 @@ namespace {
 		std::shared_ptr<MatteMaterial> matte_material = std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(1)));
 		int matte_material_id = scene.addMaterial(matte_material);
 
-		std::shared_ptr<GlossyMaterial> plastic_material = std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.9f, 0.4f, 0.8f)), 0.01f);
+		std::shared_ptr<GlossyMaterial> plastic_material = std::make_shared<GlossyMaterial>(1.5f, std::make_shared<ConstantTexture>(glm::vec3(0.2f, 0.3f, 0.6f)), 0.01f);
 		int plastic_material_id = scene.addMaterial(plastic_material);
 
 		//scene.getShapes()[0]->materialId = matte_material_id;
