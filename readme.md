@@ -1,5 +1,20 @@
-LeoEngine
+AurelRayTracer
 =========
+
+- [AurelRayTracer](#aurelraytracer)
+  - [Description](#description)
+  - [Gallery](#gallery)
+    - [Cornell Box](#cornell-box)
+    - [Oren Nayar](#oren-nayar)
+    - [Plastic material with Torrance-Sparrow reflection](#plastic-material-with-torrance-sparrow-reflection)
+    - [A model with diffuse texture and a plastic sphere](#a-model-with-diffuse-texture-and-a-plastic-sphere)
+    - [Comparisons between a basic path tracer and my main integrator](#comparisons-between-a-basic-path-tracer-and-my-main-integrator)
+  - [Important notice (the current status)](#important-notice-the-current-status)
+  - [Building and running](#building-and-running)
+    - [Dependencies](#dependencies)
+    - [Building the project](#building-the-project)
+  - [How to use](#how-to-use)
+  - [Acknowledgments and nice resources](#acknowledgments-and-nice-resources)
 
 Description
 -----------
@@ -91,7 +106,7 @@ Important notice (the current status)
 
 **Elements that would need a nice refactoring include (but are certainly not limited to)**
 * Embree integration. I integrated Embree mostly to gain time with rendering (which it does for me), but I am sure I don't use it the optimal way. It is still slow especially with the Cornell Box, if one sets the max bounces number to a high value.
-* Memory management. I still do some wild dynamic allocations in the integrator like both books I followed do. I think about recoupling materials and BSDFs, for example.
+* Memory management. I think about recoupling materials and BSDFs, for example.
 
 I will either clean them up, or just **start over** with all the knowledge I accumulated doing this, and make a better, clean ray tracer. This, after all, is a 6 months project.
 
