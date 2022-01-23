@@ -62,7 +62,7 @@ namespace {
     void gammaToLinear(float* texels, int width, int height, int nbChannels) {
         for (int i = 0; i < width * height * nbChannels; i += nbChannels) {
             for (int k = 0; k < glm::min(nbChannels, 3); ++k) {
-                texels[i + k] = glm::pow(texels[i + k], 1 / 2.2f);
+                //texels[i + k] = glm::pow(texels[i + k], 2.2f);
             }
         }
     }

@@ -31,8 +31,8 @@ int main() {
 
 	PathTracer::Parameters params;
 	params.strategy = PathTracer::ImportanceSamplingStrategy::LightsAndBSDF;
-	params.integratorStrategy = PathTracer::IntegratorStrategy::SimplePathTracer;
-	//params.integratorStrategy = PathTracer::IntegratorStrategy::PathTracerDirectLighting;
+	//params.integratorStrategy = PathTracer::IntegratorStrategy::SimplePathTracer;
+	params.integratorStrategy = PathTracer::IntegratorStrategy::PathTracerDirectLighting;
 	params.nbSamples = 256;
 	params.maxDepth = 50;
 	params.shuffleRandom = true;
@@ -49,7 +49,8 @@ int main() {
 	};
 
 	scenes = {
-		3,
+		1,
+		2,
 	};
 
 	std::vector<std::string> sceneNames = {
@@ -67,7 +68,7 @@ int main() {
 	// Matte materials sigma
 	sceneMaterials.push_back({});
 	for (int i = 0; i < 10; ++i) {
-		sceneMaterials.back().push_back(std::make_shared<MatteMaterial>(ConstantTexture::white, (i * 10.f / 180) * M_PI));
+		sceneMaterials.back().push_back(std::make_shared<MatteMaterial>(std::make_shared<ConstantTexture>(glm::vec3(0.4f, 0.2f, 0.5f)), (i * 10.f / 180) * M_PI));
 	}
 	// Dielectric materials roughness
 	sceneMaterials.push_back({});
@@ -136,7 +137,7 @@ int main() {
 	};
 	environmentLights[3]->transform(Transform(glm::vec3(0), glm::vec3(0, M_PI, 0), glm::vec3(1)));
 	std::vector<int> sceneEnvironments = {
-		0, 0, 0, 0, 1, -1, 0, 0  // -1 is black
+		0, 0, 0, 0, 0, -1, 0, 0  // -1 is black
 		// -1, -1, -1, -1, -1, -1, -1, -1  // -1 is black
 	};
 
