@@ -136,29 +136,27 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
                 HitRecord occlusion_hit_record;
                 float lightAttenuationWrtAngle = glm::dot(surfaceRecord.normal, lightSample);
 
-                if (lightAttenuationWrtAngle > 0) {
-                    glm::vec3 f(0);
-                    float pdfBSDF = 0;
-                    f = surfaceRecord.bsdf.f(lightSample, wo, surfaceRecord);
-                    pdfBSDF = surfaceRecord.bsdf.pdf(lightSample, wo, surfaceRecord);
+                glm::vec3 f(0);
+                float pdfBSDF = 0;
+                f = surfaceRecord.bsdf.f(lightSample, wo, surfaceRecord);
+                pdfBSDF = surfaceRecord.bsdf.pdf(lightSample, wo, surfaceRecord);
 
-                    if (f != glm::vec3(0) && pdfBSDF > 0) {
-                        // Occlusion test
-                        bool isLightReachable =
-                            // Area light that can be hit from our position
-                            light->getType() == LightType::AREA
-                            && _scene->castRay(direct_lighting_ray, occlusion_hit_record, &surfaceRecord)
-                            && occlusion_hit_record.areaLight.get() == light.get()
-                            ||
-                            // Infinite area light and nothing is hit along the sampled ray
-                            light->getType() == LightType::INFINITE_AREA
-                            && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
+                if (f != glm::vec3(0) && pdfBSDF > 0) {
+                    // Occlusion test
+                    bool isLightReachable =
+                        // Area light that can be hit from our position
+                        light->getType() == LightType::AREA
+                        && _scene->castRay(direct_lighting_ray, occlusion_hit_record, &surfaceRecord)
+                        && occlusion_hit_record.areaLight.get() == light.get()
+                        ||
+                        // Infinite area light and nothing is hit along the sampled ray
+                        light->getType() == LightType::INFINITE_AREA
+                        && !_scene->castRay(Ray(surfaceRecord.position, glm::normalize(lightSample)), occlusion_hit_record, &surfaceRecord);
 
-                        if (isLightReachable) {
-                            float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
-                            lightAttenuationWrtAngle = glm::abs(lightAttenuationWrtAngle);
-                            light_color += f * lightAttenuationWrtAngle * radiance * power2HeuristicWeight / pdfLight;
-                        }
+                    if (isLightReachable) {
+                        float power2HeuristicWeight = strategy & ImportanceSamplingStrategy::LightsAndBSDF ? Power2Heuristic(1, pdfLight, 1, pdfBSDF) : 1;
+                        lightAttenuationWrtAngle = glm::abs(lightAttenuationWrtAngle);
+                        light_color += f * lightAttenuationWrtAngle * radiance * power2HeuristicWeight / pdfLight;
                     }
                 }
             }
@@ -173,7 +171,7 @@ glm::vec3 PathTracer::_importanceSamplingRadiance(const glm::vec3 &wo, const glm
         glm::vec3 f = surfaceRecord.bsdf.sample_f(bsdfSample, wo, surfaceRecord, pdfBSDF, bxdfType);
         bsdfSample = glm::normalize(bsdfSample);
         float lightAttenuationWrtAngle = glm::dot(surfaceRecord.normal, bsdfSample);
-        if (lightAttenuationWrtAngle > 0 && f != glm::vec3(0) && pdfBSDF > 0) {
+        if (f != glm::vec3(0) && pdfBSDF > 0) {
             Ray bsdfRaySample(surfaceRecord.position, bsdfSample);
             HitRecord bsdf_sample_hit_record;
             glm::vec3 radianceFromLight(0);
