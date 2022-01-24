@@ -150,7 +150,7 @@ How to use
 
 **Launch *AurelRayTracer.exe* from the project root**. This will render the many test scenes I use and produce ppm images in the root folder.
 
-The *main* function in *RenderTests.cpp* sets up the path tracer. You can change the parameters of the integrator, located at the top of the function, if you want to play around :)
+The *main* function in *main.cpp* sets up the path tracer. You can change the parameters of the integrator, located at the top of the function, if you want to play around :)
 
 **If you can't launch the project for any reason**, you can find all the images as they would be rendered with the current project in the "*media/renderTestsStatus*" folder.
 
