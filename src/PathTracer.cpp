@@ -214,10 +214,6 @@ glm::vec3 PathTracer::_pathTracingDirectLighting(const Ray& camera_ray, size_t m
                 firstHit = hit_record.position;
             }
 
-            if (firstHit.x == -7.85838461f && firstHit.y == -3.10595489f && firstHit.z == 1.71875954f) {
-                int b = 0;
-            }
-
             // We add the emission at intersection in two exceptional cases:
             // 1 - Rays starting from the camera that hit a light source immediately
             // 2 - If the BxDF at the last surface intersection was specular, direct lighting contribution was not taken into account (f is always 0)
